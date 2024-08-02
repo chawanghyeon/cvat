@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState } from 'react';
 import Popover, { PopoverProps } from 'antd/lib/popover';
 
@@ -29,7 +25,7 @@ export default function withVisibilityHandling(WrappedComponent: typeof Popover,
                 }}
                 trigger={visible ? 'click' : 'hover'}
                 overlayClassName={overlayClassNames.join(' ').trim()}
-                onVisibleChange={(_visible: boolean) => {
+                onOpenChange={(_visible: boolean) => {
                     if (_visible) {
                         const [element] = window.document.getElementsByClassName(popoverClassName);
                         if (element) {

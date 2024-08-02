@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import {
     shapeFactory, trackFactory, Track, Shape, Tag,
     MaskShape, BasicInjection, RawShapeData, RawTrackData, RawTagData, SkeletonShape, SkeletonTrack,
@@ -804,9 +799,9 @@ export default class Collection {
                 checkObjectType('state descriptions', state.descriptions, null, Array);
                 state.descriptions.forEach((desc) => checkObjectType('state description', desc, 'string'));
 
-                for (const coord of state.points) {
+                /* for (const coord of state.points) {
                     checkObjectType('point coordinate', coord, 'number', null);
-                }
+                } */
 
                 if (!Object.values(ShapeType).includes(state.shapeType)) {
                     throw new ArgumentError(

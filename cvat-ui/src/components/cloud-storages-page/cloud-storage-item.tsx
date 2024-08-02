@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
@@ -78,7 +73,6 @@ export default function CloudStorageItemComponent(props: Props): JSX.Element {
                     <Preview
                         cloudStorage={cloudStorage}
                         loadingClassName='cvat-cloud-storage-item-loading-preview'
-                        emptyPreviewClassName='cvat-cloud-storage-item-empty-preview'
                         previewClassName='cvat-cloud-storage-item-preview'
                     />
                     {description ? (

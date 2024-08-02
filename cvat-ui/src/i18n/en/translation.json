@@ -1,0 +1,863 @@
+{
+  "header": {
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "jobs": "Jobs",
+    "organizations": "Organizations",
+    "statistics": "Statistics",
+    "language": "English",
+    "umap": "Umap",
+    "menu": {
+      "adminPage": "Admin Page",
+      "changePassword": "Change password",
+      "billing": "Billing",
+      "logout": "Logout",
+      "personalWorkspace": "Personal workspace"
+    },
+    "Back to projects": "Back to projects",
+    "Back to tasks": "Back to tasks"
+  },
+  "title": {
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "jobs": "Jobs",
+    "organizations": "Organizations",
+    "statistics": "Statistics"
+  },
+  "statistics": {
+    "allObjects": "All Objects",
+    "regularObjects": "Regular Objects",
+    "overObjects": "Over Objects",
+    "grid": {
+      "etc": {
+        "title": "etc",
+        "all": "All",
+        "regular": "Regular",
+        "over": "Over"
+      },
+      "stage": {
+        "title": "Stage",
+        "annotation": "annotation",
+        "validation": "validation",
+        "acceptance": "acceptance"
+      },
+      "worker": "Worker",
+      "object": "Object",
+      "project": "Project",
+      "task": "Task",
+      "job": "Job",
+      "labels": "Labels"
+    }
+  },
+  "search": {
+    "placeholder": "Search",
+    "selectAUser": "select a user"
+  },
+  "filter": {
+    "stage": "Stage",
+    "state": "State",
+    "jobs": {
+      "stage": {
+        "annotation": "annotation",
+        "validation": "validation",
+        "acceptance": "acceptance"
+      },
+      "state": {
+        "new": "new",
+        "in progress": "in progress",
+        "rejected": "rejected",
+        "completed": "completed"
+      }
+    }
+  },
+  "projects": {
+    "actions": {
+      "exportDataset": "Export Dataset",
+      "importDataset": "Import Dataset",
+      "backup": "Backup",
+      "delete": "Delete"
+    },
+    "detail": {
+      "assignee": "Assignee",
+      "overlapSize": "Overlap size",
+      "segmentSize": "Segment size",
+      "imageQuality": "Image quality"
+    },
+    "button": {
+      "addLabel": "Add Label",
+      "setupSkeleton": "Setup skeleton"
+    }
+  },
+  "tasks": {
+    "constructor": {
+      "description": "you can create or edit label in Project Page"
+    },
+    "actions": {
+      "uploadAnnotation": "Upload Annotations",
+      "exportDataset": "Export Dataset",
+      "autoAnnotation": "Auto Annotation",
+      "taskBackup": "Task Backup",
+      "moveTaskToProject": "Move Task to Project",
+      "deleteTask": "Delete Task"
+    },
+    "grid": {
+      "job": "Job",
+      "objects": "Objects",
+      "frames": "Frames",
+      "stage": {
+        "title": "Stage",
+        "annotation": "annotation",
+        "validation": "validation",
+        "acceptance": "acceptance"
+      },
+      "started": "started",
+      "lastWorked": "last worked",
+      "worker": "Worker",
+      "checker": "Checker",
+      "actions": "Actions"
+    }
+  },
+  "job": {
+    "Jobs Objects": "Jobs Objects",
+    "grid": {
+      "job": "Job",
+      "worker": "Worker",
+      "checker": "Checker",
+      "size": "Size",
+      "no assignee": "no assignee",
+      "stage": {
+        "title": "Stage",
+        "annotation": "annotation",
+        "validation": "validation",
+        "acceptance": "acceptance"
+      },
+      "state": {
+        "new": "new",
+        "in progress": "in progress",
+        "rejected": "rejected",
+        "completed": "completed"
+      },
+      "actions": "Actions",
+      "etc": {
+        "title": "etc",
+        "button": {
+          "goToProject": "go to project",
+          "goToTask": "go to task",
+          "exportJob": "Export Job"
+        }
+      }
+    }
+  },
+  "organizations": {
+    "fullName": "Full name",
+    "description": "Description",
+    "addDescription": "Add description",
+    "phoneNumber": "Phone number",
+    "addPhoneNumber": "Add Phone number",
+    "email": "Email",
+    "addEmail:": "Add Email",
+    "button": {
+      "removeOrganization": "Remove organization",
+      "inviteMembers": "Invite members"
+    },
+    "user": {
+      "worker": "Worker",
+      "supervisor": "Supervisor",
+      "maintainer": "Maintainer"
+    },
+    "create": {
+      "title": "Create a new organization",
+      "shortName": "Short name",
+      "fullName": "Full name",
+      "description": "Description",
+      "email": "Email",
+      "phoneNumber": "Phone number"
+    },
+    "validation": {
+      "shortNameRequire": "Short name is a required field",
+      "shortNameLen_1": "Short name must not exceed ",
+      "shortNameLen_2": " characters",
+      "fullNameLen_1": "Full name must not exceed ",
+      "fullNameLen_2": " characters",
+      "email": "The input is not a valid E-mail"
+    },
+    "actionMenu": {
+      "inviteUser": "Invite user",
+      "inviteUsers": "Invite users",
+      "removeOrganization": "Remove Organization",
+      "remove": "Remove",
+      "cancel": "Cancel",
+      "placeholder": "Organization name"
+    },
+    "message": {
+      "require": "This field is required",
+      "emailPlaceholder": "Enter an email address"
+    }
+  },
+  "settings": {
+    "title": "settings",
+    "player": {
+      "title": "player",
+      "playerSpeed": {
+        "title": "Player speed",
+        "usual": "usual",
+        "fastest": "fastest",
+        "fast": "fast",
+        "slow": "slow",
+        "slower": "slower",
+        "slowest": "slowest"
+      },
+      "canvasBackgroundColor": "Select canvas background color",
+      "resetZoom": {
+        "title": "Reset zoom",
+        "description": "Fit image after changing frame"
+      },
+      "rotateAllImages": {
+        "title": "Rotate all images",
+        "description": "Rotate all images simultaneously"
+      },
+      "smoothImage": {
+        "title": "Smooth Image",
+        "description": "Smooth image when zoom-in it"
+      }
+    },
+    "workspace": {
+      "title": "WorkSpace",
+      "enableAutoSave": {
+        "title": "Enable auto save",
+        "description": "Auto save every"
+      },
+      "showAllInterpolationTracks": {
+        "title": "Show all interpolation tracks",
+        "description": "Show hidden interpolated objects in the side panel"
+      },
+      "alwaysShowObjectDetails": {
+        "title": "Always show object details",
+        "description": "Show text for an object on the canvas not only when the object is activated"
+      },
+      "contentOfAText": {
+        "title": "Content of a text"
+      },
+      "positionOfAText": {
+        "title": "Position of a text"
+      },
+      "fontSizeOfAText": {
+        "title": "Font size of a text"
+      },
+      "automaticBordering": {
+        "title": "Automatic bordering",
+        "description": "Enable automatic bordering for polygons and polylines during drawing/editing"
+      },
+      "intelligentPolygonCropping": {
+        "title": "Intelligent polygon cropping",
+        "description": "Try to crop polygons automatically when editing"
+      },
+      "annotationZoomMargin": {
+        "title": "Attribute annotation mode(AAM) zoom margin"
+      },
+      "polygonApproximation": {
+        "title": "Default number of points in polygon approximation",
+        "description": "Works for serverless interactors and OpenCV scissors"
+      }
+    },
+    "design": {
+      "title": "Design",
+      "appearance": {
+        "title": "Appearance",
+        "label": "Label",
+        "instance": "Instance",
+        "group": "Group",
+        "opacity": "Opacity",
+        "selectedOpacity": "Selected opacity",
+        "outlinedBorders": "Outlined borders",
+        "showBitmaps": "Show bitmaps",
+        "showProjections": "Show projections"
+      },
+      "imageSettings": {
+        "title": "Image settings",
+        "imageGrid": "Image grid",
+        "size": "Size",
+        "color": "Color",
+        "opacity": "Opacity",
+        "colorSettings": {
+          "title": "Color settings",
+          "brightness": "Brightness",
+          "contrast": "Contrast",
+          "saturation": "Saturation"
+        },
+        "resetColorSetting": "Reset color settings"
+      }
+    }
+  },
+  "drageAndDrop": {
+    "title": "Create project from backup",
+    "text": "Click or drag file to this area",
+    "message": {
+      "require": "The file is required",
+      "error": "Only ZIP archive is supported",
+      "specify": "Please, specify a name",
+      "backupFileName": "Backup file name",
+      "noBackupSpecified": "No backup file specified",
+      "create_1": "The ",
+      "create_2": " creating from the backup has been started",
+      "createBackup_1": "Create ",
+      "createBackup_2": "  from backup",
+      "createFileBackup_1": "Create ",
+      "createFileBackup_2": "  from backup file",
+      "storageWithBackup": "Specify source storage with backup"
+    }
+  },
+  "datasetModal": {
+    "text": "Click or drag file to this area",
+    "message": {
+      "notGetTask_1": "Could not get task instance",
+      "notGetTask_2": "",
+      "require": "The file is required",
+      "error": "Only ZIP archive is supported for import a dataset",
+      "extensionError_1": "For ",
+      "extensionError_2": " format only files with ",
+      "extensionError_3": " extension can be used",
+      "confirmUploadTitle": "Current annotation will be lost",
+      "confirmUpload_1": "You are going to upload new annotations to ",
+      "confirmUpload_2": " Continue?",
+      "labelMessage_1": "Labels will be imported from dataset",
+      "labelMessage_2": "Labels from project will be used",
+      "format": "Format must be selected",
+      "importFormat": "Import Format",
+      "formatSelect": "Please select a format first",
+      "onUpload_1": "import started",
+      "onUpload_2": "import was started for",
+      "onUpload_3": "."
+    },
+    "placeholder": {
+      "datasetFileName": "Dataset file name"
+    }
+  },
+  "time": {
+    "hour": "hour",
+    "minutes": "minutes",
+    "seconds": "seconds",
+    "LastUpdated": "Last Updated"
+  },
+  "confirm": {
+    "ok": "Ok",
+    "open": "Open",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "remove": "Remove",
+    "resolve": "Resolve"
+  },
+  "modal": {
+    "Please, describe the issue": "Please, describe the issue",
+    "Please, fill out the field": "Please, fill out the field.",
+    "Print a comment here": "Print a comment here..",
+    "drawing": {
+      "intelligent scissors": "intelligent scissors",
+      "Histogram equalization": "Histogram equalization",
+      "Generate": "Generate"
+    }
+  },
+  "message": {
+    "notFound": "No results matched your search found...",
+    "noStorageAttached": "No cloud storages attached yet ...",
+    "toGetStarted": "To get started with your cloud storage",
+    "attachANewOne": "attach a new one",
+    "noProjectsCreatedYet": "No projects created yet ...",
+    "noWebhooksCreatedYet": "No webhooks created yet ...",
+    "task": {
+      "error": "Could not receive the requested project from the server",
+      "notification": {
+        "message": "Could not receive the requested task from the server",
+        "description_1": "Requested task id ",
+        "description_2": " is not valid",
+        "notUpdate": "Could not update the task"
+      },
+      "result": {
+        "title": "Sorry, but this task was not found",
+        "subTitle": "Please, be sure information you tried to get exist and you have access",
+        "Go Tasks page": "Go Tasks page"
+      }
+    },
+    "project": {
+      "error": "Could not receive the requested project from the server",
+      "notification": {
+        "message": "Could not receive the requested project from the server",
+        "description_1": "Requested project id ",
+        "description_2": " is not valid",
+        "notUpdate": "Could not update the project"
+      },
+      "No tasks found": "No tasks found",
+      "result": {
+        "title": "Sorry, but this project was not found",
+        "subTitle": "Please, be sure information you tried to get exist and you have access",
+        "Go Tasks page": "Go Tasks page"
+      },
+      "CVATTooltip": {
+        "title": "Create new task"
+      }
+    },
+    "annotation": {
+      "frame_1": "You finished working on frame ",
+      "frame_2": "",
+      "button": {
+        "add": "Add",
+        "here": "here",
+        "if you would like to continue": " if you would like to continue"
+      },
+      "notification": {
+        "description": " the first one for editing annotation.",
+        "No labels": "No labels",
+        "label_description": "does not contain any label."
+      },
+      "result": {
+        "title": "Sorry, but this job was not found",
+        "subTitle": "Please, be sure information you tried to get exist and you have access",
+        "Go Tasks page": "Go Tasks page"
+      }
+    },
+    "cloudStorage": {
+      "result": {
+        "title_1": "Sorry, but the cloud storage #",
+        "title_2": " was not found",
+        "subTitle": "Please, be sure id you requested exists and you have appropriate permissions"
+      }
+    }
+  },
+  "shortcut": {
+    "modal": {
+      "title": "Active list of shortcuts"
+    },
+    "columns": {
+      "name": "Name",
+      "shortcut": "Shortcut",
+      "action": "Actopm",
+      "description": "Description"
+    },
+    "switchShortcut": {
+      "name": "Show shortcuts",
+      "description": "Open/hide the list of available shortcuts"
+    },
+    "switchSettings": {
+      "name": "Show settings",
+      "description": "Open/hide settings dialog"
+    },
+    "switchAllLock": {
+      "name": "Lock/unlock all objects",
+      "description": "Change locked state for all objects in the side bar"
+    },
+    "switchLock": {
+      "name": "Lock/unlock an object",
+      "description": "Change locked state for an active object"
+    },
+    "switchAllHidden": {
+      "name": "Hide/show all objects",
+      "description": "Change hidden state for objects in the side bar"
+    },
+    "switchHidden": {
+      "name": "Hide/show an object",
+      "description": "Change hidden state for an active object"
+    },
+    "switchOccluded": {
+      "name": "Switch occluded",
+      "description": "Change occluded property for an active object"
+    },
+    "switchKeyframe": {
+      "name": "Switch keyframe",
+      "description": "Change keyframe property for an active track"
+    },
+    "switchOutSide": {
+      "name": "Switch outside",
+      "description": "Change outside property for an active track"
+    },
+    "deleteObject": {
+      "name": "Delete object",
+      "description": "Delete an active object. Use shift to force delete of locked objects"
+    },
+    "toBackground": {
+      "name": "To background",
+      "description": "Put an active object \"farther\" from the user (decrease z axis value)"
+    },
+    "toForeground": {
+      "name": "To foreground",
+      "description": "Put an active object \"closer\" to the user (increase z axis value)"
+    },
+    "copyShape": {
+      "name": "Copy shape",
+      "description": "Copy shape to CVAT internal clipboard"
+    },
+    "propagateObject": {
+      "name": "Propagate object",
+      "description": "Make a copy of the object on the following frames"
+    },
+    "nextKeyFrame": {
+      "name": "Next keyframe",
+      "description": "Go to the next keyframe of an active track"
+    },
+    "prevKeyFrame": {
+      "name": "Previous keyframe",
+      "description": "Go to the previous keyframe of an active track"
+    },
+    "nextAttribute": {
+      "name": "Next attribute",
+      "description": "Go to the next attribute"
+    },
+    "prevAttribute": {
+      "name": "Previous attribute",
+      "description": "Go to the previous attribute"
+    },
+    "nextObject": {
+      "name": "Next object",
+      "description": "Go to the next object"
+    },
+    "prevObject": {
+      "name": "Previous object",
+      "description": "Go to the previous object"
+    },
+    "pasteShape": {
+      "name": "Paste shape",
+      "description": "Paste a shape from internal CVAT clipboard"
+    },
+    "switchDrawMode": {
+      "name": "Switch draw mode",
+      "description": "Repeat the latest procedure of drawing with the same parameters (shift to redraw an existing shape)"
+    },
+    "openReviewIssue": {
+      "name": "Open review issue",
+      "description": "Create a new issues in the review workspace"
+    },
+    "switchMergeMode": {
+      "name": "Merge mode",
+      "description": "Activate or deactivate mode to merging shapes"
+    },
+    "switchSplitMode": {
+      "name": "Split mode",
+      "description": "Activate or deactivate mode to splitting shapes"
+    },
+    "switchGroupMode": {
+      "name": "Group mode",
+      "description": "Activate or deactivate mode to grouping shapes"
+    },
+    "resetGroup": {
+      "name": "Reset group",
+      "description": "Reset group for selected shapes (in group mode)"
+    },
+    "cancel": {
+      "name": "Cancel",
+      "description": "Cancel any active canvas mode"
+    },
+    "clockwiseRotation": {
+      "name": "Rotate clockwise",
+      "description": "Change image angle (add 90 degrees)"
+    },
+    "anticlockwiseRotation": {
+      "name": "Rotate anticlockwise",
+      "description": "Change image angle (subtract 90 degrees)"
+    },
+    "saveJob": {
+      "name": "Save the Job",
+      "description": "Send all changes of annotations to the server"
+    },
+    "undo": {
+      "name": "Undo action",
+      "description": "Cancel the latest action related with objects"
+    },
+    "redo": {
+      "name": "Redo action",
+      "description": "Cancel undo action"
+    },
+    "deleteFrame": {
+      "name": "Delete frame",
+      "description": "Delete frame"
+    },
+    "nextFrame": {
+      "name": "Next frame",
+      "description": "Go to the next frame"
+    },
+    "prevFrame": {
+      "name": "Previous frame",
+      "description": "Go to the previous frame"
+    },
+    "forwardFrame": {
+      "name": "Forward frame",
+      "description": "Go forward with a step"
+    },
+    "backwardFrame": {
+      "name": "Backward frame",
+      "description": "Go backward with a step"
+    },
+    "searchForward": {
+      "name": "Search forward",
+      "description": "Search the next frame that satisfies to the filters"
+    },
+    "searchBackward": {
+      "name": "Search backward",
+      "description": "Search the previous frame that satisfies to the filters"
+    },
+    "playPause": {
+      "name": "Play/Pause",
+      "description": "Start/stop automatic changing frames"
+    },
+    "focusInputFrame": {
+      "name": "Focus input frame",
+      "description": "Focus on the element to change the current frame"
+    },
+    "switchAutoMaticBordering": {
+      "name": "Switch automatic bordering",
+      "description": "Switch automatic bordering for polygons and polylines during drawing/editing"
+    },
+    "switchToolsBlockerState": {
+      "name": "Switch algorithm blocker",
+      "description": "Postpone running the algorithm for interaction tools"
+    },
+    "changeObjectColor": {
+      "name": "Change color",
+      "description": "Set the next color for an activated shape"
+    },
+    "toggleLayoutGrid": {
+      "name": "Toggle layout grid",
+      "description": "The grid is used to UI development"
+    },
+    "switchLabel": {
+      "name": "Switch label",
+      "description": "Change a label for an activate object or for the next drawn object if no objects are activated"
+    },
+    "tiltUp": {
+      "name": "Camera Roll Angle Up",
+      "description": "Increases camera roll angle"
+    },
+    "tiltDown": {
+      "name": "Camera Roll Angle Down",
+      "description": "Decreases camera roll angle"
+    },
+    "ratateLeft": {
+      "name": "Camera Pitch Angle Left",
+      "description": "Decreases camera pitch angle"
+    },
+    "rotateRight": {
+      "name": "Camera Pitch Angle Right",
+      "description": "Increases camera pitch angle"
+    },
+    "moveUp": {
+      "name": "Camera Move Up",
+      "description": "Move the camera up"
+    },
+    "moveDown": {
+      "name": "Camera Move Down",
+      "description": "Move the camera down"
+    },
+    "moveLeft": {
+      "name": "Camera Move Left",
+      "description": "Move the camera left"
+    },
+    "moveRight": {
+      "name": "Camera Move Right",
+      "description": "Move the camera right"
+    },
+    "moveObjectUp": {
+      "name": "Object Move Up",
+      "description": "Move the object up"
+    },
+    "moveObjectDown": {
+      "name": "Object Move Down",
+      "description": "Move the object down"
+    },
+    "moveObjectLeft": {
+      "name": "Object Move Left",
+      "description": "Move the object left"
+    },
+    "moveObjectRight": {
+      "name": "Object Move Right",
+      "description": "Move the object right"
+    },
+    "changeObjectUp": {
+      "name": "Object Size Change Up",
+      "description": "Change the object size up"
+    },
+    "changeObjectDown": {
+      "name": "Object Size Change Down",
+      "description": "Change the object size down"
+    },
+    "changeObjectLeft": {
+      "name": "Object Size Change Left",
+      "description": "Change the object size left"
+    },
+    "changeObjectRight": {
+      "name": "Object Size Change Right",
+      "description": "Change the object size Right"
+    },
+    "changeObjectUpMore": {
+      "name": "Object Size Change Up More",
+      "description": "Change the object size up more"
+    },
+    "changeObjectDownMore": {
+      "name": "Object Size Change Down More",
+      "description": "Change the object size down more"
+    },
+    "changeObjectLeftMore": {
+      "name": "Object Size Change Left More",
+      "description": "Change the object size left more"
+    },
+    "changeObjectRightMore": {
+      "name": "Object Size Change Right More",
+      "description": "Change the object size right more"
+    },
+    "zoomIn": {
+      "name": "Camera Zoom In",
+      "description": "Performs zoom in"
+    },
+    "zoomOut": {
+      "name": "Camera Zoom Out",
+      "description": "Performs zoom out"
+    },
+    "cancelSkeletonEdge": {
+      "name": "Cancel skeleton drawing",
+      "description": "Interrupts drawing a new skeleton edge"
+    }
+  },
+  "notifications": {
+    "auth": {
+      "AUTHORIZED_FAILED": "Could not check authorization on the server",
+      "LOGIN_FAILED": "Could not login on the server",
+      "LOGOUT_FAILED": "Could not logout from the server",
+      "REGISTER_FAILED": "Could not register on the server",
+      "REGISTER_SUCCESS_1": "To use your account, you need to confirm the email address.",
+      "REGISTER_SUCCESS_2": "We have sent an email with a confirmation link to",
+      "CHANGE_PASSWORD_SUCCESS": "New password has been saved.",
+      "CHANGE_PASSWORD_FAILED": "Could not change password",
+      "REQUEST_PASSWORD_RESET_SUCCESS": "Check your email for a link to reset your password. If it doesn’t appear within a few minutes, check your spam folder.",
+      "REQUEST_PASSWORD_RESET_FAILED": "Could not reset password on the server.",
+      "RESET_PASSWORD_SUCCESS": "Password has been reset with the new password.",
+      "RESET_PASSWORD_FAILED": "Could not set new password on the server.",
+      "LOAD_AUTH_ACTIONS_FAILED": "Could not check available auth actions"
+    },
+    "exporting": {
+      "EXPORT_DATASET_FAILED": "Could not export dataset for the",
+      "EXPORT_DATASET_SUCCESS_1": "for",
+      "EXPORT_DATASET_SUCCESS_2": "been",
+      "EXPORT_DATASET_SUCCESS_3": "downloaded",
+      "EXPORT_DATASET_SUCCESS_4": "uploaded",
+      "EXPORT_DATASET_SUCCESS_5": "locally",
+      "EXPORT_DATASET_SUCCESS_6": "to cloud storage",
+      "EXPORT_BACKUP_FAILED": "Could not export the ",
+      "EXPORT_BACKUP_SUCCESS_1": "Backup for the  ",
+      "EXPORT_BACKUP_SUCCESS_2": "has been",
+      "EXPORT_BACKUP_SUCCESS_3": "downloaded",
+      "EXPORT_BACKUP_SUCCESS_4": "uploaded",
+      "EXPORT_BACKUP_SUCCESS_5": "locally",
+      "EXPORT_BACKUP_SUCCESS_6": "to cloud storage"
+    },
+    "importing": {
+      "IMPORT_DATASET_SUCCESS_1": "Annotations have been loaded to the ",
+      "IMPORT_DATASET_SUCCESS_2": "task",
+      "IMPORT_DATASET_SUCCESS_3": "Dataset was imported to the ",
+      "IMPORT_DATASET_FAILED_1": "Could not upload annotation for the ",
+      "IMPORT_DATASET_FAILED_2": "task",
+      "IMPORT_DATASET_FAILED_3": "Could not import dataset to the ",
+      "IMPORT_BACKUP_SUCCESS_1": "The ",
+      "IMPORT_BACKUP_SUCCESS_2": "has been restored successfully. ",
+      "IMPORT_BACKUP_SUCCESS_3": "Click [here] ",
+      "IMPORT_BACKUP_SUCCESS_4": " to open",
+      "IIMPORT_BACKUP_FAILED_1": "Could not restore ",
+      "IIMPORT_BACKUP_FAILED_2": " backup."
+    },
+    "tasks": {
+      "GET_TASKS_FAILED": "Could not fetch tasks.",
+      "DELETE_TASK_FAILED": "Could not delete the [task ",
+      "CREATE_TASK_FAILED": "Could not create the task"
+    },
+    "projects": {
+      "GET_PROJECTS_FAILED": "Could not fetch projects",
+      "CREATE_PROJECT_FAILED": "Could not create the project",
+      "DELETE_PROJECT_FAILED": "Could not delete [project "
+    },
+    "formats": {
+      "GET_FORMATS_FAILED": "Could not get formats from the server"
+    },
+    "about": {
+      "GET_ABOUT_FAILED": "Could not get info about the server"
+    },
+    "share": {
+      "LOAD_SHARE_DATA_FAILED": "Could not load share data from the server"
+    },
+    "models": {
+      "GET_INFERENCE_STATUS_SUCCESS": "Automatic annotation accomplished for the [task ",
+      "FETCH_META_FAILED": "Could not fetch models meta information",
+      "GET_INFERENCE_STATUS_FAILED": "Fetching inference status for the [task ",
+      "GET_MODELS_FAILED": "Could not get models from the server",
+      "START_INFERENCE_FAILED": "Could not infer model for the [task ",
+      "CANCEL_INFERENCE_FAILED": "Could not cancel model inference for the [task "
+    },
+    "annotation": {
+      "GET_JOB_FAILED": "Error during fetching a job",
+      "CHANGE_FRAME_FAILED": "Could not receive frame",
+      "SAVE_ANNOTATIONS_FAILED": "Could not save annotations",
+      "UPDATE_ANNOTATIONS_FAILED": "Could not save annotations",
+      "CREATE_ANNOTATIONS_FAILED": "Could not create annotations",
+      "MERGE_ANNOTATIONS_FAILED": "Could not merge annotations",
+      "GROUP_ANNOTATIONS_FAILED": "Could not group annotations",
+      "SPLIT_ANNOTATIONS_FAILED": "Could not split the track",
+      "REMOVE_OBJECT_FAILED": "Could not remove the object",
+      "PROPAGATE_OBJECT_FAILED": "Could not propagate the object",
+      "COLLECT_STATISTICS_FAILED": "Could not collect annotations statistics",
+      "UPLOAD_JOB_ANNOTATIONS_FAILED": "Could not upload annotations for the [job ",
+      "REMOVE_JOB_ANNOTATIONS_FAILED": "Could not remove annotations",
+      "FETCH_ANNOTATIONS_FAILED": "Could not fetch annotations",
+      "REDO_ACTION_FAILED": "Could not redo",
+      "UNDO_ACTION_FAILED": "Could not undo",
+      "SEARCH_ANNOTATIONS_FAILED": "Could not execute search annotations",
+      "SEARCH_EMPTY_FRAME_FAILED": "Could not search an empty frame",
+      "SAVE_LOGS_FAILED": "Could not send logs to the server",
+      "GET_DATA_FAILED": "Could not fetch frame data from the server",
+      "DELETE_FRAME_FAILED": "Could not delete frame",
+      "RESTORE_FRAME_FAILED": "Could not restore frame"
+    },
+    "boundaries": {
+      "THROW_RESET_ERROR": "Could not reset the state"
+    },
+    "userAgreements": {
+      "GET_USER_AGREEMENTS_FAILED": "Could not get user agreements from the server"
+    },
+    "review": {
+      "FINISH_ISSUE_FAILED": "Could not open a new issue",
+      "RESOLVE_ISSUE_FAILED": "Could not resolve the issue",
+      "REOPEN_ISSUE_FAILED": "Could not reopen the issue",
+      "COMMENT_ISSUE_FAILED": "Could not comment the issue",
+      "SUBMIT_REVIEW_FAILED": "Could not submit review for the job ",
+      "REMOVE_ISSUE_FAILED": "Could not remove issue from the server"
+    },
+    "cloudStorages": {
+      "GET_CLOUD_STORAGE_FAILED": "Could not fetch cloud storage",
+      "CREATE_CLOUD_STORAGE_FAILED": "Could not create the cloud storage",
+      "UPDATE_CLOUD_STORAGE_FAILED": "Could not update cloud storage ",
+      "DELETE_CLOUD_STORAGE_FAILED": "Could not delete cloud storage ",
+      "LOAD_CLOUD_STORAGE_CONTENT_FAILED": "Could not fetch content for cloud storage ",
+      "GET_CLOUD_STORAGE_STATUS_FAILED_1": "Could not fetch cloud storage ",
+      "GET_CLOUD_STORAGE_STATUS_FAILED_2": " status",
+      "GET_CLOUD_STORAGE_PREVIEW_FAILED": "Could not fetch preview for cloud storage "
+    },
+    "organizations": {
+      "GET_ORGANIZATIONS_FAILED": "Could not fetch organizations list",
+      "CREATE_ORGANIZATION_FAILED": "Could not create organization ",
+      "UPDATE_ORGANIZATION_FAILED": "Could not update organization ",
+      "ACTIVATE_ORGANIZATION_FAILED": "Could not activate organization ",
+      "REMOVE_ORGANIZATION_FAILED": "Could not remove organization ",
+      "INVITE_ORGANIZATION_MEMBERS_FAILED": "Could not invite organization members",
+      "INVITE_ORGANIZATION_MEMBER_FAILED_1": "Could not invite this member ",
+      "INVITE_ORGANIZATION_MEMBER_FAILED_2": " to the organization",
+      "LEAVE_ORGANIZATION_FAILED": "Could not leave the organization",
+      "REMOVE_ORGANIZATION_MEMBER_FAILED_1": "Could not remove member ",
+      "REMOVE_ORGANIZATION_MEMBER_FAILED_2": " from the organization",
+      "UPDATE_ORGANIZATION_MEMBER_FAILED_1": "Could not assign role ",
+      "UPDATE_ORGANIZATION_MEMBER_FAILED_2": " to the user "
+    },
+    "jobs": {
+      "GET_JOBS_FAILED": "Could not fetch a list of jobs"
+    },
+    "webhooks": {
+      "GET_WEBHOOKS_FAILED": "Could not fetch a list of webhooks",
+      "CREATE_WEBHOOK_FAILED": "Could not create webhook",
+      "UPDATE_WEBHOOK_FAILED": "Could not update webhook",
+      "DELETE_WEBHOOK_FAILED": "Could not delete webhook"
+    }
+  }
+}

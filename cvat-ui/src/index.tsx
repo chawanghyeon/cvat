@@ -1,11 +1,8 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { connect, Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
+import { ConfigProvider } from 'antd';
 
 import { getAboutAsync } from 'actions/about-actions';
 import { authorizedAsync, loadAuthActionsAsync } from 'actions/auth-actions';
@@ -16,14 +13,19 @@ import { switchSettingsDialog } from 'actions/settings-actions';
 import { shortcutsActions } from 'actions/shortcuts-actions';
 import { getUserAgreementsAsync } from 'actions/useragreements-actions';
 import CVATApplication from 'components/cvat-app';
+import PluginsEntrypoint from 'components/plugins-entrypoint';
 import LayoutGrid from 'components/layout-grid/layout-grid';
 import logger, { LogType } from 'cvat-logger';
 import createCVATStore, { getCVATStore } from 'cvat-store';
 import { KeyMap } from 'utils/mousetrap-react';
 import createRootReducer from 'reducers/root-reducer';
 import { getOrganizationsAsync } from 'actions/organization-actions';
+import { IllustEmptyIcon } from 'icons';
+import Icon from '@ant-design/icons';
 import { resetErrors, resetMessages } from './actions/notification-actions';
-import { CombinedState, NotificationsState } from './reducers';
+import { CombinedState, NotificationsState, PluginsState } from './reducers';
+import FloatButtonComponent from 'components/channel-talk/channel-talk-modal';
+import 'i18n/i18n';
 
 createCVATStore(createRootReducer);
 const cvatStore = getCVATStore();
@@ -51,6 +53,7 @@ interface StateToProps {
     user: any;
     keyMap: KeyMap;
     isModelPluginActive: boolean;
+    pluginComponents: PluginsState['components'];
 }
 
 interface DispatchToProps {
@@ -100,6 +103,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         notifications: state.notifications,
         user: auth.user,
         keyMap: shortcuts.keyMap,
+        pluginComponents: plugins.components,
         isModelPluginActive: plugins.list.MODELS,
     };
 }
@@ -123,10 +127,31 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
 
 const ReduxAppWrapper = connect(mapStateToProps, mapDispatchToProps)(CVATApplication);
 
+// not working
+ConfigProvider.config({
+    theme: {
+        primaryColor: '#4970fb',
+        successColor: '#4970fb',
+        infoColor: '#4970fb',
+        errorColor: '#fb6e77',
+    },
+});
+
+const customEmpty = (): JSX.Element => (
+    <div className='cvat-custom-empty'>
+        <Icon component={IllustEmptyIcon} />
+        <p className='cvat-text-color'>No results</p>
+    </div>
+);
+
 ReactDOM.render(
     <Provider store={cvatStore}>
         <BrowserRouter>
-            <ReduxAppWrapper />
+            <PluginsEntrypoint />
+            <ConfigProvider renderEmpty={customEmpty}>
+                <ReduxAppWrapper />
+                <FloatButtonComponent />
+            </ConfigProvider>
         </BrowserRouter>
         <LayoutGrid />
     </Provider>,
@@ -157,6 +182,18 @@ window.addEventListener('error', (errorEvent: ErrorEvent) => {
             job.logger.log(LogType.exception, logPayload);
         } else {
             logger.log(LogType.exception, logPayload);
+        }
+    }
+});
+
+window.addEventListener('scroll', () => {
+    const { scrollY } = window;
+    if (scrollY === 0) return;
+
+    const route = window.location.href.split('/');
+    if (route.length === 5) {
+        if (route[3] === 'tasks') {
+            sessionStorage.setItem('salmon-scroll', String(scrollY));
         }
     }
 });

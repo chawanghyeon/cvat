@@ -1,13 +1,10 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect, useState } from 'react';
 import Autocomplete from 'antd/lib/auto-complete';
 import { SelectValue } from 'antd/lib/select';
 
 import { getCore } from 'cvat-core-wrapper';
+import { Input } from 'antd';
+import { DownIcon } from 'icons';
 
 const core = getCore();
 
@@ -97,6 +94,8 @@ export default function ProjectSearchField(props: Props): JSX.Element {
                 value: proj.id.toString(),
                 label: proj.name,
             }))}
-        />
+        >
+            <Input suffix={<DownIcon />} />
+        </Autocomplete>
     );
 }

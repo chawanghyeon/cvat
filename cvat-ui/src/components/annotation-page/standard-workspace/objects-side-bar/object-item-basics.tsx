@@ -1,17 +1,11 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState } from 'react';
 import { Row, Col } from 'antd/lib/grid';
 import { MoreOutlined } from '@ant-design/icons';
 import Dropdown from 'antd/lib/dropdown';
 import Text from 'antd/lib/typography/Text';
+import ObjectButtonsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-buttons';
 
 import { ObjectType, ShapeType, ColorBy } from 'reducers';
-import CVATTooltip from 'components/common/cvat-tooltip';
-import LabelSelector from 'components/label-selector/label-selector';
 import ItemMenu from './object-item-menu';
 
 interface Props {
@@ -68,7 +62,6 @@ function ItemTopComponent(props: Props): JSX.Element {
         toForegroundShortcut,
         removeShortcut,
         changeColor,
-        changeLabel,
         copy,
         remove,
         propagate,
@@ -96,70 +89,71 @@ function ItemTopComponent(props: Props): JSX.Element {
         setColorPickerVisible(visible);
     };
 
+    const selectedLabel = labels.find((label) => label.id === labelID);
+
     return (
-        <Row align='middle'>
-            <Col span={10}>
-                <Text style={{ fontSize: 12 }}>{clientID}</Text>
-                <br />
-                <Text
-                    type='secondary'
-                    style={{ fontSize: 10 }}
-                    className='cvat-objects-sidebar-state-item-object-type-text'
-                >
-                    {type}
-                </Text>
-            </Col>
-            <Col span={12}>
-                <CVATTooltip title='Change current label'>
-                    <LabelSelector
-                        disabled={readonly || shapeType === ShapeType.SKELETON}
-                        size='small'
-                        labels={labels}
-                        value={labelID}
-                        onChange={changeLabel}
-                        className='cvat-objects-sidebar-state-item-label-selector'
+        <>
+            <Row align='middle'>
+                <Col span={10}>
+                    <Text style={{ fontSize: 15, lineHeight: 1.2, color: '#fff' }}>
+                        {selectedLabel && selectedLabel.name}
+                    </Text>
+                    <br />
+                    <Text
+                        type='secondary'
+                        className='cvat-objects-sidebar-state-item-object-type-text'
+                    >
+                        {type}
+                    </Text>
+                </Col>
+                <Col span={12}>
+                    <ObjectButtonsContainer
+                        readonly={readonly}
+                        clientID={clientID}
+                        isTrack={false}
+                        isContextMenu={false}
                     />
-                </CVATTooltip>
-            </Col>
-            <Col span={2}>
-                <Dropdown
-                    visible={menuVisible}
-                    onVisibleChange={changeMenuVisible}
-                    placement='bottomLeft'
-                    overlay={ItemMenu({
-                        jobInstance,
-                        readonly,
-                        serverID,
-                        locked,
-                        shapeType,
-                        objectType,
-                        color,
-                        colorBy,
-                        colorPickerVisible,
-                        changeColorShortcut,
-                        copyShortcut,
-                        pasteShortcut,
-                        propagateShortcut,
-                        toBackgroundShortcut,
-                        toForegroundShortcut,
-                        removeShortcut,
-                        changeColor,
-                        copy,
-                        remove,
-                        propagate,
-                        createURL,
-                        switchOrientation,
-                        toBackground,
-                        toForeground,
-                        resetCuboidPerspective,
-                        changeColorPickerVisible,
-                        edit,
-                    })}
-                >
-                    <MoreOutlined />
-                </Dropdown>
-            </Col>
-        </Row>
+                </Col>
+                <Col span={2}>
+                    <Dropdown
+                        open={menuVisible}
+                        onOpenChange={changeMenuVisible}
+                        placement='bottomRight'
+                        dropdownRender={() => ItemMenu({
+                            jobInstance,
+                            readonly,
+                            serverID,
+                            locked,
+                            shapeType,
+                            objectType,
+                            color,
+                            colorBy,
+                            colorPickerVisible,
+                            changeColorShortcut,
+                            copyShortcut,
+                            pasteShortcut,
+                            propagateShortcut,
+                            toBackgroundShortcut,
+                            toForegroundShortcut,
+                            removeShortcut,
+                            changeColor,
+                            copy,
+                            remove,
+                            propagate,
+                            createURL,
+                            switchOrientation,
+                            toBackground,
+                            toForeground,
+                            resetCuboidPerspective,
+                            changeColorPickerVisible,
+                            edit,
+                        })}
+                    >
+                        <MoreOutlined />
+                    </Dropdown>
+                </Col>
+            </Row>
+        </>
     );
 }
 

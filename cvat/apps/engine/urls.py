@@ -1,8 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.urls import path, include
 from . import views
 from rest_framework import routers
@@ -22,6 +17,7 @@ router.register('issues', views.IssueViewSet)
 router.register('comments', views.CommentViewSet)
 router.register('labels', views.LabelViewSet)
 router.register('cloudstorages', views.CloudStorageViewSet)
+router.register('guide', views.GuideFileViewSet)
 
 urlpatterns = [
     # Entry point for a client

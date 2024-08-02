@@ -1,23 +1,29 @@
-# Copyright (C) 2021-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, status
 from rest_framework.permissions import SAFE_METHODS
 from django.utils.crypto import get_random_string
+import django_rq
 
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from django.conf import settings
 from cvat.apps.engine.mixins import PartialUpdateModelMixin, DestroyModelMixin, CreateModelMixin
+from cvat.apps.engine.models import Job, Label, LabeledShape, Segment, Umap
 
 from cvat.apps.iam.permissions import (
     InvitationPermission, MembershipPermission, OrganizationPermission)
+from cvat.utils.umap import process
 from .models import Invitation, Membership, Organization
 
 from .serializers import (
     InvitationReadSerializer, InvitationWriteSerializer,
     MembershipReadSerializer, MembershipWriteSerializer,
     OrganizationReadSerializer, OrganizationWriteSerializer)
+
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from cvat.apps.engine.serializers import StatisticSerializer, UmapSerializer
+from drf_spectacular.utils import OpenApiParameter
+from django.db.models import Q
+
 
 @extend_schema(tags=['organizations'])
 @extend_schema_view(
@@ -83,6 +89,129 @@ class OrganizationViewSet(viewsets.GenericViewSet,
         if not serializer.validated_data.get('name'):
             extra_kwargs.update({ 'name': serializer.validated_data['slug'] })
         serializer.save(**extra_kwargs)
+
+    @extend_schema(
+        summary = "Method returns a calculate statics for the organization or worker",
+        parameters = [
+            OpenApiParameter(
+                "worker",
+                location="path",
+                description="Provide statics data that includes worker",
+                type=str,
+                required=False,
+            ),
+        ],
+        responses = {
+            "200": StatisticSerializer,
+        },
+    )
+    @action(detail=False, methods=["GET"], url_path=r"statistic/(?P<worker>\d+)?")
+    def statistic(self, request, worker=None):
+        organization = request.iam_context["organization"]
+        if organization is None:
+            return Response({"detail": "No organization found"}, status=404)
+
+        jobs = Job.objects.filter(Q(segment__task__project__organization=organization) | Q(segment__task__organization=organization))
+
+        if worker:
+            jobs = jobs.filter(worker_id=worker)
+
+        jobs = jobs.select_related("segment__task__project", "segment__task", "worker").distinct().values(
+            "id", "state", "stage", "etc", "worker__username", "segment__task__name", "segment__task__project__name"
+        )
+
+        # 작업에 대한 라벨 정보를 가져오고 가공하는 코드
+        labels = set()
+        job_labels = {job["id"]: {} for job in jobs}
+
+        annotations = LabeledShape.objects.filter(
+            job_id__in=job_labels.keys(), parent=None
+        ).values_list("job_id", "label_id")
+
+        for job, label in annotations:
+            job_labels[job][label] = job_labels[job].get(label, 0) + 1
+            labels.add(label)
+
+        labels = {
+            id: name
+            for id, name in Label.objects.filter(id__in=labels).values_list(
+                "id", "name"
+            )
+        }
+
+        # 작업에 대한 정보를 업데이트하는 코드
+        for job in jobs:
+            job.update(
+                {
+                    "worker": job.get("worker__username"),
+                    "project": job.get("segment__task__project__name"),
+                    "task": job.get("segment__task__name"),
+                    "labels": job_labels.get(job["id"]),
+                }
+            )
+
+        serializer = StatisticSerializer(data={"labels": labels, "jobs": jobs})
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.data)
+
+
+    @extend_schema(
+        summary="Method returns umap data",
+        parameters=[
+            OpenApiParameter(
+                "label",
+                location="path",
+                description="Provide umap data that includes label",
+                type=str,
+                required=True,
+            ),
+        ],
+        responses={
+            "200": UmapSerializer,
+        },
+    )
+    @action(detail=False, methods=["GET"], url_path=r"umap/(?P<label>\d+)?")
+    def get_umap_data(self, request, label):
+        if label is None:
+            return Response({"detail": "Label is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.iam_context["organization"] is None:
+            return Response({"detail": "No organization found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if LabeledShape.objects.filter(label_id=label, encoding__isnull=False).count() < 20:
+            return Response({"detail": "인코딩된 데이터가 부족합니다. 최소 데이터 20개"}, status=status.HTTP_400_BAD_REQUEST)
+
+        organization_id = request.iam_context["organization"].id
+        rq_id = f"umap:organization.id{organization_id}-label.id{label}"
+
+        umap = Umap.objects.filter(label_id=label).first()
+        if umap:
+            if umap.is_expired() is False:
+                serializer = UmapSerializer(umap)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                umap.delete()
+
+        queue = django_rq.get_queue(settings.CVAT_QUEUES.UMAP.value)
+        rq_job = queue.fetch_job(rq_id)
+
+        if rq_job:
+            if rq_job.is_failed:
+                return Response({"detail": str(rq_job.exc_info)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            if rq_job.is_started:
+                return Response({"detail": "작업 진행중"}, status=status.HTTP_202_ACCEPTED)
+            return Response({"detail": "작업 대기중"}, status=status.HTTP_202_ACCEPTED)
+
+        queue.enqueue_call(
+            func=process,
+            args=(label, ),
+            job_id=rq_id,
+            result_ttl=500,
+            failure_ttl=500,
+        )
+
+        return Response({"detail": "작업 대기중"}, status=status.HTTP_202_ACCEPTED)
 
     class Meta:
         model = Membership

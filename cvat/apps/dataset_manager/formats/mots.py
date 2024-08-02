@@ -1,8 +1,3 @@
-# Copyright (C) 2019-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from datumaro.components.annotation import AnnotationType
 from datumaro.components.dataset import Dataset
 from datumaro.components.extractor import ItemTransform

@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Spin, { SpinProps } from 'antd/lib/spin';
 

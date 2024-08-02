@@ -1,19 +1,17 @@
-# Copyright (C) 2018-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import os
 import re
 import shutil
 from enum import Enum
 from typing import Optional
+import json
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError, models
 from django.db.models.fields import FloatField
+from django.utils import timezone
+
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
@@ -158,17 +156,32 @@ class AbstractArrayField(models.TextField):
     separator = ","
     converter = lambda x: x
 
-    def __init__(self, *args, store_sorted:Optional[bool]=False, unique_values:Optional[bool]=False, **kwargs):
+    def __init__(self, *args, store_sorted: Optional[bool]=False, unique_values: Optional[bool]=False, **kwargs):
         self._store_sorted = store_sorted
         self._unique_values = unique_values
-        super().__init__(*args,**{'default': '', **kwargs})
+        super().__init__(*args, **{'default': '', **kwargs})
 
     def from_db_value(self, value, expression, connection):
         if not value:
             return []
         if value.startswith('[') and value.endswith(']'):
             value = value[1:-1]
-        return [self.converter(v) for v in value.split(self.separator) if v]
+        check = 'int'
+        if '{' in value and '}' in value:
+            check = 'dict'
+        elif '.' in value:
+            check = 'float'
+
+        if check == 'dict':
+            value = '[' + value + ']'
+            return json.loads(value)
+
+        value = value.split(self.separator) if value else []
+
+        if check == 'float':
+            return [float(v) for v in value]
+
+        return [int(v) for v in value]
 
     def to_python(self, value):
         if isinstance(value, list):
@@ -181,6 +194,8 @@ class AbstractArrayField(models.TextField):
             value = list(dict.fromkeys(value))
         if self._store_sorted:
             value = sorted(value)
+        if value and isinstance(value[0], dict):
+            value = [json.dumps(v) for v in value]
         return self.separator.join(map(str, value))
 
 class FloatArrayField(AbstractArrayField):
@@ -267,7 +282,7 @@ class Data(models.Model):
     def get_uploaded_files(self):
         upload_dir = self.get_upload_dirname()
         uploaded_files = [os.path.join(upload_dir, file) for file in os.listdir(upload_dir) if os.path.isfile(os.path.join(upload_dir, file))]
-        represented_files = [{'file':f} for f in uploaded_files]
+        represented_files = [{'file': f} for f in uploaded_files]
         return represented_files
 
 class Video(models.Model):
@@ -456,10 +471,12 @@ class Segment(models.Model):
 
 class Job(models.Model):
     segment = models.ForeignKey(Segment, on_delete=models.CASCADE)
-    assignee = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
-    updated_date = models.DateTimeField(auto_now=True)
+    worker = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='job_worker')
+    checker = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='job_checker')
+    updated_date = models.DateTimeField(null=True)
+    saved_date = models.DateTimeField(null=True)
     # TODO: it has to be deleted in Job, Task, Project and replaced by (stage, state)
-    # The stage field cannot be changed by an assignee, but state field can be. For
+    # The stage field cannot be changed by an assignee(worker, checker), but state field can be. For
     # now status is read only and it will be updated by (stage, state). Thus we don't
     # need to update Task and Project (all should work as previously).
     status = models.CharField(max_length=32, choices=StatusChoice.choices(),
@@ -468,6 +485,7 @@ class Job(models.Model):
         default=StageChoice.ANNOTATION)
     state = models.CharField(max_length=32, choices=StateChoice.choices(),
         default=StateChoice.NEW)
+    etc = models.BooleanField(default=False)
 
     def get_dirname(self):
         return os.path.join(settings.JOBS_ROOT, str(self.id))
@@ -500,6 +518,20 @@ class Job(models.Model):
         task = self.segment.task
         project = task.project
         return project.get_labels() if project else task.get_labels()
+
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_labeled_annotation_count(self):
+        return LabeledShape.objects.filter(job=self, parent=None).count()
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_labeled_annotations_by_label(self):
+        labels = self.get_labels()
+        labeled_annotation = {}
+
+        for label in labels:
+            labeled_annotation[label.id] = LabeledShape.objects.filter(job=self, label=label, parent=None).count()
+
+        return labeled_annotation
 
     class Meta:
         default_permissions = ()
@@ -668,6 +700,7 @@ class LabeledImageAttributeVal(AttributeVal):
 
 class LabeledShape(Annotation, Shape):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='elements')
+    encoding = models.BinaryField(null=True, default=None)
 
 class LabeledShapeAttributeVal(AttributeVal):
     shape = models.ForeignKey(LabeledShape, on_delete=models.CASCADE)
@@ -852,3 +885,28 @@ class Storage(models.Model):
 
     class Meta:
         default_permissions = ()
+
+
+class GuideFile(models.Model):
+    file = models.CharField(max_length=1024)
+    project = models.ForeignKey(Project, null=False, blank=False, related_name='+', on_delete=models.CASCADE)
+
+    class Meta:
+        default_permissions = ()
+
+
+class Umap(models.Model):
+    label = models.ForeignKey(Label, on_delete=models.CASCADE)
+    tx = models.BinaryField()
+    ty = models.BinaryField()
+    annotations = models.TextField()
+    result_image = models.TextField()
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        default_permissions = ()
+        unique_together = ('label',)
+
+    def is_expired(self):
+        # Check if the record has expired
+        return self.created_date + timezone.timedelta(seconds=43200) < timezone.now()

@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Config } from 'react-awesome-query-builder';
 
 export const config: Partial<Config> = {
@@ -45,8 +41,8 @@ export const config: Partial<Config> = {
                 ],
             },
         },
-        assignee: {
-            label: 'Assignee',
+        worker: {
+            label: 'Worker',
             type: 'text', // todo: change to select
             valueSources: ['value'],
             fieldSettings: {
@@ -70,6 +66,12 @@ export const config: Partial<Config> = {
                 //     };
                 // },
             },
+        },
+        checker: {
+            label: 'Checker',
+            type: 'text',
+            valueSources: ['value'],
+            fieldSettings: {},
         },
         updated_date: {
             label: 'Last updated',
@@ -115,6 +117,6 @@ export const config: Partial<Config> = {
 export const localStorageRecentCapacity = 10;
 export const localStorageRecentKeyword = 'recentlyAppliedJobsFilters';
 export const predefinedFilterValues = {
-    'Assigned to me': '{"and":[{"==":[{"var":"assignee"},"<username>"]}]}',
-    'Not completed': '{"!":{"or":[{"==":[{"var":"state"},"completed"]},{"==":[{"var":"stage"},"acceptance"]}]}}',
+    'assigned to me': '{"or":[{"==":[{"var":"worker"},"<username>"]},{"==":[{"var":"checker"},"<username>"]}]}',
+    uncompleted: '{"!":{"or":[{"==":[{"var":"state"},"completed"]},{"==":[{"var":"stage"},"acceptance"]}]}}',
 };

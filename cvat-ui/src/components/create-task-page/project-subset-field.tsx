@@ -1,7 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect, useState } from 'react';
 import Autocomplete from 'antd/lib/auto-complete';
 

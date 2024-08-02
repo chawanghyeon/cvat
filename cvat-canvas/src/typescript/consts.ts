@@ -1,7 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 const BASE_STROKE_WIDTH = 1.25;
 const BASE_GRID_WIDTH = 2;
 const BASE_POINT_SIZE = 4;

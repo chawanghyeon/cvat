@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
 
 textarea.ant-input.cvat-raw-labels-viewer {
@@ -23,41 +19,87 @@ textarea.ant-input.cvat-raw-labels-viewer {
     }
 }
 
+.cvat-raw-viewer {
+    // width
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    // Track
+    ::-webkit-scrollbar-track {
+        background: #1F1F20;
+    }
+
+    // Handle
+    ::-webkit-scrollbar-thumb {
+        background: #656568;
+    }
+
+   // Handle on hover
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+}
+
+.cvat-label-form-constructor {
+    // 추가된 라벨 항목
+    &-added {
+        margin-bottom: 15px;
+        min-height: 35px;
+
+        // 추가된 라벨 목록 gap
+        > div:nth-child(2) > div {
+            gap: 10px;
+        }
+    }
+}
+
 .cvat-constructor-viewer {
-    border: 1px solid $border-color-2;
+    border: 2px solid $border-color-3;
     box-shadow: none;
     border-top: none;
     border-radius: 0 0 $grid-unit-size $grid-unit-size;
-    padding: $grid-unit-size;
+    padding: 10px;
     display: flex;
     overflow-y: auto;
-    min-height: 9em;
+    min-height: 14em;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-content: flex-start;
+    gap: 10px;
 }
 
 .cvat-constructor-viewer-item {
     height: fit-content;
     display: flex;
     align-items: center;
-    padding: 2px $grid-unit-size;
-    border-radius: 2px;
-    margin: 2px;
-    margin-left: $grid-unit-size * 2;
+    padding: 6px $grid-unit-size;
     user-select: none;
-    border: 1px solid $border-color-2;
-    opacity: 0.6;
+    border-radius: 5px;
+
+    .ant-typography {
+        color: white;
+    }
 
     > span {
         margin-left: 5px;
+        color: white;
 
-        > span[role='img']:hover {
-            filter: invert(0.2);
+        &[role='button'] {
+            &:hover {
+                cursor: pointer;
+                filter: opacity(0.7);
+            }
+
+            &:nth-child(3) {
+                margin-left: 10px;
+            }
         }
     }
 
-    &:hover {
-        opacity: 1;
+    svg {
+        color: white;
+        vertical-align: text-bottom;
     }
 }
 
@@ -66,23 +108,60 @@ textarea.ant-input.cvat-raw-labels-viewer {
     height: fit-content;
     display: flex;
     align-items: center;
-    padding: 2px $grid-unit-size;
-    border-radius: 2px;
-    margin: 2px;
-    margin-left: $grid-unit-size;
+    flex-direction: row-reverse;
+    padding: 5px 10px;
     user-select: none;
     opacity: 1;
+
+    > svg {
+        margin-left: 3px;
+    }
 }
 
 .cvat-label-constructor-creator,
 .cvat-label-constructor-updater {
-    > form:first-child {
-        margin-top: $grid-unit-size;
-    }
+    border: 2px solid $border-color-3;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 15px;
 }
 
 .cvat-attribute-constructor-form > div:first-child > div:nth-child(4) {
     display: contents;
+}
+
+.cvat-attribute-inputs-wrapper {
+    margin-bottom: 10px;
+
+    .cvat-attribute-mutable-checkbox {
+        > span {
+            color: $text-color;
+        }
+
+        // checkbox disabled 상태일 때
+        > .ant-checkbox-disabled .ant-checkbox-inner {
+            background-color: transparent;
+        }
+    }
+
+    // 속성 추가
+    .cvat-attribute-values-input {
+        color: $text-color;
+
+        // Radio 일 경우 필드 (다중 선택)
+        &.ant-select-multiple .ant-select-selection-item {
+            border: none;
+            background-color: $background-color-4;
+
+            span[role='img'] {
+                vertical-align: text-top;
+            }
+        }
+    }
+
+    .ant-input-affix-wrapper-disabled:hover {
+        border-color: $select-color;
+    }
 }
 
 .cvat-delete-attribute-button:hover > span[role='img'] {
@@ -90,21 +169,46 @@ textarea.ant-input.cvat-raw-labels-viewer {
 }
 
 .cvat-new-attribute-button {
+    padding: 0;
     width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+    justify-content: space-evenly;
+
+    > span {
+        font-size: 13px;
+        margin-left: 3px;
+    }
 }
 
 .cvat-change-task-label-color-button {
     width: 100%;
+    background-color: #2C2D2E;
+    border-color: #656568;
+    border-radius: 5px;
+
+    &:hover, &:active, &:focus {
+        border-color: $text-color;
+        background-color: transparent;
+    }
 
     .ant-badge-status-text {
         margin-left: $grid-unit-size * 2;
+        vertical-align: middle;
+
+        > span {
+            scale: 1.2;
+        }
     }
 }
 
-.cvat-change-task-label-color-badge .ant-badge-status-dot {
-    width: $grid-unit-size * 2;
-    height: $grid-unit-size * 2;
-    border-radius: unset;
+.cvat-change-task-label-color-badge {
+    .ant-badge-status-dot {
+        width: $grid-unit-size * 2;
+        height: $grid-unit-size * 2;
+        border-radius: 8px;
+    }
 }
 
 .cvat-skeleton-configurator {
@@ -171,6 +275,13 @@ textarea.ant-input.cvat-raw-labels-viewer {
             height: $grid-unit-size * 5;
             line-height: $grid-unit-size * 5;
             margin-bottom: $grid-unit-size;
+            background-color: transparent;
+            border-radius: 6px;
+            border: 1px solid #ACACB5;
+
+            &::before {
+                content: none;
+            }
 
             .anticon-line {
                 transform: rotate(45deg);
@@ -179,6 +290,17 @@ textarea.ant-input.cvat-raw-labels-viewer {
             svg {
                 width: $grid-unit-size * 2;
                 height: $grid-unit-size * 2;
+            }
+
+            &.ant-radio-button-wrapper-checked {
+                border-color: $text-color;
+
+                &:focus-within {
+                    box-shadow: 0 0 0 3px rgba(216, 236, 255, 0.12);
+                }
+                &:first-child {
+                    border-color: $text-color;
+                }
             }
         }
     }
@@ -209,5 +331,46 @@ textarea.ant-input.cvat-raw-labels-viewer {
         padding: $grid-unit-size $grid-unit-size * 2;
         line-height: $grid-unit-size * 3;
         margin-bottom: 0 !important;
+    }
+}
+
+// Projects > Detail > Labels editor (Raw, Constructor)
+.cvat-labels-editor {
+    // Texts
+    .ant-typography {
+        color: $text-color;
+    }
+
+    .ant-tabs-card {
+
+        // The border line between tabs and viewer
+        &.ant-tabs-top > .ant-tabs-nav::before {
+            border-color: #656568;
+            border-width: 2px;
+        }
+
+        >.ant-tabs-nav {
+
+            // When the tab button is inactive
+            .ant-tabs-tab {
+                background-color: #1F1F20;
+                border: none;
+                border-bottom: 2px solid #656568;
+                border-radius: 5px 5px 0 0;
+
+                &:hover {
+                    color: $text-color;
+                }
+
+                // When the tab button is active
+                &-active {
+                    background-color: #2C2D2E;
+                    border: 2px solid #656568;
+                    border-bottom: none;
+                    border-radius: 5px 5px 0 0;
+                    color: $text-color;
+                }
+            }
+        }
     }
 }

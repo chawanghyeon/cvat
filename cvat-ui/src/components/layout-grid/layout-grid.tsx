@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';

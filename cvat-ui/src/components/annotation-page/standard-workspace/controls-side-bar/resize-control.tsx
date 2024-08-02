@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 
@@ -19,7 +15,7 @@ function ResizeControl(props: Props): JSX.Element {
     const { activeControl, canvasInstance } = props;
 
     return (
-        <CVATTooltip title='Select a region of interest' placement='right'>
+        <CVATTooltip title='Resize [drag]' placement='bottom'>
             <Icon
                 component={ZoomIcon}
                 className={

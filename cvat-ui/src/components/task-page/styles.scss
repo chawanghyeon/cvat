@@ -1,35 +1,72 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
 
 .cvat-task-details-wrapper {
     overflow-y: auto;
-    height: 90%;
+    min-height: 100%;
     width: 100%;
 
     .cvat-task-details {
         width: 100%;
         height: auto;
-        border: 1px solid $border-color-1;
         border-radius: 3px;
         padding: 20px;
-        background: $background-color-1;
 
-        .cvat-task-details-user-block {
-            > div:nth-child(2) > span {
-                margin-right: 8px;
+        // 좌측 패널
+        &-left-group {
+            .cvat-text-color {
+                border: 1px solid #ffffff1a;
+                border-radius: 6px;
+                color: $text-color;
+                padding: 10px;
+
+                > div[role='button'] {
+                    float: right;
+                }
+
+                &.ant-typography-h4 {
+                    > textarea {
+                        color: $text-color;
+                        height: auto;
+                    }
+
+                    .ant-typography-edit-content-confirm {
+                        top: 20px;
+                        right: 15px;
+                    }
+                }
             }
-        }
 
-        > div:nth-child(2) {
-            > div:nth-child(2) {
-                padding-left: 20px;
+            .cvat-task-description {
+                .ant-divider {
+                    border-color: $border-color-3;
+                }
+            }
 
-                > div:not(:first-child) {
-                    margin-top: 20px;
+            .cvat-task-details-progress {
+                flex-direction: column;
+                justify-content: space-around;
+                height: 100%;
+
+                // 작업자 할당 영역
+                .cvat-user-search-assign {
+                    margin-top: 10px;
+
+                    > div {
+                        width: 100%;
+                    }
+                }
+
+                .ant-select-selector > .ant-select-selection-search {
+                    margin-right: 0;
+
+                    .ant-select-selection-search-input {
+                        height: 40px;
+                    }
+                }
+
+                .ant-select-selection-placeholder {
+                    left: 30px !important;
+                    line-height: 40px;
                 }
             }
         }
@@ -37,31 +74,25 @@
         .cvat-project-search-field {
             width: $grid-unit-size * 20;
         }
-
-        .cvat-task-item-loading-preview,
-        .cvat-task-item-empty-preview {
-            .ant-spin {
-                position: inherit;
-            }
-
-            height: $grid-unit-size * 18;
-            font-size: $grid-unit-size * 10;
-            text-align: center;
-            margin-bottom: $grid-unit-size * 3;
-        }
-
-        .cvat-task-item-preview {
-            width: 100%;
-            object-fit: cover;
-            margin-bottom: $grid-unit-size * 3;
-            height: $grid-unit-size * 18;
-        }
     }
 
     .cvat-task-page-actions-button {
         display: flex;
         align-items: center;
-        line-height: 14px;
+        height: 40px;
+        width: 200px;
+        justify-content: space-between;
+
+        &.ant-btn-default:hover,
+        &.ant-btn-default:focus {
+            background-color: $background-color-4;
+            border-color: $text-color;
+            color: $text-color;
+
+            > span[role='img'] > svg {
+                color: $text-color;
+            }
+        }
     }
 }
 
@@ -106,11 +137,9 @@
 .cvat-task-job-list {
     width: 100%;
     height: auto;
-    border: 1px solid $border-color-1;
     border-radius: 3px;
     margin-top: 20px;
     padding: 20px;
-    background: $background-color-1;
 
     > div:nth-child(1) > div:nth-child(1) {
         display: flex;
@@ -118,16 +147,44 @@
 }
 
 .cvat-task-top-bar {
-    margin: $grid-unit-size * 2 0;
+    padding: $grid-unit-size * 2 0;
+    border-bottom: 1px solid black;
+    box-shadow: 0 1px 0 0 $border-color-2;
+
+    div:first-child {
+        svg {
+            color: #9ab0ff;
+        }
+    }
+}
+
+.cvat-task-item-loading-preview,
+.cvat-task-item-empty-preview {
+    .ant-spin {
+        position: inherit;
+    }
+
+    height: $grid-unit-size * 18;
+    font-size: $grid-unit-size * 10;
+    text-align: center;
+    margin-bottom: $grid-unit-size * 3;
+}
+
+.cvat-task-item-preview {
+    width: 100%;
+    object-fit: cover;
+    margin-bottom: $grid-unit-size * 3;
+    height: $grid-unit-size * 18;
 }
 
 .cvat-task-preview-wrapper {
     overflow: hidden;
     margin-bottom: 20px;
-    height: $grid-unit-size * 18;
-    text-align: center;
-    vertical-align: middle;
-    background-color: $background-color-2;
+    border-radius: 10px;
+    min-height: 150px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .cvat-task-parameters {
@@ -139,23 +196,175 @@
 }
 
 .ant-typography.cvat-jobs-header {
-    margin-bottom: 0;
-    font-size: 20px;
+    margin-bottom: 10px;
+    font-size: 22px;
+    color: $text-color;
     font-weight: bold;
 }
 
-/* Pagination in center */
-.cvat-task-jobs-table > div > div {
-    text-align: center;
+.cvat-task-jobs-table-row-selected {
+    background: #4970fb !important;
+}
 
-    > .ant-table-pagination.ant-pagination {
-        float: none;
+/* Pagination in center */
+.cvat-task-jobs-table {
+    min-width: 1075px;
+    .ant-pagination {
+        > li {
+            border-radius: 3px;
+            background-color: transparent;
+            border-color: #ffffff4d;
+
+            > button {
+                background-color: transparent;
+                border-color: #ffffff4d;
+                border-radius: 3px;
+            }
+
+            &:hover,
+            > button:hover {
+                border-color: $text-color;
+            }
+        }
+
+        &-disabled > button {
+            opacity: 0.2;
+        }
+
+        &-item {
+            &.ant-pagination-item-active {
+                border-color: #acacb5;
+                > a {
+                    color: #1f1f20;
+                    background-color: #acacb5;
+                }
+
+                &:hover {
+                    border-color: #acacb5;
+                }
+            }
+
+            > a {
+                color: #ffffff;
+            }
+        }
     }
 }
 
-.cvat-job-item-stage {
-    .ant-select {
-        margin-right: $grid-unit-size;
+.cvat-task-jobs-table-row {
+    .job-id {
+        color: #d0d0d8;
+        border: 1px solid #d0d0d8;
+        border-radius: 13px;
+        padding: 1px 10px;
+        font-size: 12px;
+        text-align: center;
+        display: inline;
+    }
+
+    > td {
+        text-align: center;
+
+        &.cvat-job-item-assignee {
+            text-align: left !important;
+        }
+    }
+}
+
+#cvat-job-item-stage {
+    .ant-steps {
+        &-small {
+            width: 350px;
+        }
+
+        &-item {
+            &-container {
+                &:hover {
+                    .ant-steps-item {
+                        &-icon,
+                        &-title {
+                            border-color: #9ab0ff;
+                            color: #9ab0ff;
+                            > span {
+                                color: #9ab0ff;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // step 활성화 상태
+            &-active {
+                .ant-steps-item {
+                    &-icon {
+                        background-color: #9ab0ff;
+                        border: none;
+
+                        > span {
+                            color: #656568 !important;
+                        }
+                    }
+
+                    &-title {
+                        color: #9ab0ff;
+                        padding-right: 6px;
+
+                        &::after {
+                            background-color: #656568;
+                        }
+                    }
+                }
+            }
+
+            // step 비활성화 상태
+            &-finish,
+            &-wait {
+                .ant-steps-item {
+                    &-icon {
+                        background-color: transparent;
+                        border: 1px solid #656568;
+
+                        > .ant-steps-icon {
+                            color: #656568;
+                        }
+                    }
+
+                    &-title {
+                        color: #656568;
+                        padding-right: 6px;
+
+                        &::after {
+                            background-color: #656568;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.cvat-job-item-state {
+    > .state-box {
+        border: 1px solid;
+        border-radius: 13px;
+        padding: 0 12px;
+        width: max-content;
+    }
+}
+
+.cvat-job-item-assignee {
+    .cvat-user-search-assign {
+        .ant-select-selection-search {
+            margin-right: 0;
+        }
+    }
+}
+
+.cvat-job-actions {
+    text-align: center;
+
+    svg {
+        vertical-align: middle;
     }
 }
 
@@ -170,5 +379,45 @@
         > td:nth-child(2) {
             padding-left: $grid-unit-size;
         }
+    }
+}
+
+.cvat-user-search-assign {
+    .ant-select-selection-placeholder {
+        color: #acacb5;
+    }
+}
+
+.cvat-constructor-viewer-item {
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    user-select: none;
+    border-radius: 5px;
+
+    .ant-typography {
+        color: white;
+    }
+
+    > span {
+        margin-left: 5px;
+        color: white;
+
+        &[role='button'] {
+            &:hover {
+                cursor: pointer;
+                filter: opacity(0.7);
+            }
+
+            &:nth-child(3) {
+                margin-left: 10px;
+            }
+        }
+    }
+
+    svg {
+        color: white;
+        vertical-align: text-bottom;
     }
 }

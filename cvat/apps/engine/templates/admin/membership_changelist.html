@@ -1,0 +1,10 @@
+<!-- templates/admin/membership_changelist.html -->
+
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+<li>
+    <a href="{% url 'admin:bulk-create-memberships' %}" class="addlink">Bulk Create Memberships</a>
+</li>
+{{ block.super }}
+{% endblock %}

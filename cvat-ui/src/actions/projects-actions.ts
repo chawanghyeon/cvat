@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Dispatch, ActionCreator } from 'redux';
 
 import { ActionUnion, createAction, ThunkAction } from 'utils/redux';

@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { connect } from 'react-redux';
@@ -10,7 +5,7 @@ import { connect } from 'react-redux';
 import { MenuInfo } from 'rc-menu/lib/interface';
 
 import { CombinedState, JobStage } from 'reducers';
-import AnnotationMenuComponent, { Actions } from 'components/annotation-page/top-bar/annotation-menu';
+import AnnotationMenuComponent, { Actions } from 'components/header/top-bar/annotation-menu';
 import { updateJobAsync } from 'actions/tasks-actions';
 import {
     saveAnnotationsAsync,

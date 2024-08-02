@@ -1,31 +1,12 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 const validationPatterns = {
     validatePasswordLength: {
-        pattern: /(?=.{8,})/,
+        pattern: /(?=.{4,})/,
         message: 'Password must have at least 8 characters',
     },
 
     passwordContainsNumericCharacters: {
         pattern: /(?=.*[0-9])/,
         message: 'Password must have at least 1 numeric characters',
-    },
-
-    passwordContainsUpperCaseCharacter: {
-        pattern: /(?=.*[A-Z])/,
-        message: 'Password must have at least 1 uppercase alphabetical character',
-    },
-
-    passwordContainsLowerCaseCharacter: {
-        pattern: /(?=.*[a-z])/,
-        message: 'Password must have at least 1 lowercase alphabetical character',
-    },
-
-    validateUsernameLength: {
-        pattern: /(?=.{5,})/,
-        message: 'Username must have at least 5 characters',
     },
 
     validateUsernameCharacters: {

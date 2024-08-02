@@ -1,6 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
 import http.client
 
 from django.http import HttpResponseBadRequest, HttpResponse

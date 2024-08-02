@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router';

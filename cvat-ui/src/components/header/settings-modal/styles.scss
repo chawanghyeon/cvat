@@ -1,113 +1,272 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../../base.scss';
 
+//Settings Modal
+.cvat-settings-modal {
+    // screen attributes for setting
+    .ant-modal-content {
+
+        .ant-modal-body {
+            padding-top: 10px;
+            padding-bottom: 0;
+        }
+    }
+}
+
+// Tabs
+//Settings Tabs
 .cvat-settings-tabs {
     height: 100%;
     overflow-y: auto;
-    padding-bottom: 15px;
 
     > div:nth-child(1) {
         margin-top: 10px;
         margin-bottom: 10px;
     }
-}
 
-.cvat-workspace-settings,
-.cvat-player-settings,
-.cvat-organizations-settings {
-    width: 100%;
-    height: max-content;
-    background: $background-color-1;
-    padding: 24px;
-}
+    .ant-tabs-card > .ant-tabs-nav {
 
-.cvat-workspace-settings-auto-save,
-.cvat-workspace-settings-autoborders,
-.cvat-workspace-settings-intelligent-polygon-cropping,
-.cvat-workspace-settings-show-text-always,
-.cvat-workspace-settings-show-interpolated,
-.cvat-workspace-settings-show-deleted,
-.cvat-workspace-settings-approx-poly-threshold,
-.cvat-workspace-settings-aam-zoom-margin,
-.cvat-workspace-settings-show-frame-tags,
-.cvat-workspace-settings-text-settings,
-.cvat-workspace-settings-control-points-size {
-    margin-bottom: $grid-unit-size * 3;
+        &::before {
+            border-bottom: 1px solid #656568;
+        }
 
-    > div:first-child {
-        margin-bottom: $grid-unit-size;
+        .ant-tabs-tab {
+            background-color: $select-color;
+            color: #acacb5;
+            border: none;
+            border-bottom: 1px solid $border-color-3;
+            border-radius: 6px 6px 0 0;
+
+            &-active {
+                background-color: $background-color-1;
+                border: 1px solid $border-color-3;
+                border-bottom: none;
+
+                > div[role='tab'] {
+                    color: $text-color;
+                }
+
+            }
+
+            &:hover, &:active {
+                color: $text-color;
+            }
+
+            &-btn {
+                color: #acacb5;
+
+                &:focus {
+                    color: $text-color;
+                }
+            }
+        }
     }
-}
 
-.cvat-workspace-settings-text-content {
-    width: 100%;
-}
-
-.cvat-workspace-settings-approx-poly-threshold {
-    user-select: none;
-}
-
-.cvat-player-settings-step,
-.cvat-player-settings-speed,
-.cvat-player-settings-reset-zoom,
-.cvat-player-settings-rotate-all,
-.cvat-player-settings-canvas-background,
-.cvat-workspace-settings-aam-zoom-margin,
-.cvat-workspace-settings-auto-save-interval {
-    margin-bottom: $grid-unit-size * 3;
-}
-
-.cvat-player-settings-step,
-.cvat-player-settings-speed {
-    > div {
-        display: grid;
-        justify-items: start;
-    }
-}
-
-.cvat-player-settings-step > div > span > span[role='img'] {
-    margin: 0 5px;
-    font-size: 10px;
-}
-
-.cvat-player-settings-speed > div > .ant-select {
-    width: 90px;
-}
-
-.cvat-player-reset-color-settings {
-    > .ant-col {
-        text-align: center;
-    }
-}
-
-.cvat-player-settings-image-preview {
-    width: 100%;
-    max-height: 180px;
-    object-fit: cover;
-}
-
-.canvas-background-color-picker-popover .ant-popover-inner-content {
-    padding: 6px 12px;
-
-    :first-child:first-child {
-        box-shadow: unset !important;
-    }
-}
-
-.cvat-settings-modal .ant-modal-body {
-    padding-top: 0;
-}
-
-.cvat-organizations-settings-list {
-    width: $grid-unit-size * 24;
-    margin-bottom: $grid-unit-size * 3;
-}
-
-.cvat-organizations-settings-list-item {
-    div {
+    // Settings screen frame for Player and Workspace Tabs
+    .cvat-workspace-settings,
+    .cvat-player-settings,
+    .cvat-organizations-settings {
         width: 100%;
+        height: max-content;
+        background: $background-color-1;
+        padding: 0 24px;
+        border: 1px solid #656568;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+
+        .ant-row {
+            padding: 20px 0;
+            border-bottom: 1px solid $background-color-2;
+            align-items: center;
+
+            &:last-child {
+                border: none;
+            }
+        }
+    }
+
+    .cvat-design-settings {
+        border: 1px solid #656568;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+
+        // Slider attributes under Design Tab
+        .ant-slider > .ant-slider {
+            &-track {
+                background-color: white;
+                height: 2px;
+            }
+
+            &-handle {
+                width: 12px;
+                height: 12px;
+            }
+
+            &-rail {
+                background-color: #656568;
+            }
+        }
+    }
+}
+
+//Player Tab
+// Settings > Player
+.cvat-player-settings {
+
+    // Player speed
+    &-speed-select {
+        width: 100%;
+    }
+
+    // Select canvas background color
+    &-canvas-background {
+        .ant-btn {
+            background-color: $background-color-1;
+            border-color: #ffffff4d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    }
+
+    &-color-picker {
+
+        .ant-popover-inner {
+            background-color: $background-color-1;
+            border-radius: 6px;
+        }
+    }
+}
+
+//Workspace Tab
+// Settings > Workspace
+.cvat-workspace-settings {
+
+    .ant-input-number {
+        margin: 0 10px;
+    }
+
+    &-auto-save-interval {
+        display: inline-block;
+    }
+
+    &-text-position {
+        width: 100px;
+        margin-left: 10px;
+    }
+
+    .ant-slider {
+        // less, more 문구
+        &-mark {
+            width: 85%;
+        }
+
+        // less, more 부분의 dot 제거
+        &-dot {
+            display: none;
+        }
+
+        &-rail {
+            background-color: #acacb5;
+        }
+
+        > .ant-slider-track {
+            background: linear-gradient(90deg, #d0d0d8 0%, #d0d0d8 100%);
+            height: 2px;
+        }
+
+    }
+
+    // Setting > Workspace > 텍스트 내용
+    &-text-content {
+        width: 100%;
+        margin-top: -4px;
+    }
+}
+
+// Design - 디자인 속성
+.cvat-objects-appearance {
+    padding: 20px;
+
+    &-content {
+        .ant-row {
+            padding-bottom: 10px;
+
+            &:last-child {
+                padding-bottom: 0;
+            }
+        }
+
+        .ant-col {
+            position: unset;
+        }
+    }
+
+    &-radio-group {
+        > label {
+            color: $text-color;
+        }
+    }
+
+    .cvat-appearance-outlined-borders-button {
+        vertical-align: middle;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+}
+
+// Design - 이미지 설정
+.cvat-image-setups {
+    padding: 20px;
+
+    .ant-row {
+        padding-bottom: 10px;
+
+        &:last-child {
+            padding-bottom: 0;
+        }
+
+        &.disabled {
+            opacity: 0.3;
+        }
+    }
+
+    .ant-col {
+        position: unset;
+    }
+
+    // Grid
+    &-grid-size-input, &-grid-color-input {
+        width: 100%;
+    }
+
+    &-grid-opacity-input {
+        top: 6px;
+    }
+
+    // Color
+    &-color-settings {
+        // color setting title
+        > div:first-child {
+            margin: 10px 0;
+        }
+    }
+
+    &-reset-color-settings {
+
+        .ant-btn {
+            display: flex;
+            flex-direction: row-reverse;
+            align-items: center;
+
+            > span[role='img'] {
+                margin-left: 8px;
+            }
+
+            > span:not([role='img']) {
+                margin: 0;
+            }
+        }
     }
 }

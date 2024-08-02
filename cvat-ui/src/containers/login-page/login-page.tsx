@@ -1,12 +1,9 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { connect } from 'react-redux';
 import LoginPageComponent from 'components/login-page/login-page';
 import { CombinedState } from 'reducers';
 import { loginAsync, loadSocialAuthAsync } from 'actions/auth-actions';
 import { SocialAuthMethods } from 'cvat-core-wrapper';
+
 
 interface StateToProps {
     fetching: boolean;

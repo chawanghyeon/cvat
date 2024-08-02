@@ -1,18 +1,12 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React from 'react';
-import Tabs from 'antd/lib/tabs';
+import Tabs, { TabsProps } from 'antd/lib/tabs';
 import Text from 'antd/lib/typography/Text';
 import ModalConfirm from 'antd/lib/modal/confirm';
-import {
-    EditOutlined, BuildOutlined, ExclamationCircleOutlined,
-} from '@ant-design/icons';
+import Icon from '@ant-design/icons';
 
 import { SerializedLabel, SerializedAttribute } from 'cvat-core-wrapper';
+import { IllustWarningIcon } from 'icons';
 import RawViewer from './raw-viewer';
 import ConstructorViewer from './constructor-viewer';
 import ConstructorCreator from './constructor-creator';
@@ -28,6 +22,7 @@ enum ConstructorMode {
 interface LabelsEditorProps {
     labels: SerializedLabel[];
     onSubmit: (labels: LabelOptColor[]) => void;
+    hasProject?: boolean;
 }
 
 interface LabelsEditorState {
@@ -162,11 +157,20 @@ export default class LabelsEditor extends React.PureComponent<LabelsEditorProps,
         if (typeof label.id !== 'undefined' && label.id >= 0) {
             ModalConfirm({
                 className: 'cvat-modal-delete-label',
-                icon: <ExclamationCircleOutlined />,
                 title: `Do you want to delete "${label.name}" label?`,
-                content: 'This action is irreversible. Annotation corresponding with this label will be deleted.',
-                type: 'warning',
-                okType: 'danger',
+                content: (
+                    <div style={{ textAlign: 'center' }}>
+                        <Icon component={IllustWarningIcon} />
+                        <br />
+                        <Text>
+                            This action is irreversible. Annotation corresponding with this label will be deleted.
+                        </Text>
+                    </div>
+                ),
+                okButtonProps: {
+                    type: 'primary',
+                    danger: true,
+                },
                 onOk() {
                     deleteLabel();
                 },
@@ -210,75 +214,77 @@ export default class LabelsEditor extends React.PureComponent<LabelsEditorProps,
     }
 
     public render(): JSX.Element {
-        const { labels } = this.props;
+        const { labels, hasProject } = this.props;
         const {
             savedLabels, unsavedLabels, constructorMode, labelForUpdate, creatorType,
         } = this.state;
         const savedAndUnsavedLabels = [...savedLabels, ...unsavedLabels];
 
-        return (
-            <Tabs
-                defaultActiveKey='2'
-                type='card'
-                tabBarStyle={{ marginBottom: '0px' }}
-            >
-                <Tabs.TabPane
-                    tab={(
-                        <span>
-                            <EditOutlined />
-                            <Text>Raw</Text>
-                        </span>
-                    )}
-                    key='1'
-                >
-                    <RawViewer labels={savedAndUnsavedLabels} onSubmit={this.handleRawSubmit} />
-                </Tabs.TabPane>
+        const tabItems: TabsProps['items'] = [
+            {
+                key: '1',
+                label: (
+                    <Text>Raw</Text>
+                ),
+                children: <RawViewer labels={savedAndUnsavedLabels} onSubmit={this.handleRawSubmit} />,
+            },
+            {
+                key: '2',
+                label: (
+                    <Text>Constructor</Text>
+                ),
+                children: (
+                    <>
+                        {constructorMode === ConstructorMode.SHOW && (
+                            <ConstructorViewer
+                                labels={savedAndUnsavedLabels}
+                                onUpdate={(label: LabelOptColor): void => {
+                                    this.setState({
+                                        constructorMode: ConstructorMode.UPDATE,
+                                        labelForUpdate: label,
+                                    });
+                                }}
+                                onDelete={this.handleDelete}
+                                onCreate={(_creatorType: 'basic' | 'skeleton'): void => {
+                                    this.setState({
+                                        creatorType: _creatorType,
+                                        constructorMode: ConstructorMode.CREATE,
+                                    });
+                                }}
+                                visible={!hasProject}
+                            />
+                        )}
+                        {constructorMode === ConstructorMode.UPDATE && labelForUpdate !== null && (
+                            <ConstructorUpdater
+                                label={labelForUpdate}
+                                labelNames={labels.map((l) => l.name)}
+                                onUpdate={this.handleUpdate}
+                                onCancel={this.handlerCancel}
+                            />
+                        )}
+                        {constructorMode === ConstructorMode.CREATE && (
+                            <ConstructorCreator
+                                creatorType={creatorType}
+                                labelNames={labels.map((l) => l.name)}
+                                onCreate={this.handleCreate}
+                                onCancel={this.handlerCancel}
+                            />
+                        )}
+                    </>
+                ),
+            },
+        ];
 
-                <Tabs.TabPane
-                    tab={(
-                        <span>
-                            <BuildOutlined />
-                            <Text>Constructor</Text>
-                        </span>
-                    )}
-                    key='2'
-                >
-                    {constructorMode === ConstructorMode.SHOW && (
-                        <ConstructorViewer
-                            labels={savedAndUnsavedLabels}
-                            onUpdate={(label: LabelOptColor): void => {
-                                this.setState({
-                                    constructorMode: ConstructorMode.UPDATE,
-                                    labelForUpdate: label,
-                                });
-                            }}
-                            onDelete={this.handleDelete}
-                            onCreate={(_creatorType: 'basic' | 'skeleton'): void => {
-                                this.setState({
-                                    creatorType: _creatorType,
-                                    constructorMode: ConstructorMode.CREATE,
-                                });
-                            }}
-                        />
-                    )}
-                    {constructorMode === ConstructorMode.UPDATE && labelForUpdate !== null && (
-                        <ConstructorUpdater
-                            label={labelForUpdate}
-                            labelNames={labels.map((l) => l.name)}
-                            onUpdate={this.handleUpdate}
-                            onCancel={this.handlerCancel}
-                        />
-                    )}
-                    {constructorMode === ConstructorMode.CREATE && (
-                        <ConstructorCreator
-                            creatorType={creatorType}
-                            labelNames={labels.map((l) => l.name)}
-                            onCreate={this.handleCreate}
-                            onCancel={this.handlerCancel}
-                        />
-                    )}
-                </Tabs.TabPane>
-            </Tabs>
+        return (
+            <div className='cvat-labels-editor'>
+                <Tabs
+                    defaultActiveKey='2'
+                    type='card'
+                    tabBarStyle={{ marginBottom: '0px' }}
+                    className='cvat-labels-editor-tabs'
+                    items={tabItems}
+                />
+            </div>
         );
     }
 }

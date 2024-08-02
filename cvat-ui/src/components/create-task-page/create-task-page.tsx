@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
@@ -16,6 +11,9 @@ import CreateTaskContent, { CreateTaskData } from './create-task-content';
 
 interface Props {
     onCreate: (data: CreateTaskData, onProgress?: (status: string) => void) => Promise<any>;
+    status: string;
+    error: string;
+    taskId: number | null;
     installedGit: boolean;
     dumpers: []
 }
@@ -78,7 +76,7 @@ export default function CreateTaskPage(props: Props): JSX.Element {
     return (
         <Row justify='center' align='top' className='cvat-create-work-form-wrapper'>
             <Col md={20} lg={16} xl={14} xxl={9}>
-                <Text className='cvat-title'>Create a new task</Text>
+                <Text className='cvat-title'>Create a Task</Text>
                 <CreateTaskContent
                     projectId={projectId}
                     onCreate={handleCreate}

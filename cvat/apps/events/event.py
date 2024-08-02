@@ -1,7 +1,3 @@
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from rest_framework.renderers import JSONRenderer
 from datetime import datetime, timezone
 

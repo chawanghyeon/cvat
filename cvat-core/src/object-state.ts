@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Source, ShapeType, ObjectType } from './enums';
 import PluginRegistry from './plugins';
 import { ArgumentError } from './exceptions';
@@ -90,7 +85,7 @@ export default class ObjectState {
     public color: string;
     public hidden: boolean;
     public pinned: boolean;
-    public points: number[] | null;
+    public points: any | null;
     public rotation: number | null;
     public zOrder: number;
     public outside: boolean;
@@ -254,7 +249,7 @@ export default class ObjectState {
                         return [];
                     },
                     set: (points) => {
-                        if (!Array.isArray(points) || points.some((coord) => typeof coord !== 'number')) {
+                        if (!Array.isArray(points)) {
                             throw new ArgumentError(
                                 'Points are expected to be an array of numbers ' +
                                     `but got ${

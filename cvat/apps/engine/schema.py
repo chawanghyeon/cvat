@@ -1,7 +1,3 @@
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import textwrap
 from typing import Type
 from rest_framework import serializers

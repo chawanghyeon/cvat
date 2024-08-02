@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 function deepCopy<T>(obj: T): T {
     if (typeof obj !== 'object') {
         return obj;

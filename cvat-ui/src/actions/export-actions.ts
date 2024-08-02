@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { ActionUnion, createAction, ThunkAction } from 'utils/redux';
 
 import { getCore, Storage } from 'cvat-core-wrapper';
@@ -78,6 +73,7 @@ export const exportDatasetAsync = (
     saveImages: boolean,
     useDefaultSettings: boolean,
     targetStorage: Storage,
+    downloadOnlyAccepted: boolean,
     name?: string,
 ): ThunkAction => async (dispatch) => {
     dispatch(exportActions.exportDataset(instance, format));
@@ -93,7 +89,7 @@ export const exportDatasetAsync = (
 
     try {
         const result = await instance.annotations
-            .exportDataset(format, saveImages, useDefaultSettings, targetStorage, name);
+            .exportDataset(format, saveImages, useDefaultSettings, targetStorage, downloadOnlyAccepted, name);
         if (result) {
             const downloadAnchor = window.document.getElementById('downloadAnchor') as HTMLAnchorElement;
             downloadAnchor.href = result;

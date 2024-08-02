@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { JobsActions, JobsActionTypes } from 'actions/jobs-actions';
 import { JobsState } from '.';
 
@@ -16,6 +12,7 @@ const defaultState: JobsState = {
     },
     current: [],
     previews: {},
+    guide: [],
 };
 
 export default (state: JobsState = defaultState, action: JobsActions): JobsState => {
@@ -39,6 +36,18 @@ export default (state: JobsState = defaultState, action: JobsActions): JobsState
             };
         }
         case JobsActionTypes.GET_JOBS_FAILED: {
+            return {
+                ...state,
+                fetching: false,
+            };
+        }
+        case JobsActionTypes.GET_JOB_GUIDE_SUCCESS: {
+            return {
+                ...state,
+                guide: action.payload.guide,
+            };
+        }
+        case JobsActionTypes.GET_JOB_GUIDE_FAILED: {
             return {
                 ...state,
                 fetching: false,

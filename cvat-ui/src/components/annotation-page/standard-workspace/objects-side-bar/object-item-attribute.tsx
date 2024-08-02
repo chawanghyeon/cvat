@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Col } from 'antd/lib/grid';
 import Select from 'antd/lib/select';
@@ -13,6 +9,7 @@ import Text from 'antd/lib/typography/Text';
 
 import config from 'config';
 import { clamp } from 'utils/math';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 
 interface Props {
     readonly: boolean;
@@ -42,7 +39,9 @@ function ItemAttributeComponent(props: Props): JSX.Element {
         attrInputType, attrValues, attrValue, attrName, attrID, readonly, changeAttribute,
     } = props;
 
-    const attrNameStyle: React.CSSProperties = { wordBreak: 'break-word', lineHeight: '1em', fontSize: 12 };
+    const attrNameStyle: React.CSSProperties = {
+        wordBreak: 'break-word', lineHeight: '1em', color: '#d0d0d8', paddingRight: 7,
+    };
 
     if (attrInputType === 'checkbox') {
         return (
@@ -66,20 +65,20 @@ function ItemAttributeComponent(props: Props): JSX.Element {
 
     if (attrInputType === 'radio') {
         return (
-            <Col span={24}>
-                <fieldset className='cvat-object-item-radio-attribute'>
-                    <legend>
-                        <Text style={attrNameStyle} className='cvat-text'>
-                            {attrName}
-                        </Text>
-                    </legend>
+            <>
+                <Col span={8}>
+                    <Text style={attrNameStyle} className='cvat-text'>
+                        {attrName}
+                    </Text>
+                </Col>
+                <Col span={16}>
                     <Radio.Group
                         disabled={readonly}
-                        size='small'
                         value={attrValue}
                         onChange={(event: RadioChangeEvent): void => {
                             changeAttribute(attrID, event.target.value);
                         }}
+                        className='cvat-object-item-radio-attribute'
                     >
                         {attrValues.map(
                             (value: string): JSX.Element => (
@@ -89,8 +88,8 @@ function ItemAttributeComponent(props: Props): JSX.Element {
                             ),
                         )}
                     </Radio.Group>
-                </fieldset>
-            </Col>
+                </Col>
+            </>
         );
     }
 
@@ -103,7 +102,6 @@ function ItemAttributeComponent(props: Props): JSX.Element {
                 <Col span={16}>
                     <Select
                         disabled={readonly}
-                        size='small'
                         onChange={(value: string): void => {
                             changeAttribute(attrID, value);
                         }}
@@ -133,7 +131,6 @@ function ItemAttributeComponent(props: Props): JSX.Element {
                 <Col span={16}>
                     <InputNumber
                         disabled={readonly}
-                        size='small'
                         onChange={(value: number | undefined | string): void => {
                             if (typeof value !== 'undefined') {
                                 changeAttribute(attrID, `${clamp(+value, min, max)}`);
@@ -144,6 +141,8 @@ function ItemAttributeComponent(props: Props): JSX.Element {
                         min={min}
                         max={max}
                         step={step}
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
                     />
                 </Col>
             </>
@@ -177,7 +176,6 @@ function ItemAttributeComponent(props: Props): JSX.Element {
             <Col span={16}>
                 <Input
                     ref={ref}
-                    size='small'
                     disabled={readonly}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>): void => {
                         if (ref.current && ref.current.input) {

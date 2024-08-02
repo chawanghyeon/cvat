@@ -1,27 +1,27 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { Row, Col } from 'antd/lib/grid';
-import Icon, {
-    UnlockOutlined,
-    LockFilled,
-    TeamOutlined,
-    UserOutlined,
-    PushpinFilled,
-    PushpinOutlined,
-    EyeInvisibleFilled,
-    StarFilled,
-    SelectOutlined,
-    StarOutlined,
-    EyeOutlined,
-} from '@ant-design/icons';
+import Icon from '@ant-design/icons';
 
 import CVATTooltip from 'components/common/cvat-tooltip';
 import { ObjectType, ShapeType } from 'reducers';
 import {
-    ObjectOutsideIcon, FirstIcon, LastIcon, PreviousIcon, NextIcon,
+    FirstIcon,
+    LastIcon,
+    PreviousIcon,
+    NextIcon,
+    LockIcon,
+    UnlockIcon,
+    StrokeIcon,
+    NonStrokeIcon,
+    PinIcon,
+    UnpinIcon,
+    EyeIcon,
+    EyeOffIcon,
+    TrackIcon,
+    TrackActiveIcon,
+    StarFillIcon,
+    StarIcon,
+    TrashIcon,
 } from 'icons';
 
 interface Props {
@@ -35,6 +35,7 @@ interface Props {
     pinned: boolean;
     hidden: boolean;
     keyframe: boolean | undefined;
+    isContextMenu: boolean;
     outsideDisabled: boolean;
     hiddenDisabled: boolean;
     keyframeDisabled: boolean;
@@ -63,6 +64,7 @@ interface Props {
     unpin(): void;
     hide(): void;
     show(): void;
+    remove(): void;
 }
 
 const classes = {
@@ -108,7 +110,7 @@ function NavigateFirstKeyframe(props: Props): JSX.Element {
 function NavigatePrevKeyframe(props: Props): JSX.Element {
     const { prevKeyFrameShortcut, navigatePrevKeyframe } = props;
     return navigatePrevKeyframe ? (
-        <CVATTooltip title={`Go to previous keyframe ${prevKeyFrameShortcut}`}>
+        <CVATTooltip title={`이전 프레임으로 이동 ${prevKeyFrameShortcut}`}>
             <Icon {...classes.prevKeyFrame} component={PreviousIcon} onClick={navigatePrevKeyframe} />
         </CVATTooltip>
     ) : (
@@ -119,7 +121,7 @@ function NavigatePrevKeyframe(props: Props): JSX.Element {
 function NavigateNextKeyframe(props: Props): JSX.Element {
     const { navigateNextKeyframe, nextKeyFrameShortcut } = props;
     return navigateNextKeyframe ? (
-        <CVATTooltip title={`Go to next keyframe ${nextKeyFrameShortcut}`}>
+        <CVATTooltip title={`다음 프레임으로 이동 ${nextKeyFrameShortcut}`}>
             <Icon {...classes.nextKeyFrame} component={NextIcon} onClick={navigateNextKeyframe} />
         </CVATTooltip>
     ) : (
@@ -141,11 +143,11 @@ function SwitchLock(props: Props): JSX.Element {
         locked, switchLockShortcut, lock, unlock,
     } = props;
     return (
-        <CVATTooltip title={`Switch lock property ${switchLockShortcut}`}>
+        <CVATTooltip title={`Lock ${switchLockShortcut}`}>
             {locked ? (
-                <LockFilled {...classes.lock.enabled} onClick={unlock} />
+                <Icon {...classes.lock.enabled} component={LockIcon} onClick={unlock} />
             ) : (
-                <UnlockOutlined {...classes.lock.disabled} onClick={lock} />
+                <Icon {...classes.lock.disabled} component={UnlockIcon} onClick={lock} />
             )}
         </CVATTooltip>
     );
@@ -156,11 +158,11 @@ function SwitchOccluded(props: Props): JSX.Element {
         switchOccludedShortcut, occluded, unsetOccluded, setOccluded,
     } = props;
     return (
-        <CVATTooltip title={`Switch occluded property ${switchOccludedShortcut}`}>
+        <CVATTooltip title={`Occluded ${switchOccludedShortcut}`}>
             {occluded ? (
-                <TeamOutlined {...classes.occluded.enabled} onClick={unsetOccluded} />
+                <Icon {...classes.occluded.enabled} component={NonStrokeIcon} onClick={unsetOccluded} />
             ) : (
-                <UserOutlined {...classes.occluded.disabled} onClick={setOccluded} />
+                <Icon {...classes.occluded.disabled} component={StrokeIcon} onClick={setOccluded} />
             )}
         </CVATTooltip>
     );
@@ -169,11 +171,11 @@ function SwitchOccluded(props: Props): JSX.Element {
 function SwitchPinned(props: Props): JSX.Element {
     const { pinned, pin, unpin } = props;
     return (
-        <CVATTooltip title='Switch pinned property'>
+        <CVATTooltip title='Pinned'>
             {pinned ? (
-                <PushpinFilled {...classes.pinned.enabled} onClick={unpin} />
+                <Icon {...classes.pinned.enabled} component={PinIcon} onClick={unpin} />
             ) : (
-                <PushpinOutlined {...classes.pinned.disabled} onClick={pin} />
+                <Icon {...classes.pinned.disabled} component={UnpinIcon} onClick={pin} />
             )}
         </CVATTooltip>
     );
@@ -185,11 +187,11 @@ function SwitchHidden(props: Props): JSX.Element {
     } = props;
     const hiddenStyle = hiddenDisabled ? { opacity: 0.5, pointerEvents: 'none' as const } : {};
     return (
-        <CVATTooltip title={`Switch hidden property ${switchHiddenShortcut}`}>
+        <CVATTooltip title={`Hidden ${switchHiddenShortcut}`}>
             {hidden ? (
-                <EyeInvisibleFilled {...classes.hidden.enabled} onClick={show} style={hiddenStyle} />
+                <Icon {...classes.hidden.enabled} component={EyeOffIcon} onClick={show} style={hiddenStyle} />
             ) : (
-                <EyeOutlined {...classes.hidden.disabled} onClick={hide} style={hiddenStyle} />
+                <Icon {...classes.hidden.disabled} component={EyeIcon} onClick={hide} style={hiddenStyle} />
             )}
         </CVATTooltip>
     );
@@ -201,16 +203,16 @@ function SwitchOutside(props: Props): JSX.Element {
     } = props;
     const outsideStyle = outsideDisabled ? { opacity: 0.5, pointerEvents: 'none' as const } : {};
     return (
-        <CVATTooltip title={`Switch outside property ${switchOutsideShortcut}`}>
+        <CVATTooltip title={`Track outside ${switchOutsideShortcut}`}>
             {outside ? (
                 <Icon
                     {...classes.outside.enabled}
-                    component={ObjectOutsideIcon}
+                    component={TrackActiveIcon}
                     onClick={unsetOutside}
                     style={outsideStyle}
                 />
             ) : (
-                <SelectOutlined {...classes.outside.disabled} onClick={setOutside} style={outsideStyle} />
+                <Icon {...classes.outside.disabled} component={TrackIcon} onClick={setOutside} style={outsideStyle} />
             )}
         </CVATTooltip>
     );
@@ -222,76 +224,51 @@ function SwitchKeyframe(props: Props): JSX.Element {
     } = props;
     const keyframeStyle = keyframeDisabled ? { opacity: 0.5, pointerEvents: 'none' as const } : {};
     return (
-        <CVATTooltip title={`Switch keyframe property ${switchKeyFrameShortcut}`}>
+        <CVATTooltip title={`Keyframe ${switchKeyFrameShortcut}`}>
             {keyframe ? (
-                <StarFilled {...classes.keyframe.enabled} onClick={unsetKeyframe} style={keyframeStyle} />
+                <Icon
+                    {...classes.keyframe.enabled}
+                    component={StarFillIcon}
+                    onClick={unsetKeyframe}
+                    style={keyframeStyle}
+                />
             ) : (
-                <StarOutlined {...classes.keyframe.disabled} onClick={setKeyframe} style={keyframeStyle} />
+                <Icon {...classes.keyframe.disabled} component={StarIcon} onClick={setKeyframe} style={keyframeStyle} />
             )}
+        </CVATTooltip>
+    );
+}
+
+function RemoveItem(props: Props): JSX.Element {
+    const {
+        remove,
+    } = props;
+    return (
+        <CVATTooltip title='remove'>
+            <Icon component={TrashIcon} onClick={remove} className='remove-btn' />
         </CVATTooltip>
     );
 }
 
 function ItemButtonsComponent(props: Props): JSX.Element {
     const {
-        readonly, objectType, shapeType, parentID,
+        readonly, objectType, shapeType, parentID, isContextMenu,
     } = props;
 
-    if (objectType === ObjectType.TRACK) {
+    if (readonly) {
         return (
-            <Row align='middle' justify='space-around'>
-                <Col span={20} style={{ textAlign: 'center' }}>
-                    <Row justify='space-around'>
-                        <Col>
-                            <NavigateFirstKeyframe {...props} />
-                        </Col>
-                        <Col>
-                            <NavigatePrevKeyframe {...props} />
-                        </Col>
-                        <Col>
-                            <NavigateNextKeyframe {...props} />
-                        </Col>
-                        <Col>
-                            <NavigateLastKeyframe {...props} />
-                        </Col>
-                    </Row>
-                    {!readonly && (
-                        <Row justify='space-around'>
-                            <Col>
-                                <SwitchOutside {...props} />
-                            </Col>
-                            <Col>
-                                <SwitchLock {...props} />
-                            </Col>
-                            <Col>
-                                <SwitchOccluded {...props} />
-                            </Col>
-                            <Col>
-                                <SwitchHidden {...props} />
-                            </Col>
-                            <Col>
-                                <SwitchKeyframe {...props} />
-                            </Col>
-                            {shapeType !== ShapeType.POINTS && (
-                                <Col>
-                                    <SwitchPinned {...props} />
-                                </Col>
-                            )}
-                        </Row>
-                    )}
+            <Row align='middle' justify='end' className='cvat-objects-button'>
+                <Col span={5} style={{ textAlign: 'center' }}>
+                    <SwitchHidden {...props} />
                 </Col>
             </Row>
         );
     }
 
-    if (readonly) {
-        return <div />;
-    }
-
     if (objectType === ObjectType.TAG) {
         return (
             <Row align='middle' justify='space-around'>
-                <Col span={20} style={{ textAlign: 'center' }}>
+                <Col span={24} style={{ textAlign: 'center' }}>
                     <Row justify='space-around'>
                         <Col>
                             <SwitchLock {...props} />
@@ -303,9 +280,9 @@ function ItemButtonsComponent(props: Props): JSX.Element {
     }
 
     return (
-        <Row align='middle' justify='space-around'>
-            <Col span={20} style={{ textAlign: 'center' }}>
-                <Row justify='space-around'>
+        <Row align='middle' justify='space-around' className='cvat-objects-button'>
+            <Col span={24} style={{ textAlign: 'center' }}>
+                <Row style={{ justifyContent: 'space-evenly' }}>
                     { Number.isInteger(parentID) && (
                         <Col>
                             <SwitchOutside {...props} />
@@ -325,10 +302,54 @@ function ItemButtonsComponent(props: Props): JSX.Element {
                             <SwitchPinned {...props} />
                         </Col>
                     )}
+                    {isContextMenu && (
+                        <Col>
+                            <RemoveItem {...props} />
+                        </Col>
+                    )}
                 </Row>
             </Col>
         </Row>
     );
 }
 
+function ItemButtonsTrack(props: Props): JSX.Element {
+    const {
+        readonly,
+    } = props;
+
+    return (
+        <Row align='middle' justify='space-around' className='cvat-item-buttons-track'>
+            <Col span={24} style={{ textAlign: 'center' }}>
+                <Row justify='space-around'>
+                    {!readonly && (
+                        <>
+                            <Col>
+                                <SwitchOutside {...props} />
+                            </Col>
+                            <Col>
+                                <SwitchKeyframe {...props} />
+                            </Col>
+                        </>
+                    )}
+                    <Col>
+                        <NavigateFirstKeyframe {...props} />
+                    </Col>
+                    <Col>
+                        <NavigatePrevKeyframe {...props} />
+                    </Col>
+                    <Col>
+                        <NavigateNextKeyframe {...props} />
+                    </Col>
+                    <Col>
+                        <NavigateLastKeyframe {...props} />
+                    </Col>
+                </Row>
+            </Col>
+        </Row>
+    );
+}
+const ItemButtonsTrackComponent = React.memo(ItemButtonsTrack);
+
 export default React.memo(ItemButtonsComponent);
+export { ItemButtonsTrackComponent };

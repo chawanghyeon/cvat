@@ -1,7 +1,3 @@
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
 
@@ -15,7 +11,7 @@ UserModel = get_user_model()
 class ResetPasswordFormEx(AllAuthPasswordResetForm):
     def save(self, request=None, domain_override=None,
              email_template_prefix='authentication/password_reset_key',
-             use_https=False, token_generator=default_token_generator,
+             use_https=True, token_generator=default_token_generator,
              extra_email_context=None, **kwargs):
 
         """

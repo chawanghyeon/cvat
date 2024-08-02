@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { Row, Col } from 'antd/lib/grid';
 
@@ -15,13 +11,19 @@ export interface Props {
 
 function TaskListComponent(props: Props): JSX.Element {
     const { currentTasksIndexes } = props;
-    const taskViews = currentTasksIndexes.map((tid, id): JSX.Element => <TaskItem idx={id} taskID={tid} key={tid} />);
+    const taskViews = currentTasksIndexes.map((tid, id): JSX.Element => (
+        <Col span={6} key={tid}>
+            <TaskItem idx={id} taskID={tid} />
+        </Col>
+    ));
 
     return (
         <>
             <Row justify='center' align='middle'>
-                <Col className='cvat-tasks-list' md={22} lg={18} xl={16} xxl={14}>
-                    {taskViews}
+                <Col className='cvat-tasks-list' md={22} lg={20} xl={18} xxl={14}>
+                    <Row className='cvat-tasks-lists' gutter={[32, 32]}>
+                        {taskViews}
+                    </Row>
                 </Col>
             </Row>
             <ModelRunnerModal />

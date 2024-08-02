@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { ObjectState } from '.';
 import { MasterImpl } from './master';
 
@@ -43,6 +38,9 @@ export interface DrawData {
     initialState?: any;
     redraw?: number;
     shapeType?: string;
+    brush?: boolean;
+    size?: number;
+    pointSize?: number;
 }
 
 export enum FrameZoom {
@@ -113,6 +111,7 @@ export interface Canvas3dDataModel {
     imageSize: Size;
     imageIsDeleted: boolean;
     drawData: DrawData;
+    fixed: number;
     mode: Mode;
     objects: ObjectState[];
     shapeProperties: ShapeProperties;
@@ -138,6 +137,8 @@ export interface Canvas3dModel {
     setup(frameData: any, objectStates: ObjectState[]): void;
     isAbleToChangeFrame(): boolean;
     draw(drawData: DrawData): void;
+    brush(drawData: DrawData): void;
+    fixedObject(clientID: number): void;
     cancel(): void;
     dragCanvas(enable: boolean): void;
     activate(clientID: string | null, attributeID: number | null): void;
@@ -178,7 +179,10 @@ export class Canvas3dModelImpl extends MasterImpl implements Canvas3dModel {
             drawData: {
                 enabled: false,
                 initialState: null,
+                brush: false,
+                size: 2.5,
             },
+            fixed: 0,
             mode: Mode.IDLE,
             groupData: {
                 enabled: false,
@@ -282,6 +286,16 @@ export class Canvas3dModelImpl extends MasterImpl implements Canvas3dModel {
         const isUnable = [Mode.EDIT].includes(this.data.mode) ||
             this.data.isFrameUpdating || (this.data.mode === Mode.DRAW && typeof this.data.drawData.redraw === 'number');
         return !isUnable;
+    }
+
+    public brush(drawData: DrawData): void {
+        this.data.drawData.brush = drawData?.brush;
+        this.data.drawData.size = drawData?.size;
+        this.data.drawData.pointSize = drawData?.pointSize;
+    }
+
+    public fixedObject(cliendID: number): void {
+        this.data.fixed = cliendID;
     }
 
     public draw(drawData: DrawData): void {

@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import platform from 'platform';
 
 const engine = platform.layout || 'unknown';

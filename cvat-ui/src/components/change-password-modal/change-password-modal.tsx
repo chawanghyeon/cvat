@@ -1,11 +1,7 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
+import './styles.scss';
 import React from 'react';
 import { connect } from 'react-redux';
 import Modal from 'antd/lib/modal';
-import Title from 'antd/lib/typography/Title';
 
 import { changePasswordAsync } from 'actions/auth-actions';
 import { CombinedState } from 'reducers';
@@ -50,11 +46,11 @@ function ChangePasswordComponent(props: ChangePasswordPageComponentProps): JSX.E
     return (
         <Modal
             className='cvat-modal-change-password'
-            title={<Title level={3}>Change password</Title>}
+            title='Change password'
             okType='primary'
             okText='Submit'
             footer={null}
-            visible={visible}
+            open={visible}
             destroyOnClose
             onCancel={onClose}
         >

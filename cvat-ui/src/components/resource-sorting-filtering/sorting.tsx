@@ -1,8 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState, useEffect } from 'react';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import {
@@ -178,9 +173,9 @@ function SortingModalComponent(props: Props): JSX.Element {
         <Dropdown
             disabled={disabled}
             destroyPopupOnHide
-            visible={visible}
+            open={visible}
             placement='bottomLeft'
-            overlay={(
+            dropdownRender={() => (
                 <SortableList
                     onSortEnd={({ oldIndex, newIndex }: { oldIndex: number, newIndex: number }) => {
                         if (oldIndex !== newIndex) {
@@ -197,7 +192,7 @@ function SortingModalComponent(props: Props): JSX.Element {
             )}
         >
             <Button className='cvat-switch-sort-constructor-button' type='default' onClick={() => onVisibleChange(!visible)}>
-                Sort by
+                정렬순서
                 <OrderedListOutlined />
             </Button>
         </Dropdown>

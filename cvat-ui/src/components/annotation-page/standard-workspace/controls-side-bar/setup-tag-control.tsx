@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Popover from 'antd/lib/popover';
 import Icon from '@ant-design/icons';
@@ -24,7 +20,7 @@ function SetupTagControl(props: Props): JSX.Element {
     return disabled ? (
         <Icon className='cvat-setup-tag-control cvat-disabled-canvas-control' component={TagIcon} />
     ) : (
-        <CustomPopover placement='right' content={<SetupTagPopoverContainer />}>
+        <CustomPopover placement='bottom' content={<SetupTagPopoverContainer />}>
             <Icon className='cvat-setup-tag-control' component={TagIcon} />
         </CustomPopover>
     );

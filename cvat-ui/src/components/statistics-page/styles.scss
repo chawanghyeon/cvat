@@ -1,0 +1,85 @@
+.cvat-statistics-header {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 22px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.sub {
+    font-size: 18px;
+    letter-spacing: 0.8px;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
+.sub2 {
+    font-size: 18px;
+    letter-spacing: 0.8px;
+    margin-top: 10px;
+}
+
+.sub3 {
+    font-size: 18px;
+    letter-spacing: 0.8px;
+    margin-top: 0px;
+    margin-bottom: 10px;
+}
+
+.cvat-statistics-page-search-bar {
+    display: inline;
+    border-radius: 6px !important;
+    .ant-input-group > .ant-input-affix-wrapper {
+        border-radius: 6px !important;
+    }
+
+    .ant-input-group-addon {
+        display: none;
+    }
+}
+
+.cvat-statistics-table-row {
+    > td {
+        text-align: center;
+        letter-spacing: 0.8px;
+        color: #fff;
+    }
+    > tr > td.ant-table-column-sort {
+        background-color: #2c2d2e;
+        box-shadow: none;
+    }
+}
+
+.cvat-constructor-viewer-item {
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    user-select: none;
+    border-radius: 5px;
+
+    .ant-typography {
+        color: white;
+    }
+
+    > span {
+        margin-left: 5px;
+        color: white;
+
+        &[role='button'] {
+            &:hover {
+                cursor: pointer;
+                filter: opacity(0.7);
+            }
+
+            &:nth-child(3) {
+                margin-left: 10px;
+            }
+        }
+    }
+
+    svg {
+        color: white;
+        vertical-align: text-bottom;
+    }
+}

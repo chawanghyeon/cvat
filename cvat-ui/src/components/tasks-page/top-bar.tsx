@@ -1,30 +1,18 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
-import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router';
-
 import { Row, Col } from 'antd/lib/grid';
-import Dropdown from 'antd/lib/dropdown';
-import { PlusOutlined, UploadOutlined, LoadingOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons';
 import Button from 'antd/lib/button';
 import Input from 'antd/lib/input';
-import { importActions } from 'actions/import-actions';
-import { SortingComponent, ResourceFilterHOC, defaultVisibility } from 'components/resource-sorting-filtering';
+import Text from 'antd/lib/typography/Text';
+
 import { TasksQuery } from 'reducers';
 import { usePrevious } from 'utils/hooks';
-import { MultiPlusIcon } from 'icons';
-import CvatDropdownMenuPaper from 'components/common/cvat-dropdown-menu-paper';
-import {
-    localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues, config,
-} from './tasks-filter-configuration';
-
-const FilteringComponent = ResourceFilterHOC(
-    config, localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues,
-);
+import CvatTooltip from 'components/common/cvat-tooltip';
+import { Space } from 'antd';
+import { importActions } from 'actions/import-actions';
+import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 interface VisibleTopBarProps {
     onApplyFilter(filter: string | null): void;
@@ -36,10 +24,8 @@ interface VisibleTopBarProps {
 
 export default function TopBarComponent(props: VisibleTopBarProps): JSX.Element {
     const dispatch = useDispatch();
-    const {
-        importing, query, onApplyFilter, onApplySorting, onApplySearch,
-    } = props;
-    const [visibility, setVisibility] = useState(defaultVisibility);
+    const { t } = useTranslation();
+    const { importing, query, onApplyFilter, onApplySearch } = props;
     const history = useHistory();
     const prevImporting = usePrevious(importing);
 
@@ -51,82 +37,41 @@ export default function TopBarComponent(props: VisibleTopBarProps): JSX.Element 
 
     return (
         <Row className='cvat-tasks-page-top-bar' justify='center' align='middle'>
-            <Col md={22} lg={18} xl={16} xxl={14}>
-                <div className='cvat-tasks-page-filters-wrapper'>
+            <Col md={22} lg={20} xl={18} xxl={14}>
+                <div className='cvat-tasks-page-header'>
+                    <Text strong className='cvat-text-color'>
+                        {t('title.tasks')}
+                    </Text>
+                </div>
+                <Space>
                     <Input.Search
-                        enterButton
+                        enterButton={false}
                         onSearch={(phrase: string) => {
                             onApplySearch(phrase);
                         }}
                         defaultValue={query.search || ''}
                         className='cvat-tasks-page-search-bar'
-                        placeholder='Search ...'
+                        placeholder={t('search.placeholder')}
+                        suffix={<SearchOutlined />}
                     />
-                    <div>
-                        <SortingComponent
-                            visible={visibility.sorting}
-                            onVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, sorting: visible })
-                            )}
-                            defaultFields={query.sort?.split(',') || ['-ID']}
-                            sortingFields={['ID', 'Owner', 'Status', 'Assignee', 'Updated date', 'Subset', 'Mode', 'Dimension', 'Project ID', 'Name', 'Project name']}
-                            onApplySorting={onApplySorting}
+                    <CvatTooltip title='Create a Task from a backup'>
+                        <Button
+                            className='cvat-import-task-button'
+                            type='primary'
+                            disabled={importing}
+                            icon={importing ? <LoadingOutlined /> : <UploadOutlined />}
+                            onClick={() => dispatch(importActions.openImportBackupModal('task'))}
                         />
-                        <FilteringComponent
-                            value={query.filter}
-                            predefinedVisible={visibility.predefined}
-                            builderVisible={visibility.builder}
-                            recentVisible={visibility.recent}
-                            onPredefinedVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, predefined: visible })
-                            )}
-                            onBuilderVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, builder: visible })
-                            )}
-                            onRecentVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, builder: visibility.builder, recent: visible })
-                            )}
-                            onApplyFilter={onApplyFilter}
+                    </CvatTooltip>
+                    <CvatTooltip title='Create a Task'>
+                        <Button
+                            className='cvat-create-task-button'
+                            type='primary'
+                            onClick={(): void => history.push('/tasks/create')}
+                            icon={<PlusOutlined />}
                         />
-                    </div>
-                </div>
-                <div>
-                    <Dropdown
-                        trigger={['click']}
-                        overlay={(
-                            <CvatDropdownMenuPaper>
-                                <Button
-                                    className='cvat-create-task-button'
-                                    type='primary'
-                                    onClick={(): void => history.push('/tasks/create')}
-                                    icon={<PlusOutlined />}
-                                >
-                                    Create a new task
-                                </Button>
-                                <Button
-                                    className='cvat-create-multi-tasks-button'
-                                    type='primary'
-                                    onClick={(): void => history.push('/tasks/create?many=true')}
-                                    icon={<span className='anticon'><MultiPlusIcon /></span>}
-                                >
-                                    Create multi tasks
-                                </Button>
-                                <Button
-                                    className='cvat-import-task-button'
-                                    type='primary'
-                                    disabled={importing}
-                                    icon={<UploadOutlined />}
-                                    onClick={() => dispatch(importActions.openImportBackupModal('task'))}
-                                >
-                                    Create from backup
-                                    {importing && <LoadingOutlined />}
-                                </Button>
-                            </CvatDropdownMenuPaper>
-                        )}
-                    >
-                        <Button type='primary' className='cvat-create-task-dropdown' icon={<PlusOutlined />} />
-                    </Dropdown>
-                </div>
+                    </CvatTooltip>
+                </Space>
             </Col>
         </Row>
     );

@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
 
 .cvat-modal-import-dataset-option-item > .ant-select-item-option-content,
@@ -15,6 +11,10 @@
 .cvat-modal-import-header-question-icon {
     margin-left: $grid-unit-size;
     color: $text-color-secondary;
+}
+
+.cvat-modal-import-switch-use-default-storage {
+    display: table-cell;
 }
 
 .cvat-modal-import-dataset-status .ant-modal-body {
@@ -31,12 +31,32 @@
     }
 }
 
-.cvat-modal-import-switch-use-default-storage,
-.cvat-modal-import-switch-conv-mask-to-poly {
-    display: table-cell;
-}
-
 .cvat-modal-import-switch-use-default-storage-container,
 .cvat-modal-import-switch-conv-mask-to-poly-container {
     width: 100%;
+}
+
+// 데이터셋 등록 > file list text
+.cvat-modal-import-dataset {
+    // 데이터셋 등록 > Title Text
+    .import-dataset-modal-title-text {
+        font-weight: bold;
+        color: white !important;
+    }
+
+    // 데이터셋 등록 > 포맷 area
+    .ant-form-item {
+        border-bottom: 1px solid #414142;
+        padding-bottom: 15px;
+    }
+
+
+    .ant-upload-list-text .ant-upload-list-item-name {
+        color: $text-color;
+    }
+    // 데이터셋 등록 > file list area
+    .ant-upload-list-item:hover .ant-upload-list-item-info {
+        background-color: #1f1f20;
+        border-radius: 5px;
+    }
 }

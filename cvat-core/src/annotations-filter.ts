@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import jsonLogic from 'json-logic-js';
 import { SerializedData } from 'object-state';
 import { AttributeType, ObjectType, ShapeType } from './enums';

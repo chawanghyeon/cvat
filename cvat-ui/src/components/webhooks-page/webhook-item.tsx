@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
@@ -148,7 +144,7 @@ function WebhookItem(props: WebhookItemProps): JSX.Element | null {
                 </Row>
                 <Row justify='end'>
                     <Col>
-                        <Dropdown overlay={() => (
+                        <Dropdown menu={() => (
                             <Menu>
                                 <Menu.Item key='edit'>
                                     <a

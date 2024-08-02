@@ -1,0 +1,864 @@
+{
+  "header": {
+    "projects": "프로젝트",
+    "tasks": "작업",
+    "jobs": "하위 작업",
+    "organizations": "조직",
+    "statistics": "통계",
+    "language": "Korea",
+    "umap": "Umap",
+    "menu": {
+      "adminPage": "관리자 페이지",
+      "changePassword": "패스워드 변경",
+      "billing": "청구서",
+      "logout": "로그아웃",
+      "personalWorkspace": "개인 작업공간"
+    },
+    "Back to projects": "프로젝트로 돌아가기",
+    "Back to tasks": "작업으로 돌아가기"
+  },
+  "title": {
+    "projects": "프로젝트",
+    "tasks": "작업",
+    "jobs": "하위 작업",
+    "organizations": "조직",
+    "statistics": "통계"
+  },
+  "statistics": {
+    "allObjects": "모든 객체",
+    "regularObjects": "일반 객체",
+    "overObjects": "초과된 객체",
+    "grid": {
+      "etc": {
+        "title": "기타",
+        "all": "전체",
+        "regular": "일반",
+        "over": "초과"
+      },
+      "stage": {
+        "title": "단계",
+        "annotation": "작업",
+        "validation": "검수",
+        "acceptance": "승인"
+      },
+      "worker": "작업자",
+      "object": "객체",
+      "project": "프로젝트",
+      "task": "작업",
+      "job": "하위 작업",
+      "labels": "라벨"
+    }
+  },
+  "search": {
+    "placeholder": "검색",
+    "selectAUser": "이용자 선택"
+  },
+  "filter": {
+    "stage": "단계",
+    "state": "상태",
+    "jobs": {
+      "stage": {
+        "annotation": "작업",
+        "validation": "검수",
+        "acceptance": "승인"
+      },
+      "state": {
+        "new": "신규",
+        "in progress": "진행중",
+        "rejected": "거부",
+        "completed": "완료"
+      }
+    }
+  },
+  "projects": {
+    "actions": {
+      "exportDataset": "데이터셋 내보내기",
+      "importDataset": "데이터셋 가져오기",
+      "backup": "백업",
+      "delete": "삭제"
+    },
+    "detail": {
+      "assignee": "담당자",
+      "overlapSize": "중첩 구간 크기",
+      "segmentSize": "세그먼트 크기",
+      "imageQuality": "이미지 품질"
+    },
+    "button": {
+      "addLabel": "라벨 추가",
+      "setupSkeleton": "스켈레톤 설정"
+    }
+  },
+  "tasks": {
+    "constructor": {
+      "description": "Project Page에서 레이블을 생성하거나 편집할 수 있습니다."
+    },
+    "actions": {
+      "uploadAnnotation": "작업단계 업로드",
+      "exportDataset": "데이터셋 내보내기",
+      "autoAnnotation": "자동 작업",
+      "taskBackup": "작업 백업",
+      "moveTaskToProject": "작업을 프로젝트로 이동",
+      "deleteTask": "작업 삭제"
+    },
+    "grid": {
+      "job": "하위 작업",
+      "objects": "객체",
+      "frames": "프레임 범위",
+      "stage": {
+        "title": "Stage",
+        "annotation": "작업",
+        "validation": "검수",
+        "acceptance": "승인"
+      },
+      "started": "시작일",
+      "lastWorked": "최종 작업일",
+      "worker": "작업자",
+      "checker": "검수자",
+      "actions": "실행"
+    }
+  },
+  "job": {
+    "Jobs Objects": "하위 작업 객체",
+    "grid": {
+      "job": "하위 작업",
+      "worker": "작업자",
+      "checker": "검수자",
+      "size": "크기",
+      "no assignee": "담당자 미정",
+      "stage": {
+        "title": "단계",
+        "annotation": "작업",
+        "validation": "검수",
+        "acceptance": "승인"
+      },
+      "state": {
+        "title": "상태",
+        "new": "신규",
+        "in progress": "진행중",
+        "rejected": "거부",
+        "completed": "완료"
+      },
+      "actions": "실행",
+      "etc": {
+        "title": "기타",
+        "button": {
+          "goToTask": "작업으로 돌아가기",
+          "goToProject": "프로젝트로 돌아가기",
+          "exportJob": "하위 작업 추출하기"
+        }
+      }
+    }
+  },
+  "organizations": {
+    "fullName": "이름",
+    "description": "설명",
+    "addDescription": "설명 추가",
+    "phoneNumber": "전화번호",
+    "addPhoneNumber": "전화번호 추가",
+    "email": "이메일",
+    "addEmail": "이메일 추가",
+    "button": {
+      "removeOrganization": "조직 삭제",
+      "inviteMembers": "회원 초대"
+    },
+    "user": {
+      "worker": "작업자",
+      "supervisor": "(부)담당자",
+      "maintainer": "담당자"
+    },
+    "create": {
+      "title": "새로운 조직을 만들어 주세요",
+      "shortName": "이름",
+      "fullName": "전체 이름",
+      "description": "설명",
+      "email": "이메일",
+      "phoneNumber": "전화 번호"
+    },
+    "validation": {
+      "shortNameRequire": "이름은 필수 입력 항목입니다",
+      "shortNameLen_1": "S짧은 이름은 ",
+      "shortNameLen_2": "자를 초과할 수 없습니다.",
+      "fullNameLen_1": "전체 이름은 ",
+      "fullNameLen_2": "자를 초과해서는 안 됩니다.",
+      "email": "입력이 유효한 이메일이 아닙니다."
+    },
+    "actionMenu": {
+      "inviteUser": "이용자 초대",
+      "inviteUsers": "이용자 초대",
+      "removeOrganization": "조직 제거",
+      "remove": "제거",
+      "cancel": "취소",
+      "placeholder": "조직 이름"
+    },
+    "message": {
+      "require": "필수 값 입니다.",
+      "emailPlaceholder": "이메일을 입력해 주세요."
+    }
+  },
+  "settings": {
+    "title": "설정",
+    "player": {
+      "title": "플레이어",
+      "playerSpeed": {
+        "title": "플레이어 속도",
+        "usual": "보통",
+        "fastest": "가장 빠른",
+        "fast": "빠른",
+        "slow": "느린",
+        "slower": "더 느린",
+        "slowest": "가장 느린"
+      },
+      "canvasBackgroundColor": "캔버스 배경색",
+      "resetZoom": {
+        "title": "줌 초기화",
+        "description": "프레임 변경 후 이미지 맞추기"
+      },
+      "rotateAllImages": {
+        "title": "모든 이미지 회전",
+        "description": "모든 이미지 동시 회전"
+      },
+      "smoothImage": {
+        "title": "부드러운 이미지",
+        "description": "줌인시 이미지 부드럽게"
+      }
+    },
+    "workspace": {
+      "title": "작업공간",
+      "enableAutoSave": {
+        "title": "자동 저장 활성화",
+        "description": "자동 저장 간격"
+      },
+      "showAllInterpolationTracks": {
+        "title": "모든 보간 트랙 표시하기",
+        "description": "측면 패널에 숨겨진 보간된 객체 표시"
+      },
+      "alwaysShowObjectDetails": {
+        "title": "항상 객체 세부정보 표시하기",
+        "description": "객체가 활성화되지 않았을 때도 캔버스에 텍스트 표시"
+      },
+      "contentOfAText": {
+        "title": "텍스트 내용"
+      },
+      "positionOfAText": {
+        "title": "텍스트 위치"
+      },
+      "fontSizeOfAText": {
+        "title": "텍스트 글꼴 크기"
+      },
+      "automaticBordering": {
+        "title": "자동 테두리 생성",
+        "description": "그리기/편집 중 다각형 및 다각형의 라인에 대한 자동 테두리 활성화"
+      },
+      "intelligentPolygonCropping": {
+        "title": "지능형 다각형 자르기",
+        "description": "편집 중에 다각형을 자동으로 자르게 하기"
+      },
+      "annotationZoomMargin": {
+        "title": "속성 주석 모드(AAM) 줌 여백"
+      },
+      "polygonApproximation": {
+        "title": "다각형 근사화의 기본 꼭지점의 수",
+        "description": "OpenCV 편집기에서 사용되는 다각형 근사화의 기본적인 꼭지점 수"
+      }
+    },
+    "design": {
+      "title": "디자인",
+      "appearance": {
+        "title": "외관",
+        "label": "라벨",
+        "instance": "인스턴스",
+        "group": "그룹",
+        "opacity": "투명도",
+        "selectedOpacity": "선택된 투명도",
+        "outlinedBorders": "외곽선",
+        "showBitmaps": "비트맵 표시",
+        "showProjections": "투영 표시"
+      },
+      "imageSettings": {
+        "title": "이미지 설정",
+        "imageGrid": "이미지 그리드",
+        "size": "크기",
+        "color": "색상",
+        "opacity": "투명도",
+        "colorSettings": {
+          "title": "색상 설정",
+          "brightness": "밝기",
+          "contrast": "대비",
+          "saturation": "채도"
+        },
+        "resetColorSetting": "색상 설정 초기화"
+      }
+    }
+  },
+  "drageAndDrop": {
+    "title": "백업에서 프로젝트 생성",
+    "text": "여기로 파일을 클릭하거나 드래그하세요",
+    "message": {
+      "require": "필수 값 입니다.",
+      "error": "zip 파일만 업로드 가능합니다.",
+      "specify": "이름을 지정해주세요.",
+      "backupFileName": "백업 파일 이름",
+      "noBackupSpecified": "백업 파일이 지정되지 않았습니다.",
+      "create_1": "",
+      "create_2": " 백업에서 생성 중입니다.",
+      "createBackup_1": "백업으로",
+      "createBackup_2": " 생성",
+      "createFileBackup_1": "백업 파일로",
+      "createFileBackup_2": "  생성",
+      "storageWithBackup": "백업과 함께 소스 저장소를 지정하세요."
+    }
+  },
+  "datasetModal": {
+    "text": "여기로 파일을 클릭하거나 드래그하세요",
+    "message": {
+      "notGetTask_1": "",
+      "notGetTask_2": "작업 인스턴스를 가져올 수 없습니다",
+      "require": "필수 값 입니다.",
+      "error": "데이터셋을 가져오려면 ZIP 형식만 지원됩니다.",
+      "extensionError_1": "",
+      "extensionError_2": " 형식은 ",
+      "extensionError_3": " 확장자를 가진 파일만 사용할 수 있습니다.",
+      "confirmUploadTitle": "현재 어노테이션(작업 단계)이 손실됩니다.",
+      "confirmUpload_1": "새로운 어노테이션(작업 단계)을 ",
+      "confirmUpload_2": " 에 업로드할 예정입니다. 계속 진행하시겠습니까?",
+      "labelMessage_1": "데이터셋에서 레이블이 가져와질 것입니다",
+      "labelMessage_2": "프로젝트의 레이블이 사용될 것입니다.",
+      "format": "포맷을 선택해야 합니다.",
+      "importFormat": "포맷 가져오기",
+      "formatSelect": "먼저 포맷을 선택해주세요.",
+      "onUpload_1": "가져오기 시작",
+      "onUpload_2": "에 대한 ",
+      "onUpload_3": "가져오기가 시작되었습니다."
+    },
+    "placeholder": {
+      "datasetFileName": "데이터셋 파일 이름"
+    }
+  },
+  "time": {
+    "hour": "시",
+    "minutes": "분",
+    "seconds": "초",
+    "LastUpdated": "마지막 수정"
+  },
+  "confirm": {
+    "ok": "확인",
+    "open": "열기",
+    "cancel": "취소",
+    "submit": "제출",
+    "remove": "제거",
+    "resolve": "해결"
+  },
+  "modal": {
+    "Please, describe the issue": "문제를 설명해 주세요.",
+    "Please, fill out the field": "필드를 작성해 주세요.",
+    "Print a comment here": "댓글을 입력해 주세요..",
+    "drawing": {
+      "intelligent scissors": "지능적으로 자르기",
+      "Histogram equalization": "히스토그램 균등화",
+      "Generate": "생성"
+    }
+  },
+  "message": {
+    "notFound": "검색 결과가 없습니다...",
+    "noStorageAttached": "아직 연결된 클라우드 저장소가 없습니다...",
+    "toGetStarted": "클라우드 저장소를 시작하려면",
+    "attachANewOne": "새로운 것을 추가하세요.",
+    "noProjectsCreatedYet": "아직 프로젝트가 생성되지 않았습니다...",
+    "noWebhooksCreatedYet": "아직 Webhooks(이)가 생성되지 않았습니다...",
+    "task": {
+      "error": "서버에서 요청한 프로젝트를 받을 수 없습니다",
+      "notification": {
+        "message": "서버에서 요청한 작업을 받을 수 없습니다",
+        "description_1": "요청한 작업 ID ",
+        "description_2": " 가 유효하지 않습니다.",
+        "notUpdate": "작업을 업데이트 할 수 없습니다."
+      },
+      "result": {
+        "title": "죄송합니다. 이 작업을 찾을 수 없습니다.",
+        "subTitle": "얻으려고 한 정보가 존재하고 액세스할 수 있는지 확인하세요.",
+        "Go Tasks page": "작업 페이지로 이동"
+      }
+    },
+    "project": {
+      "error": "서버에서 요청한 프로젝트를 받을 수 없습니다",
+      "notification": {
+        "message": "서버에서 요청한 프로젝트를 받을 수 없습니다",
+        "description_1": "요청한 프로젝트 ID ",
+        "description_2": " 가 유효하지 않습니다.",
+        "notUpdate": "프로젝트를 업데이트 할 수 없습니다."
+      },
+      "No tasks found": "작업을 찾을 수 없습니다.",
+      "result": {
+        "title": "죄송합니다. 이 프로젝트를 찾을 수 없습니다.",
+        "subTitle": "얻으려고 한 정보가 존재하고 액세스할 수 있는지 확인하세요.",
+        "Go Tasks page": "작업 페이지로 이동"
+      },
+      "CVATTooltip": {
+        "title": "새로운 작업 생성"
+      }
+    },
+    "annotation": {
+      "frame_1": "",
+      "frame_2": " 프레임 작업을 마쳤습니다.",
+      "button": {
+        "add": "추가",
+        "here": "여기",
+        "if you would like to continue": " 계속하길 원한다면"
+      },
+      "notification": {
+        "description": " 어노테이션(작업 단계) 수정을 위한 첫 번째",
+        "No labels": "라벨이 없습니다.",
+        "label_description": "어떠한 라벨을 얻을 수 없습니다."
+      },
+      "result": {
+        "title": "죄송합니다. 이 하위작업을 찾을 수 없습니다.",
+        "subTitle": "얻으려고 한 정보가 존재하고 액세스할 수 있는지 확인하세요.",
+        "Go Tasks page": "작업 페이지로 이동"
+      }
+    },
+    "cloudStorage": {
+      "result": {
+        "title_1": "죄송합니다. 클라우드 저장소 #",
+        "title_2": " 를 찾을 수 없습니다.",
+        "subTitle": "요청한 ID가 존재하고 적절한 권한을 가지고 있는지 확인해 주세요."
+      }
+    }
+  },
+
+  "shortcut": {
+    "modal": {
+      "title": "단축키 목록"
+    },
+    "columns": {
+      "name": "이름",
+      "shortcut": "단축키",
+      "action": "동작",
+      "description": "설명"
+    },
+    "switchShortcut": {
+      "name": "단축키 목록 열기/숨기기",
+      "description": "사용 가능한 단축키 목록 열기/숨기기"
+    },
+    "switchSettings": {
+      "name": "설정 페이지 열기",
+      "description": "설정 페이지로 이동하거나 돌아가기"
+    },
+    "switchAllLock": {
+      "name": "모든 개체 잠금 상태 변경",
+      "description": "사이드바의 모든 개체에 대한 잠금 상태 변경"
+    },
+    "switchLock": {
+      "name": "활성 개체의 잠금 상태 변경",
+      "description": "활성 개체의 잠금 상태 변경"
+    },
+    "switchAllHidden": {
+      "name": "모든 개체의 숨김 상태 변경",
+      "description": "사이드바에서 모든 개체의 숨겨진 상태 변경"
+    },
+    "switchHidden": {
+      "name": "활성 개체의 숨김 상태 변경",
+      "description": "활성 개체의 숨겨진 상태 변경"
+    },
+    "switchOccluded": {
+      "name": "활성 개체의 폐쇄 속성 변경",
+      "description": "활성 개체의 폐쇄 속성 변경"
+    },
+    "switchKeyframe": {
+      "name": "키프레임 변경",
+      "description": "활성 트랙의 키 프레임 속성 변경"
+    },
+    "switchOutSide": {
+      "name": "활성 트랙 외부 속성 변경",
+      "description": "활성 트랙의 외부 속성 변경"
+    },
+    "deleteObject": {
+      "name": "활성 개체 삭제",
+      "description": "활성 개체를 삭제. Shift를 사용하여 잠긴 객체를 강제로 삭제"
+    },
+    "toBackground": {
+      "name": "멀리 배치",
+      "description": "활성 개체를 사용자로부터 \"더 멀리\" 배치합니다(z축 값 감소)"
+    },
+    "toForeground": {
+      "name": "가까이 배치",
+      "description": "활성 개체를 사용자에게 \"더 가깝게\" 배치합니다(z축 값 증가)"
+    },
+    "copyShape": {
+      "name": "도형 복사",
+      "description": "CVAT 내부 클립보드에 도형 복사"
+    },
+    "propagateObject": {
+      "name": "객체의 복사본 만들기",
+      "description": "다음 프레임에 객체의 복사본 만들기"
+    },
+    "nextKeyFrame": {
+      "name": "다음 키 프레임",
+      "description": "활성 트랙의 다음 키 프레임으로 이동"
+    },
+    "prevKeyFrame": {
+      "name": "이전 키 프레임",
+      "description": "활성 트랙의 이전 키 프레임으로 이동"
+    },
+    "nextAttribute": {
+      "name": "Next attribute",
+      "description": "Go to the next attribute"
+    },
+    "prevAttribute": {
+      "name": "Previous attribute",
+      "description": "Go to the previous attribute"
+    },
+    "nextObject": {
+      "name": "다음 개체",
+      "description": "현재 프레임에서 주석이 달린 다음 개체로 이동"
+    },
+    "prevObject": {
+      "name": "이전 개체",
+      "description": "현재 프레임에서 주석이 달린 이전 개체로 이동"
+    },
+    "pasteShape": {
+      "name": "도형 붙여넣기",
+      "description": "내부 CVAT 클립보드에서 도형 붙여넣기"
+    },
+    "switchDrawMode": {
+      "name": "Switch draw mode",
+      "description": "Repeat the latest procedure of drawing with the same parameters (shift to redraw an existing shape)"
+    },
+    "openReviewIssue": {
+      "name": "최신 절차 반복",
+      "description": "동일한 매개변수를 사용하여 도면의 최신 절차 반복"
+    },
+    "switchMergeMode": {
+      "name": "병합 모드",
+      "description": "도형 병합 모드 활성화 또는 비활성화"
+    },
+    "switchSplitMode": {
+      "name": "분할 모드",
+      "description": "셰이프 분할 모드 활성화 또는 비활성화"
+    },
+    "switchGroupMode": {
+      "name": "그룹 모드",
+      "description": "셰이프 그룹화 모드 활성화 또는 비활성화"
+    },
+    "resetGroup": {
+      "name": "그룹 재설정",
+      "description": "선택한 도형에 대한 그룹 재설정(그룹 모드)"
+    },
+    "cancel": {
+      "name": "캔버스 모드 취소",
+      "description": "활성 캔버스 모드 취소"
+    },
+    "clockwiseRotation": {
+      "name": "영상 각도 90도 추가",
+      "description": "영상 각도 변경(90도 추가)"
+    },
+    "anticlockwiseRotation": {
+      "name": "영상 각도 90도 빼기",
+      "description": "영상 각도 변경(90도 빼기"
+    },
+    "saveJob": {
+      "name": "Job 저장",
+      "description": "작업중인 Job 저장하기"
+    },
+    "undo": {
+      "name": "최신 작업 취소",
+      "description": "개체와 관련된 최신 작업 취소"
+    },
+    "redo": {
+      "name": "실행 취소 작업",
+      "description": "실행 취소 작업"
+    },
+    "deleteFrame": {
+      "name": "프레임 삭제",
+      "description": "프레임 삭제"
+    },
+    "nextFrame": {
+      "name": "다음 프레임",
+      "description": "다음 프레임으로 이동"
+    },
+    "prevFrame": {
+      "name": "이전 프레임",
+      "description": "이전 프레임으로 이동"
+    },
+    "forwardFrame": {
+      "name": "앞의 10 프레임",
+      "description": "10 프레임 앞으로 이동"
+    },
+    "backwardFrame": {
+      "name": "뒤의 10 프레임",
+      "description": "10 프레임 뒤로 이동"
+    },
+    "searchForward": {
+      "name": "앞으로 검색",
+      "description": "필터를 충족하는 다음 프레임을 검색"
+    },
+    "searchBackward": {
+      "name": "뒤로 검색",
+      "description": "필터를 충족하는 이전 프레임을 검색"
+    },
+    "playPause": {
+      "name": "시작/중지",
+      "description": "프레임 자동 변경 시작/중지"
+    },
+    "focusInputFrame": {
+      "name": "입력 프레임에 초점",
+      "description": "요소에 초점을 맞추어 현재 프레임을 변경"
+    },
+    "switchAutoMaticBordering": {
+      "name": "폴리곤 및 폴리선 자동 경계 전환",
+      "description": "그리기/편집 중 폴리곤 및 폴리선에 대한 자동 경계 전환"
+    },
+    "switchToolsBlockerState": {
+      "name": "알고리즘 실행을 중단",
+      "description": "알고리즘 실행을 일시적으로 중단"
+    },
+    "changeObjectColor": {
+      "name": "색상 변경",
+      "description": "활성화된 모양에 대해 다음 색상을 설정합니다"
+    },
+    "toggleLayoutGrid": {
+      "name": "레이아웃 그리드 전환",
+      "description": "레이아웃 그리드는 UI 개발에 사용"
+    },
+    "switchLabel": {
+      "name": "레이블 변경",
+      "description": "활성화된 개체 또는 활성화된 개체가 없는 경우 다음에 그려진 개체의 레이블을 변경합니다"
+    },
+    "tiltUp": {
+      "name": "카메라 롤 각도 증가",
+      "description": "카메라 롤 각도 증가"
+    },
+    "tiltDown": {
+      "name": "카메라 롤 각도 감소",
+      "description": "카메라 롤 각도 감소"
+    },
+    "ratateLeft": {
+      "name": "카메라 피치 각도 감소",
+      "description": "카메라 피치 각도 감소"
+    },
+    "rotateRight": {
+      "name": "카메라 피치 각도 증가",
+      "description": "카메라 피치 각도 증가"
+    },
+    "moveUp": {
+      "name": "카메라 위로 이동",
+      "description": "카메라를 위로 이동"
+    },
+    "moveDown": {
+      "name": "카메라 아래로 이동",
+      "description": "카메라를 아래로 이동"
+    },
+    "moveLeft": {
+      "name": "카메라 왼쪽 이동",
+      "description": "카메라를 왼쪽으로 이동"
+    },
+    "moveRight": {
+      "name": "카메라 오른쪽 이동",
+      "description": "카메라를 오른쪽으로 이동"
+    },
+    "moveObjectUp": {
+      "name": "라벨링 객체 위로 이동",
+      "description": "라벨링 객체 위로 1px 이동"
+    },
+    "moveObjectDown": {
+      "name": "라벨링 객체 아래로 이동",
+      "description": "라벨링 객체 아래로 1px 이동"
+    },
+    "moveObjectLeft": {
+      "name": "라벨링 객체 좌측으로 이동",
+      "description": "라벨링 객체 좌측으로 1px 이동"
+    },
+    "moveObjectRight": {
+      "name": "라벨링 객체 좌측으로 이동",
+      "description": "라벨링 객체 우측으로 1px 이동"
+    },
+    "changeObjectUp": {
+      "name": "라벨링 객체 크기 윗 방향으로 축소",
+      "description": "라벨링 객체 크기 윗 방향으로 1px 축소"
+    },
+    "changeObjectDown": {
+      "name": "라벨링 객체 크기 아래 방향으로 확대",
+      "description": "라벨링 객체 크기 아래 방향으로 1px 확대"
+    },
+    "changeObjectLeft": {
+      "name": "라벨링 객체 크기 좌측으로 축소",
+      "description": "라벨링 객체 크기 좌측으로 1px 축소"
+    },
+    "changeObjectRight": {
+      "name": "라벨링 객체 크기 우측으로 확대",
+      "description": "라벨링 객체 크기 우측으로 1px 확대"
+    },
+    "changeObjectUpMore": {
+      "name": "라벨링 객체 크기 윗 방향으로 축소",
+      "description": "라벨링 객체 크기 윗 방향으로 10px 축소"
+    },
+    "changeObjectDownMore": {
+      "name": "라벨링 객체 크기 윗 방향으로 확대",
+      "description": "라벨링 객체 크기 윗 방향으로 10px 확대"
+    },
+    "changeObjectLeftMore": {
+      "name": "라벨링 객체 크기 좌측으로 축소",
+      "description": "라벨링 객체 크기 좌측으로 10px 축소"
+    },
+    "changeObjectRightMore": {
+      "name": "라벨링 객체 크기 좌측으로 확대",
+      "description": "라벨링 객체 크기 좌측으로 10px 확대"
+    },
+    "zoomIn": {
+      "name": "확대",
+      "description": "카메라 확대"
+    },
+    "zoomOut": {
+      "name": "축소",
+      "description": "카메라 축소"
+    },
+    "cancelSkeletonEdge": {
+      "name": "스켈레톤 그리기 중지",
+      "description": " 새로운 스켈레톤 가장자리를 그리는 작업 중지"
+    }
+  },
+  "notifications": {
+    "auth": {
+      "AUTHORIZED_FAILED": "서버에서 권한 확인을 할 수 없습니다.",
+      "LOGIN_FAILED": "서버에 로그인할 수 없습니다.",
+      "LOGOUT_FAILED": "서버에서 로그아웃할 수 없습니다.",
+      "REGISTER_FAILED": "서버에 회원가입할 수 없습니다.",
+      "REGISTER_SUCCESS_1": "계정을 사용하려면 이메일 주소를 확인해야 합니다.",
+      "REGISTER_SUCCESS_2": "확인 링크가 포함된 이메일을 보냈습니다.",
+      "CHANGE_PASSWORD_SUCCESS": "새 비밀번호가 저장되었습니다.",
+      "CHANGE_PASSWORD_FAILED": "비밀번호를 변경할 수 없습니다.",
+      "REQUEST_PASSWORD_RESET_SUCCESS": "비밀번호 재설정 링크를 이메일로 확인하세요. 몇 분 내에 나타나지 않으면 스팸함을 확인하세요.",
+      "REQUEST_PASSWORD_RESET_FAILED": "서버에서 비밀번호를 재설정할 수 없습니다.",
+      "RESET_PASSWORD_SUCCESS": "새로운 비밀번호로 비밀번호가 재설정되었습니다.",
+      "RESET_PASSWORD_FAILED": "서버에서 새로운 비밀번호를 설정할 수 없습니다.",
+      "LOAD_AUTH_ACTIONS_FAILED": "사용 가능한 권한 조치를 확인할 수 없습니다."
+    },
+    "exporting": {
+      "EXPORT_DATASET_FAILED": "데이터셋을 내보낼 수 없습니다.",
+      "EXPORT_DATASET_SUCCESS_1": "를 위해",
+      "EXPORT_DATASET_SUCCESS_2": "이(가)",
+      "EXPORT_DATASET_SUCCESS_3": "다운로드되었습니다",
+      "EXPORT_DATASET_SUCCESS_4": "업로드되었습니다",
+      "EXPORT_DATASET_SUCCESS_5": "로컬로",
+      "EXPORT_DATASET_SUCCESS_6": "클라우드 저장소로",
+      "EXPORT_BACKUP_FAILED": "백업을 내보낼 수 없습니다.",
+      "EXPORT_BACKUP_SUCCESS_1": "백업",
+      "EXPORT_BACKUP_SUCCESS_2": "가 성공적으로",
+      "EXPORT_BACKUP_SUCCESS_3": "로컬로",
+      "EXPORT_BACKUP_SUCCESS_4": "다운로드되었습니다.",
+      "EXPORT_BACKUP_SUCCESS_5": "클라우드 저장소로 업로드되었습니다."
+    },
+    "importing": {
+      "IMPORT_DATASET_SUCCESS_1": "어노테이션(작업 단계)이",
+      "IMPORT_DATASET_SUCCESS_2": "작업",
+      "IMPORT_DATASET_SUCCESS_3": "로드되었습니다. [프로젝트",
+      "IMPORT_DATASET_FAILED_1": "어노테이션(작업 단계)을 업로드할 수 없습니다.",
+      "IMPORT_DATASET_FAILED_2": "작업",
+      "IMPORT_DATASET_FAILED_3": "데이터셋을 가져올 수 없습니다. [프로젝트 ",
+      "IMPORT_BACKUP_SUCCESS_1": "",
+      "IMPORT_BACKUP_SUCCESS_2": "백업이 성공적으로 복원되었습니다. ",
+      "IMPORT_BACKUP_SUCCESS_3": " 클릭하세요 [ 여기 ]",
+      "IMPORT_BACKUP_SUCCESS_4": "로 오픈",
+      "IMPORT_BACKUP_FAILED_1": "",
+      "IMPORT_BACKUP_FAILED_2": "백업을 복원할 수 없습니다."
+    },
+    "tasks": {
+      "GET_TASKS_FAILED": "작업을 가져올 수 없습니다.",
+      "DELETE_TASK_FAILED": "작업을 삭제할 수 없습니다. [ 작업 ",
+      "CREATE_TASK_FAILED": "작업을 생성할 수 없습니다."
+    },
+    "projects": {
+      "GET_PROJECTS_FAILED": "프로젝트를 가져오는데 실패 했습니다.",
+      "CREATE_PROJECT_FAILED": "프로젝트를 생성할 수 없습니다.",
+      "DELETE_PROJECT_FAILED": "프로젝트를 삭제할 수 없습니다. [프로젝트 "
+    },
+    "formats": {
+      "GET_FORMATS_FAILED": "서버에서 형식을 가져올 수 없습니다."
+    },
+    "about": {
+      "GET_ABOUT_FAILED": "서버 정보를 가져올 수 없습니다."
+    },
+    "share": {
+      "LOAD_SHARE_DATA_FAILED": "공유 데이터를 가져올 수 없습니다."
+    },
+    "models": {
+      "GET_INFERENCE_STATUS_SUCCESS": "자동 어노테이션(작업 단계)이 완료되었습니다. [작업",
+      "FETCH_META_FAILED": "모델 메타 정보를 가져올 수 없습니다. [작업",
+      "GET_INFERENCE_STATUS_FAILED": "분석 상태를 가져오는 중입니다. [작업",
+      "GET_MODELS_FAILED": "서버에서 모델을 가져올 수 없습니다.",
+      "START_INFERENCE_FAILED": " 모델 분석을 할 수 없습니다. [작업",
+      "CANCEL_INFERENCE_FAILED": " 모델 분석을 취소할 수 없습니다. [작업"
+    },
+    "annotation": {
+      "GET_JOB_FAILED": "작업 중 오류가 발생했습니다.",
+      "CHANGE_FRAME_FAILED": "프레임을 받을 수 없습니다.",
+      "SAVE_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 저장할 수 없습니다.",
+      "UPDATE_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 저장할 수 없습니다.",
+      "CREATE_ANNOTATIONS_FAILED": "어노테이션ㅍ을 생성할 수 없습니다.",
+      "MERGE_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 병합할 수 없습니다.",
+      "GROUP_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 그룹화할 수 없습니다.",
+      "SPLIT_ANNOTATIONS_FAILED": "트랙을 분할할 수 없습니다.",
+      "REMOVE_OBJECT_FAILED": "객체를 제거할 수 없습니다.",
+      "PROPAGATE_OBJECT_FAILED": "객체를 전파할 수 없습니다.",
+      "COLLECT_STATISTICS_FAILED": "어노테이션(작업 단계) 통계를 수집할 수 없습니다.",
+      "UPLOAD_JOB_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 업로드 할 수 없습니다. [하위 작업",
+      "REMOVE_JOB_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 제거할 수 없습니다.",
+      "FETCH_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 가져올 수 없습니다.",
+      "REDO_ACTION_FAILED": "다시 수행할 수 없습니다.",
+      "UNDO_ACTION_FAILED": "실행 취소할 수 없습니다.",
+      "SEARCH_ANNOTATIONS_FAILED": "어노테이션(작업 단계)을 검색할 수 없습니다.",
+      "SEARCH_EMPTY_FRAME_FAILED": "빈 프레임을 검색할 수 없습니다.",
+      "SAVE_LOGS_FAILED": "로그를 서버에 보낼 수 없습니다.",
+      "GET_DATA_FAILED": "프레임 데이터를 가져올 수 없습니다.",
+      "DELETE_FRAME_FAILED": "프레임을 삭제할 수 없습니다.",
+      "RESTORE_FRAME_FAILED": "프레임을 복원할 수 없습니다."
+    },
+    "boundaries": {
+      "THROW_RESET_ERROR": "상태를 재설정할 수 없습니다."
+    },
+    "userAgreements": {
+      "GET_USER_AGREEMENTS_FAILED": "사용자 동의를 가져올 수 없습니다."
+    },
+    "review": {
+      "FINISH_ISSUE_FAILED": "새 이슈를 열 수 없습니다.",
+      "RESOLVE_ISSUE_FAILED": "이슈를 해결할 수 없습니다.",
+      "REOPEN_ISSUE_FAILED": "이슈를 다시 열 수 없습니다.",
+      "COMMENT_ISSUE_FAILED": "이슈에 댓글을 남길 수 없습니다.",
+      "SUBMIT_REVIEW_FAILED": "작업에 대한 리뷰를 제출할 수 없습니다. : ",
+      "REMOVE_ISSUE_FAILED": "서버에서 이슈를 제거할 수 없습니다."
+    },
+    "cloudStorages": {
+      "GET_CLOUD_STORAGE_FAILED": "클라우드 저장소를 가져올 수 없습니다.",
+      "CREATE_CLOUD_STORAGE_FAILED": "클라우드 저장소를 생성할 수 없습니다.",
+      "UPDATE_CLOUD_STORAGE_FAILED": "클라우드 저장소를 업데이트할 수 없습니다.",
+      "DELETE_CLOUD_STORAGE_FAILED": "클라우드 저장소를 삭제할 수 없습니다.",
+      "LOAD_CLOUD_STORAGE_CONTENT_FAILED": "클라우드 저장소의 내용을 가져올 수 없습니다.",
+      "GET_CLOUD_STORAGE_STATUS_FAILED_1": "클라우드 저장소",
+      "GET_CLOUD_STORAGE_STATUS_FAILED_2": "상태를 가져올 수 없습니다.",
+      "GET_CLOUD_STORAGE_PREVIEW_FAILED": "클라우드 저장소의 미리보기를 가져올 수 없습니다."
+    },
+    "organizations": {
+      "GET_ORGANIZATIONS_FAILED": "조직 목록을 가져올 수 없습니다.",
+      "CREATE_ORGANIZATION_FAILED": "조직을 생성할 수 없습니다.",
+      "UPDATE_ORGANIZATION_FAILED": "조직을 업데이트할 수 없습니다.",
+      "ACTIVATE_ORGANIZATION_FAILED": "조직을 활성화할 수 없습니다.",
+      "REMOVE_ORGANIZATION_FAILED": "조직을 삭제할 수 없습니다.",
+      "INVITE_ORGANIZATION_MEMBERS_FAILED": "조직 구성원을 초대할 수 없습니다.",
+      "INVITE_ORGANIZATION_MEMBER_FAILED_1": "이 구성원을 조직에 초대할 수 없습니다.",
+      "INVITE_ORGANIZATION_MEMBER_FAILED_2": "을(를) 조직에 초대할 수 없습니다.",
+      "LEAVE_ORGANIZATION_FAILED": "조직을 탈퇴할 수 없습니다.",
+      "REMOVE_ORGANIZATION_MEMBER_FAILED_1": "구성원을",
+      "REMOVE_ORGANIZATION_MEMBER_FAILED_2": "에서 제거할 수 없습니다.",
+      "UPDATE_ORGANIZATION_MEMBER_FAILED_1": "사용자에게 역할을 지정할 수 없습니다.",
+      "UPDATE_ORGANIZATION_MEMBER_FAILED_2": "할 수 없습니다."
+    },
+    "jobs": {
+      "GET_JOBS_FAILED": "작업 목록을 가져올 수 없습니다."
+    },
+    "webhooks": {
+      "GET_WEBHOOKS_FAILED": "웹훅 목록을 가져올 수 없습니다.",
+      "CREATE_WEBHOOK_FAILED": "웹훅을 생성할 수 없습니다.",
+      "UPDATE_WEBHOOK_FAILED": "웹훅을 업데이트할 수 없습니다.",
+      "DELETE_WEBHOOK_FAILED": "웹훅을 삭제할 수 없습니다."
+    }
+  }
+}

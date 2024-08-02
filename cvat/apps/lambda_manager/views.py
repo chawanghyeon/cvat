@@ -1,16 +1,14 @@
-# Copyright (C) 2022 Intel Corporation
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import base64
 import json
 from functools import wraps
 from enum import Enum
 from copy import deepcopy
 import textwrap
+from glob import glob
 from typing import Any, Dict, Optional
 
+from cvat.apps.lambda_manager.llava_inference import LlavaQueue
+from cvat.apps.lambda_manager.test import llava
 import django_rq
 import requests
 import rq
@@ -18,12 +16,13 @@ import os
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django_sendfile import sendfile
 from rest_framework import status, viewsets, serializers
 from rest_framework.response import Response
 
 import cvat.apps.dataset_manager as dm
 from cvat.apps.engine.frame_provider import FrameProvider
-from cvat.apps.engine.models import Job, Task
+from cvat.apps.engine.models import Job, Task, Image
 from cvat.apps.engine.serializers import LabeledDataSerializer
 from cvat.apps.engine.models import ShapeType, SourceType
 from cvat.utils.http import make_requests_session
@@ -47,13 +46,10 @@ class LambdaGateway:
 
     def _http(self, method="get", scheme=None, host=None, port=None,
         function_namespace=None, url=None, headers=None, data=None):
-        NUCLIO_GATEWAY = '{}://{}:{}'.format(
-            scheme or settings.NUCLIO['SCHEME'],
-            host or settings.NUCLIO['HOST'],
-            port or settings.NUCLIO['PORT'])
+        NUCLIO_GATEWAY = settings.NUCLIO["URL"]
         NUCLIO_FUNCTION_NAMESPACE = function_namespace or settings.NUCLIO['FUNCTION_NAMESPACE']
         extra_headers = {
-            'x-nuclio-project-name': 'cvat',
+            'x-nuclio-project-name': 'salmon',
             'x-nuclio-function-namespace': NUCLIO_FUNCTION_NAMESPACE,
             'x-nuclio-invoke-via': 'domain-name',
         }
@@ -258,6 +254,10 @@ class LambdaFunction:
                     "neg_points": data["neg_points"],
                     "obj_bbox": data["pos_points"][0:2] if self.startswith_box else None
                 })
+                if self.name == "Segment Anything":
+                    payload.update({
+                        "image_name": self.image_name
+                    })
             elif self.kind == LambdaType.REID:
                 payload.update({
                     "image0": self._get_image(db_task, data["frame0"], quality),
@@ -363,6 +363,8 @@ class LambdaFunction:
 
         frame_provider = FrameProvider(db_task.data)
         image = frame_provider.get_frame(frame, quality=quality)
+        db_image = Image.objects.get(data_id=db_task.data.id, frame=frame)
+        self.image_name = db_image.path
 
         return base64.b64encode(image[0].getvalue()).decode('utf-8')
 
@@ -738,7 +740,12 @@ class FunctionViewSet(viewsets.ViewSet):
     @return_response()
     def list(self, request):
         gateway = LambdaGateway()
-        return [f.to_dict() for f in gateway.list()]
+        function_list = [f.to_dict() for f in gateway.list()]
+
+        if os.getenv("DJANGO_CONFIGURATION", "development") != "testing":
+            function_list.append(llava)
+
+        return function_list
 
     @return_response()
     def retrieve(self, request, func_id):
@@ -763,6 +770,7 @@ class FunctionViewSet(viewsets.ViewSet):
     )
     @return_response()
     def call(self, request, func_id):
+        # TODO: 권한 수정 필요
         self.check_object_permissions(request, func_id)
         try:
             job_id = request.data.get('job')
@@ -815,6 +823,11 @@ class RequestViewSet(viewsets.ViewSet):
 
     @return_response()
     def create(self, request):
+        # 라바 기능 추가
+        if request.data.get("function") == "llava":
+            queue = LlavaQueue()
+            job = queue.enqueue(request.data.get("task"), request.data.get("cleanup"))
+            return job.to_dict()
         try:
             function = request.data['function']
             threshold = request.data.get('threshold')
@@ -852,3 +865,34 @@ class RequestViewSet(viewsets.ViewSet):
         queue = LambdaQueue()
         job = queue.fetch_job(pk)
         job.delete()
+
+
+
+
+from django.http import StreamingHttpResponse
+from django.views.generic import View
+from cvat.utils.openai import process
+from django.views.decorators.csrf import csrf_exempt
+
+@extend_schema(tags=['lambda'])
+class OpenAiViewSet(View):
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        response = StreamingHttpResponse(
+            process(request=request), content_type="text/event-stream"
+        )
+        response["X-Accel-Buffering"] = "no"  # Disable buffering in nginx
+        response["Cache-Control"] = "no-cache"  # Ensure clients don't cache the data
+        return response
+
+
+def ONNXDetector(request):
+    dirname = os.path.join(settings.STATIC_ROOT, 'lambda_manager')
+    pattern = os.path.join(dirname, 'decoder.onnx')
+    path = glob(pattern)[0]
+    response = sendfile(request, path)
+    response['Cache-Control'] = "public, max-age=604800"
+    return response

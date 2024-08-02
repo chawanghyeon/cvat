@@ -1,11 +1,7 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import * as THREE from 'three';
 import { PCDLoader } from 'three/examples/jsm/loaders/PCDLoader';
 import CameraControls from 'camera-controls';
+import skmeans from 'skmeans';
 import { Canvas3dController } from './canvas3dController';
 import { Listener, Master } from './master';
 import CONST from './consts';
@@ -117,6 +113,11 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         cuboid: CuboidModel;
     }>;
     private model: Canvas3dModel & Master;
+    private brushPoints: number[];
+    private editPoints: number[];
+    private editId: number;
+    private colorInversion: boolean;
+    private pointSize: number;
     private action: {
         translation: any;
         resize: {
@@ -146,6 +147,24 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             return this.drawnObjects[+clientID].cuboid || null;
         }
 
+        return null;
+    }
+
+    private get selectedData(): DrawnObjectData | null {
+        const { clientID } = this.model.data.activeElement;
+        if (clientID > 0) {
+            return this.drawnObjects[+clientID].data || null;
+        }
+
+        return null;
+    }
+
+    private get drawnPoints(): any[] | null {
+        if (this.model.data.objects) {
+            return this.model.data.objects
+                .filter((o) => o.clientID !== this.selectedData?.clientID)
+                .reduce((acc, cur) => acc.concat(cur.points.map((p: any) => p.index)), []);
+        }
         return null;
     }
 
@@ -266,6 +285,12 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 },
             },
         };
+        this.brushPoints = [];
+        this.editPoints = [];
+        this.editId = 0;
+        this.colorInversion = false;
+        this.pointSize = 0.05;
+
         CameraControls.install({ THREE });
 
         const canvasPerspectiveView = this.views.perspective.renderer.domElement;
@@ -369,6 +394,51 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             }
         });
 
+        window.addEventListener('click', (e: MouseEvent): void => {
+            if (
+                e.target.farthestViewportElement?.dataset.icon === 'bg-colors' ||
+                e.target.attributes[1]?.value === 'bg-colors' ||
+                e.target.attributes[2]?.value === 'bg-colors'
+            ) {
+                const { color } = this.views.perspective.scene.children[0].geometry.attributes;
+                const len = color.array.length / 3;
+                const colorArr = color.array;
+
+                if (this.colorInversion) {
+                    this.views.perspective.scene.add(new THREE.AxesHelper(5));
+                    this.colorInversion = false;
+
+                    for (let i = 0; i < len; i++) {
+                        if (Number(colorArr[i * 3]) + Number(colorArr[i * 3 + 1]) + Number(colorArr[i * 3 + 2]) === 0) {
+                            color.setXYZ(i, 1, 1, 1);
+                        }
+                    }
+                } else {
+                    this.views.perspective.scene.remove(this.views.perspective.scene.children[1]);
+                    this.colorInversion = true;
+
+                    for (let i = 0; i < len; i++) {
+                        if (Number(colorArr[i * 3]) + Number(colorArr[i * 3 + 1]) + Number(colorArr[i * 3 + 2]) === 3) {
+                            color.setXYZ(i, 0, 0, 0);
+                        }
+                    }
+                }
+
+                color.needsUpdate = true;
+                this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+            }
+        });
+
+        window.addEventListener('mousemove', (): void => {
+            if (this.pointSize !== this.model.data.drawData.pointSize) {
+                this.pointSize = this.model.data.drawData.pointSize;
+                if (typeof this.pointSize === 'number') {
+                    this.views.perspective.scene.children[0].material.size = this.pointSize;
+                    this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+                }
+            }
+        });
+
         canvasTopView.addEventListener('mousedown', this.startAction.bind(this, 'top'));
         canvasSideView.addEventListener('mousedown', this.startAction.bind(this, 'side'));
         canvasFrontView.addEventListener('mousedown', this.startAction.bind(this, 'front'));
@@ -383,18 +453,117 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         canvasSideView.addEventListener('mouseleave', this.completeActions.bind(this));
         canvasFrontView.addEventListener('mouseup', this.completeActions.bind(this));
         canvasFrontView.addEventListener('mouseleave', this.completeActions.bind(this));
-
-        canvasPerspectiveView.addEventListener('mousemove', (event: MouseEvent): void => {
-            event.preventDefault();
-            this.isCtrlDown = event.ctrlKey;
+        // front-3d 휠 이벤트로 브러쉬 사이즈 조절
+        canvasPerspectiveView.addEventListener('wheel', (e: WheelEvent): void => {
+            e.preventDefault();
+            const [container]: any = window.document.getElementsByClassName('round-circle');
+            const dst = Math.floor(this.views.perspective.controls.distance);
+            if (dst === 0) container.style.transform = 'scale(2.6)';
+            else if (dst <= 1) container.style.transform = 'scale(2.2)';
+            else if (dst <= 2) container.style.transform = 'scale(1.8)';
+            else if (dst <= 3) container.style.transform = 'scale(1.45)';
+            else if (dst <= 4) container.style.transform = 'scale(1.25)';
+            else if (dst <= 5) container.style.transform = 'scale(1.0)';
+            else if (dst <= 9) container.style.transform = 'scale(0.7)';
+            else if (dst <= 10) container.style.transform = 'scale(0.5)';
+            else container.style.transform = 'scale(0.3)';
+        });
+        // front-3d 컨트롤 누르고 마우스를 움직이면 객체 그리기 / 알트키 누르면 지우기
+        // 활성화 된 객체가 있을때 그리거나 지우고 더블클릭 시 수정됨 (색상은 빨강색) 하단 더블클릭 이벤트 참고
+        canvasPerspectiveView.addEventListener('mousemove', (e: MouseEvent): void => {
+            e.preventDefault();
             if (this.mode === Mode.DRAG_CANVAS) return;
+
+            // 마우스 객체 조절
             const canvas = this.views.perspective.renderer.domElement;
             const rect = canvas.getBoundingClientRect();
             const { mouseVector } = this.views.perspective.rayCaster as { mouseVector: THREE.Vector2 };
-            mouseVector.x = ((event.clientX - (canvas.offsetLeft + rect.left)) / canvas.clientWidth) * 2 - 1;
-            mouseVector.y = -((event.clientY - (canvas.offsetTop + rect.top)) / canvas.clientHeight) * 2 + 1;
-        });
+            mouseVector.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouseVector.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
+            // brush 기능이 켜져있지 않거나 ctrl /alt 키를 누른 경우 return
+            if (!this.model.data.drawData.brush || (!e.ctrlKey && !e.altKey) || (e.ctrlKey && e.altKey)) return;
+            // 수정 중인 경우
+            if (this.selectedData?.points?.length > 16) this.editId = this.selectedData?.clientID;
+            // 수정 중이 아님
+            else this.editId = 0;
+
+            // 캔버스 위에 띄워진 브러시 툴 객체 위치 조정
+            const [container]: any = window.document.getElementsByClassName('round-circle');
+            const wdh = Number(container.style.width.match(/\d+/g)[0]);
+            container.style.top = `${e.clientY - wdh / 2}px`;
+            container.style.left = `${e.clientX - wdh / 2}px`;
+
+            // 카메라 객체 , threshold(raycasting 범위), 거리 조정
+            this.views.perspective.rayCaster.renderer.setFromCamera(mouseVector, this.views.perspective.camera);
+            this.views.perspective.rayCaster.renderer.params.Points.threshold = this.model.data.drawData.size / 10;
+            this.views.perspective.rayCaster.renderer.far = 60;
+            this.views.perspective.scene.children[0].geometry.computeBoundingBox();
+
+            // PCD 객체 raycasting
+            const intersects = this.views.perspective.rayCaster.renderer.intersectObjects(
+                this.views.perspective.scene.children,
+                false,
+            );
+            // 부딪힌 객체가 없다면 리턴
+            if (intersects.length === 0) return;
+
+            const { color } = this.views.perspective.scene.children[0].geometry.attributes;
+            const drawn = this.drawnPoints;
+
+            // 수정 중인 경우
+            if (this.editId > 0) {
+                // 그리는 중
+                if (e.ctrlKey) {
+                    intersects
+                        .filter(({ index }) => this.editPoints.includes(index))
+                        .forEach(({ index }) => {
+                            color.setXYZ(index, 1, 0, 0);
+                        });
+                    const newBrushPoints = intersects
+                        .filter(({ index }) => !drawn.includes(index) && !this.editPoints.includes(index))
+                        .map(({ index }) => {
+                            color.setXYZ(index, 1, 0, 0);
+                            return index;
+                        });
+                    this.editPoints.push(...newBrushPoints);
+                    // 지우는 중
+                } else if (e.altKey) {
+                    const indicesToRemove = intersects
+                        .filter(({ index }) => this.editPoints.includes(index))
+                        .map(({ index }) => {
+                            color.setXYZ(index, 1, 1, 1);
+                            return index;
+                        });
+                    this.editPoints = this.editPoints.filter((p) => !indicesToRemove.includes(p));
+                }
+                // 수정 중이 아님
+            } else if (this.editId === 0) {
+                // 그리는 중
+                if (e.ctrlKey) {
+                    const newBrushPoints = intersects
+                        .filter(({ index }) => !drawn.includes(index) && !this.brushPoints.includes(index))
+                        .map(({ index }) => {
+                            color.setXYZ(index, 0, 1, 0);
+                            return index;
+                        });
+                    this.brushPoints.push(...newBrushPoints);
+                    // 지우는 중
+                } else if (e.altKey) {
+                    const indicesToRemove = intersects
+                        .filter(({ index }) => this.brushPoints.includes(index))
+                        .map(({ index }) => {
+                            color.setXYZ(index, 1, 1, 1);
+                            return index;
+                        });
+                    this.brushPoints = this.brushPoints.filter((p) => !indicesToRemove.includes(p));
+                }
+            }
+            // 캔버스 렌더링
+            color.needsUpdate = true;
+            this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+        });
+        // front-3d 클릭 시 라벨 활성화 혹은 비활성화
         canvasPerspectiveView.addEventListener('click', (e: MouseEvent): void => {
             e.preventDefault();
             const selectionIsBlocked = ![Mode.GROUP, Mode.MERGE, Mode.SPLIT, Mode.IDLE].includes(this.mode) ||
@@ -402,8 +571,42 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 this.isPerspectiveBeingDragged;
 
             if (e.detail !== 1 || selectionIsBlocked) return;
-            const intersects = this.views.perspective.rayCaster.renderer
-                .intersectObjects(this.getAllVisibleCuboids(), false);
+            // 그려진 객체가 있음
+            if (this.drawnPoints !== null && this.drawnPoints?.length > 0) {
+                // 레이캐스팅 해보기
+                const its = this.views.perspective.rayCaster.renderer.intersectObjects(
+                    this.views.perspective.scene.children,
+                    false,
+                );
+                // 부딪힌 객체가 있다면 ?
+                if (its.length) {
+                    // 부딪힌 객체의 첫번째 값 인덱스를 포함하는 그려진 객체 찾기
+                    const drawnPoints = this.model.data.objects.find(
+                        (obj) => obj.points.findIndex((p: any) => p.index === its[0].index) !== -1,
+                    );
+                    // 그려진 객체를 찾았다면 ? 활성화 시켜주고 return
+                    if (drawnPoints?.clientID > 0 && this.mode === Mode.IDLE) {
+                        const intersectedClientID = drawnPoints?.clientID || null;
+                        if (this.model.data.activeElement.clientID !== String(intersectedClientID)) {
+                            this.dispatchEvent(
+                                new CustomEvent('canvas.selected', {
+                                    bubbles: false,
+                                    cancelable: true,
+                                    detail: {
+                                        clientID: intersectedClientID,
+                                    },
+                                }),
+                            );
+                            return;
+                        }
+                    }
+                }
+            }
+
+            const intersects = this.views.perspective.rayCaster.renderer.intersectObjects(
+                this.getAllVisibleCuboids(),
+                false,
+            );
             const intersectionClientID = +(intersects[0]?.object?.name) || null;
             const objectState = Number.isInteger(intersectionClientID) ? this.model.objects
                 .find((state: ObjectState) => state.clientID === intersectionClientID) : null;
@@ -450,9 +653,120 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 }
             }
         });
-
+        // front-3d 더블 클릭시 라벨 생성 혹은 수정
         canvasPerspectiveView.addEventListener('dblclick', (e: MouseEvent): void => {
             e.preventDefault();
+            // 그려진 객체 찾기
+            const state = this.model.objects.find((object: ObjectState): boolean => object.clientID === this.editId);
+            const { color } = this.views.perspective.scene.children[0].geometry.attributes;
+            // 브러쉬 기능 사용 중인지 체크
+            if (this.model.data.drawData.brush) {
+                // 수정중 인 객체가 있는지 체크, editPoints는 수정 중인 객체 포인트
+                if (this.editId !== 0 && this.editPoints.length > 0) {
+                    // 컬러 변경
+                    for (let i = 0; i < this.editPoints.length; i++) {
+                        color.setXYZ(this.editPoints[i], 1, 1, 1);
+                    }
+                    // 컬러 렌더링
+                    color.needsUpdate = true;
+                    this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+                    // 객체 수정
+                    this.dispatchEvent(
+                        new CustomEvent('canvas.edited', {
+                            bubbles: false,
+                            cancelable: true,
+                            detail: {
+                                state,
+                                points: this.editPoints.map((p) => ({
+                                    index: p,
+                                    x: this.views.perspective.scene.children[0].geometry.attributes.position.array[
+                                        p * 3
+                                    ],
+                                    y: this.views.perspective.scene.children[0].geometry.attributes.position.array[
+                                        p * 3 + 1
+                                    ],
+                                    z: this.views.perspective.scene.children[0].geometry.attributes.position.array[
+                                        p * 3 + 2
+                                    ],
+                                })),
+                            },
+                        }),
+                    );
+                    // 수정 중이 아니므로 새로운 객체 생성, brushPoints는 새로운 객체 포인트
+                } else if (this.brushPoints.length > 0) {
+                    const initState = this.model.data.drawData.initialState;
+                    this.dispatchEvent(
+                        new CustomEvent('canvas.drawn', {
+                            bubbles: false,
+                            cancelable: true,
+                            detail: {
+                                state: {
+                                    shapeType: 'points',
+                                    frame: this.model.data.imageID,
+                                    points: this.brushPoints.map((p) => ({
+                                        index: p,
+                                        x: this.views.perspective.scene.children[0].geometry.attributes.position.array[
+                                            p * 3
+                                        ],
+                                        y: this.views.perspective.scene.children[0].geometry.attributes.position.array[
+                                            p * 3 + 1
+                                        ],
+                                        z: this.views.perspective.scene.children[0].geometry.attributes.position.array[
+                                            p * 3 + 2
+                                        ],
+                                    })),
+                                    ...(initState ?
+                                        {
+                                            attributes: { ...initState.attributes },
+                                            group: initState.group?.id || null,
+                                            label: initState.label,
+                                            shapeType: 'Points',
+                                        } :
+                                        {}),
+                                },
+                                continue: undefined,
+                                duration: 0,
+                            },
+                        }),
+                    );
+                }
+                // 최종 작업
+                if (this.brushPoints.length > 0 || this.editPoints.length > 0) {
+                    // 수정
+                    if (this.editId !== 0) {
+                        for (let i = 0; i < this.editPoints.length; i++) {
+                            color.setXYZ(this.editPoints[i], 0.25, 0, 1);
+                        }
+                        // 생성
+                    } else {
+                        for (let i = 0; i < this.brushPoints.length; i++) {
+                            color.setXYZ(this.brushPoints[i], 0.25, 0, 1);
+                        }
+                    }
+                    // 캔버스 컬러 렌더링
+                    color.needsUpdate = true;
+                    this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+
+                    // 수정, 생성 객체 초기화 및 brush 기능 해제
+                    this.brushPoints = [];
+                    this.editPoints = [];
+                    this.editId = 0;
+                    this.model.data.fixed = 0;
+                    this.model.data.drawData.brush = false;
+                    this.dispatchEvent(new CustomEvent('canvas.canceled'));
+                    this.dispatchEvent(
+                        new CustomEvent('canvas.selected', {
+                            bubbles: false,
+                            cancelable: true,
+                            detail: {
+                                clientID: 0,
+                            },
+                        }),
+                    );
+                    return;
+                }
+            }
+
             if (this.mode !== Mode.DRAW) {
                 const { perspective: viewType } = this.views;
                 viewType.rayCaster.renderer.setFromCamera(viewType.rayCaster.mouseVector, viewType.camera);
@@ -693,7 +1007,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             cameraTop.zoom = x1 / 50;
             cameraTop.updateProjectionMatrix();
             cameraTop.updateMatrix();
-            this.updateHelperPointsSize(ViewType.TOP);
+            if (this.selectedData.points.length < 17) this.updateHelperPointsSize(ViewType.TOP);
 
             const { renderer: { domElement: canvasFront }, camera: cameraFront } = front;
             const bboxfront = new THREE.Box3().setFromObject(this.selectedCuboid.front);
@@ -704,7 +1018,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             cameraFront.zoom = x2 / 50;
             cameraFront.updateProjectionMatrix();
             cameraFront.updateMatrix();
-            this.updateHelperPointsSize(ViewType.FRONT);
+            if (this.selectedData.points.length < 17) this.updateHelperPointsSize(ViewType.FRONT);
 
             const { renderer: { domElement: canvasSide }, camera: cameraSide } = side;
             const bboxside = new THREE.Box3().setFromObject(this.selectedCuboid.side);
@@ -715,7 +1029,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             cameraSide.zoom = x3 / 50;
             cameraSide.updateProjectionMatrix();
             cameraSide.updateMatrix();
-            this.updateHelperPointsSize(ViewType.SIDE);
+            if (this.selectedData.points.length < 17) this.updateHelperPointsSize(ViewType.SIDE);
         }
     }
 
@@ -996,9 +1310,17 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     }
 
     private deactivateObject(): void {
+        if (this.model.data.fixed > 0) return;
         const { opacity } = this.model.data.shapeProperties;
         if (this.activatedElementID !== null) {
             const { cuboid } = this.drawnObjects[this.activatedElementID];
+            const { color } = this.views.perspective.scene.children[0].geometry.attributes;
+            for (let i = 0; i < this.editPoints?.length; i++) {
+                color.setXYZ(this.editPoints[i], 0.25, 0, 1);
+            }
+            color.needsUpdate = true;
+            this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+
             cuboid.setOpacity(opacity);
             for (const view of BOTTOM_VIEWS) {
                 cuboid[view].visible = false;
@@ -1011,16 +1333,27 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     }
 
     private activateObject(): void {
+        if (this.model.data.fixed > 0) return;
         const { selectedOpacity } = this.model.data.shapeProperties;
         const { clientID } = this.model.data.activeElement;
         if (clientID !== null && this.drawnObjects[+clientID]?.cuboid?.perspective?.visible) {
             const { cuboid, data } = this.drawnObjects[+clientID];
+            const { color } = this.views.perspective.scene.children[0].geometry.attributes;
+
+            this.editPoints = data.points.map((p: any) => p.index);
+            for (let i = 0; i < this.editPoints?.length; i++) {
+                color.setXYZ(this.editPoints[i], 1, 0, 0);
+            }
+            color.needsUpdate = true;
+            this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+
             cuboid.setOpacity(selectedOpacity);
             for (const view of BOTTOM_VIEWS) {
-                cuboid[view].visible = true;
-                createCuboidEdges(cuboid[view]);
-
-                if (!data.lock) {
+                if (data.points.length < 17) {
+                    cuboid[view].visible = true;
+                    createCuboidEdges(cuboid[view]);
+                }
+                if (!data.lock && data.points.length < 17) {
                     createResizeHelper(cuboid[view]);
                     createRotationHelper(cuboid[view], view);
                 }
@@ -1092,13 +1425,22 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     }
 
     private deleteObjects(clientIDs: number[]): void {
-        clientIDs.forEach((clientID: number): void => {
-            const { cuboid } = this.drawnObjects[clientID];
+        clientIDs.forEach((cID: number): void => {
+            const { cuboid, data } = this.drawnObjects[cID];
             Object.keys(this.views).forEach((view: string): void => {
                 this.views[view as keyof Views].scene.children[0].remove(cuboid[view as keyof Views]);
             });
 
-            delete this.drawnObjects[clientID];
+            const { color } = this.views.perspective.scene.children[0].geometry.attributes;
+            const newColor = new THREE.Color(0xffffff);
+            for (let i = 0; i < data.points.length; i++) {
+                color.setXYZ(data.points[i], newColor.r, newColor.g, newColor.b);
+            }
+
+            color.needsUpdate = true;
+            this.views.perspective.renderer.render(this.views.perspective.scene, this.views.perspective.camera);
+
+            delete this.drawnObjects[cID];
         });
     }
 
@@ -1206,6 +1548,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                     this.dispatchEvent(new CustomEvent('canvas.setup'));
                 } finally {
                     URL.revokeObjectURL(objectURL);
+                    this.brushPoints = [];
                 }
             } catch (error: any) {
                 model.unlockFrameUpdating();
@@ -1449,9 +1792,39 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             ];
         };
 
+        // points.material.size = 0.05;
+        // points.material.color.set(new THREE.Color(0xffffff));
+        /*                      front-3d                          */
+        const positions = points.geometry.attributes.position.array;
+        const point = [];
+
+        for (let i = 0; i < positions.length; i += 3) {
+            const x = positions[i];
+            const y = positions[i + 1];
+            const z = positions[i + 2];
+            const xyz = [x, y, z];
+            point.push(xyz);
+        }
+
+        const { idxs } = skmeans(point, 1);
+
+        const drawnPoints = this.model.data.objects
+            .reduce((acc, cur) => acc.concat(cur.points), [])
+            .map((p) => p.index);
+
+        const newPoints = [];
+        for (let i = 0; i < idxs.length; i++) {
+            let color = new THREE.Color(0xffffff);
+            if (drawnPoints.includes(i)) color = new THREE.Color(0.25, 0, 1);
+            newPoints.push(color.r, color.g, color.b);
+        }
+
+        points.geometry.setAttribute('color', new THREE.Float32BufferAttribute(newPoints, 3));
+        const newMaterial = new THREE.PointsMaterial({ vertexColors: true });
         // eslint-disable-next-line no-param-reassign
+        points = new THREE.Points(points.geometry, newMaterial);
         points.material.size = 0.05;
-        points.material.color.set(new THREE.Color(0xffffff));
+        /*                          front-3d custom end               */
 
         const { controls } = this.views.perspective;
         controls.mouseButtons.wheel = CameraControls.ACTION.DOLLY;
@@ -1902,6 +2275,21 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     }
 
     private detachCamera(view?: ViewType): void {
+        if (this.selectedData.points.length > 16) {
+            const { x, y, z }: any = this.selectedData.points[0];
+
+            this.selectedCuboid.top.position.set(x, y, z);
+            this.selectedCuboid.top.rotation.set(0, 0, 0);
+            this.selectedCuboid.top.scale.set(1, 1, 1);
+
+            this.selectedCuboid.front.position.set(x, y, z);
+            this.selectedCuboid.front.rotation.set(0, 0, 0);
+            this.selectedCuboid.front.scale.set(1, 1, 1);
+
+            this.selectedCuboid.side.position.set(x, y, z);
+            this.selectedCuboid.side.rotation.set(0, 0, 0);
+            this.selectedCuboid.side.scale.set(1, 1, 1);
+        }
         const coordTop = this.selectedCuboid.getReferenceCoordinates(ViewType.TOP);
         const sphericaltop = new THREE.Spherical();
         sphericaltop.setFromVector3(coordTop);

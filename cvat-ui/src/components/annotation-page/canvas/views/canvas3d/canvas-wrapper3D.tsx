@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, {
     ReactElement, useEffect, useRef,
@@ -509,6 +504,7 @@ const Canvas3DWrapperComponent = React.memo((props: Props): ReactElement => {
     const onCanvasShapeSelected = (event: any): void => {
         const { onActivateObject } = props;
         const { clientID } = event.detail;
+        if (canvasInstance.model.data.fixed > 0) return;
         onActivateObject(clientID);
         canvasInstance.activate(clientID);
     };
@@ -561,7 +557,9 @@ const Canvas3DWrapperComponent = React.memo((props: Props): ReactElement => {
     };
 
     const onContextMenu = (event: any): void => {
+        if (canvasInstance.model.data.fixed > 0) return;
         const { onUpdateContextMenu, onActivateObject } = props;
+        if (canvasInstance.model.data.fixed > 0) return;
         onActivateObject(event.detail.clientID);
         onUpdateContextMenu(
             event.detail.clientID !== null,

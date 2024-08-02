@@ -1,18 +1,17 @@
-# Copyright (C) 2019-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from copy import copy
+from email.policy import default
 from inspect import isclass
+import json
 import os
 import re
 import shutil
+import datetime
 
 from tempfile import NamedTemporaryFile
 import textwrap
 from typing import Any, Dict, Iterable, Optional, OrderedDict, Union
 
+import numpy as np
 from rest_framework import serializers, exceptions
 from django.contrib.auth.models import User, Group
 from django.db import transaction
@@ -21,7 +20,7 @@ from cvat.apps.dataset_manager.formats.utils import get_label_color
 from cvat.apps.engine import models
 from cvat.apps.engine.cloud_provider import get_cloud_storage_instance, Credentials, Status
 from cvat.apps.engine.log import slogger
-from cvat.apps.engine.utils import parse_specific_attributes
+from cvat.apps.engine.utils import crop_mask, parse_specific_attributes
 
 from drf_spectacular.utils import OpenApiExample, extend_schema_field, extend_schema_serializer
 
@@ -95,9 +94,13 @@ class LabelsSummarySerializer(_CollectionSummarySerializer):
 
 class JobsSummarySerializer(_CollectionSummarySerializer):
     completed = serializers.IntegerField(source='completed_jobs_count', default=0)
+    ids = serializers.SerializerMethodField()
 
     def __init__(self, *, model=models.Job, url_filter_key, **kwargs):
         super().__init__(model=model, url_filter_key=url_filter_key, **kwargs)
+
+    def get_ids(self, instance):
+        return models.Job.objects.filter(segment__task=instance.id).select_related('segment').only('id').values_list('id', flat=True)
 
 
 class TasksSummarySerializer(_CollectionSummarySerializer):
@@ -476,7 +479,8 @@ class JobReadSerializer(serializers.ModelSerializer):
     project_id = serializers.ReadOnlyField(source="get_project_id", allow_null=True)
     start_frame = serializers.ReadOnlyField(source="segment.start_frame")
     stop_frame = serializers.ReadOnlyField(source="segment.stop_frame")
-    assignee = BasicUserSerializer(allow_null=True, read_only=True)
+    worker = BasicUserSerializer(allow_null=True, read_only=True)
+    checker = BasicUserSerializer(allow_null=True, read_only=True)
     dimension = serializers.CharField(max_length=2, source='segment.task.dimension', read_only=True)
     data_chunk_size = serializers.ReadOnlyField(source='segment.task.data.chunk_size')
     data_compressed_chunk_type = serializers.ReadOnlyField(source='segment.task.data.compressed_chunk_type')
@@ -485,17 +489,20 @@ class JobReadSerializer(serializers.ModelSerializer):
         allow_null=True, read_only=True)
     labels = LabelsSummarySerializer(url_filter_key='job_id')
     issues = IssuesSummarySerializer(models.Issue, url_filter_key='job_id')
+    labeled_annotation_count = serializers.ReadOnlyField(source="get_labeled_annotation_count")
+    labeled_annotations = serializers.ReadOnlyField(source="get_labeled_annotations_by_label")
 
     class Meta:
         model = models.Job
-        fields = ('url', 'id', 'task_id', 'project_id', 'assignee',
+        fields = ('url', 'id', 'task_id', 'project_id', 'worker', 'checker',
             'dimension', 'bug_tracker', 'status', 'stage', 'state', 'mode',
             'start_frame', 'stop_frame', 'data_chunk_size', 'data_compressed_chunk_type',
-            'updated_date', 'issues', 'labels')
+            'updated_date', 'issues', 'labels', 'saved_date', 'etc', 'labeled_annotation_count', 'labeled_annotations')
         read_only_fields = fields
 
 class JobWriteSerializer(serializers.ModelSerializer):
-    assignee = serializers.IntegerField(allow_null=True, required=False)
+    worker = serializers.IntegerField(allow_null=True, required=False)
+    checker = serializers.IntegerField(allow_null=True, required=False)
 
     def to_representation(self, instance):
         # FIXME: deal with resquest/response separation
@@ -505,21 +512,40 @@ class JobWriteSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         state = validated_data.get('state')
         stage = validated_data.get('stage')
+        # status 설정하는 로직 변경
         if stage:
-            if stage == models.StageChoice.ANNOTATION:
-                status = models.StatusChoice.ANNOTATION
-            elif stage == models.StageChoice.ACCEPTANCE and state == models.StateChoice.COMPLETED:
-                status = models.StatusChoice.COMPLETED
-            else:
-                status = models.StatusChoice.VALIDATION
+            status = models.StatusChoice.ANNOTATION
+            if stage == models.StageChoice.ACCEPTANCE:
+                if state == models.StateChoice.COMPLETED or instance.state == models.StateChoice.COMPLETED:
+                    status = models.StatusChoice.COMPLETED
+                else:
+                    status = models.StatusChoice.VALIDATION
 
             validated_data['status'] = status
             if stage != instance.stage and not state:
                 validated_data['state'] = models.StateChoice.NEW
+                if models.LabeledShape.objects.filter(job=instance).exists():
+                    validated_data['state'] = models.StateChoice.IN_PROGRESS
 
-        assignee = validated_data.get('assignee')
-        if assignee is not None:
-            validated_data['assignee'] = User.objects.get(id=assignee)
+        if state:
+            status = models.StatusChoice.ANNOTATION
+            if state == models.StateChoice.COMPLETED:
+                if instance.stage == models.StageChoice.ACCEPTANCE or stage == models.StageChoice.ACCEPTANCE:
+                    status = models.StatusChoice.COMPLETED
+            elif state == models.StateChoice.REJECTED:
+                status = models.StatusChoice.VALIDATION
+
+            validated_data['status'] = status
+
+
+        for assignee in ('worker', 'checker'):
+            assignee_id = validated_data.get(assignee)
+            if assignee_id is not None:
+                validated_data[assignee] = User.objects.get(id=assignee_id)
+
+        if not validated_data:
+            tz = datetime.timezone(datetime.timedelta(hours=9))
+            validated_data.update({'updated_date': datetime.datetime.now(tz)})
 
         instance = super().update(instance, validated_data)
 
@@ -528,14 +554,16 @@ class JobWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Job
-        fields = ('assignee', 'stage', 'state')
+        fields = ('worker', 'checker', 'stage', 'state', 'etc')
 
 class SimpleJobSerializer(serializers.ModelSerializer):
-    assignee = BasicUserSerializer(allow_null=True)
-
+    worker = BasicUserSerializer(allow_null=True)
+    checker = BasicUserSerializer(allow_null=True)
+    labeled_annotation_count = serializers.ReadOnlyField(source="get_labeled_annotation_count")
     class Meta:
         model = models.Job
-        fields = ('url', 'id', 'assignee', 'status', 'stage', 'state')
+        fields = ('url', 'id', 'worker', 'checker', 'status', 'stage', 'state',
+                  'updated_date', 'saved_date', 'etc', 'labeled_annotation_count')
         read_only_fields = fields
 
 class SegmentSerializer(serializers.ModelSerializer):
@@ -792,6 +820,14 @@ class StorageSerializer(serializers.ModelSerializer):
         model = models.Storage
         fields = ('id', 'location', 'cloud_storage_id')
 
+
+class GuideFileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.GuideFile
+        fields = '__all__'
+
+
 class TaskReadSerializer(serializers.ModelSerializer):
     data_chunk_size = serializers.ReadOnlyField(source='data.chunk_size', required=False)
     data_compressed_chunk_type = serializers.ReadOnlyField(source='data.compressed_chunk_type', required=False)
@@ -821,6 +857,20 @@ class TaskReadSerializer(serializers.ModelSerializer):
             'organization': { 'allow_null': True },
             'overlap': { 'allow_null': True },
         }
+
+
+# tasks페이지에서 필요한 정보만 반환하는 serializer
+class TaskReadManySerializer(serializers.ModelSerializer):
+    owner = BasicUserSerializer(required=False)
+    jobs = JobsSummarySerializer(url_filter_key='task_id', source='segment_set')
+    dimension = serializers.CharField(allow_blank=True, required=False)
+
+    class Meta:
+        model = models.Task
+        fields = ('url', 'id', 'name', 'project_id', 'mode', 'owner',
+           'created_date', 'updated_date', 'status', 'jobs', 'dimension',
+        )
+        read_only_fields = fields
 
 
 class TaskWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
@@ -927,9 +977,20 @@ class TaskWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
                     new_attr = new_label.attributespec_set.filter(name=old_attr.name,
                                                                   values=old_attr.values,
                                                                   input_type=old_attr.input_type).first()
-                    if new_attr is None:
-                        raise serializers.ValidationError('Target project does not have ' \
-                            f'"{old_label.name}" label with "{old_attr.name}" attribute')
+
+                    # task를 project로 이동할 때, target project에 해당 attr이 없으면 삭제한다.
+                    if new_attr is None and instance.project_id is not None:
+                        for (attr, attr_name) in (
+                            (models.LabeledTrackAttributeVal, 'track'),
+                            (models.LabeledShapeAttributeVal, 'shape'),
+                            (models.LabeledImageAttributeVal, 'image')
+                        ):
+                            attr.objects.filter(**{
+                                f'{attr_name}__job__segment__task': instance,
+                                f'{attr_name}__label': old_label
+                            }).delete()
+
+                        continue
 
                     for (model, model_name) in (
                         (models.LabeledTrackAttributeVal, 'track'),
@@ -1189,6 +1250,7 @@ class OptimizedFloatListField(serializers.ListField):
 
         raise exceptions.ValidationError(errors)
 
+
 class ShapeSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=models.ShapeType.choices())
     occluded = serializers.BooleanField(default=False)
@@ -1205,6 +1267,21 @@ class SubLabeledShapeSerializer(ShapeSerializer, AnnotationSerializer):
 
 class LabeledShapeSerializer(SubLabeledShapeSerializer):
     elements = SubLabeledShapeSerializer(many=True, required=False)
+
+    # mask의 밸리데이션을 위해 추가
+    width = serializers.IntegerField(min_value=0, required=False, default=None, write_only=True)
+    height = serializers.IntegerField(min_value=0, required=False, default=None, write_only=True)
+
+    # mask의 밸리데이션을 위해 추가
+    def validate(self, attrs):
+        if attrs['type'] == models.ShapeType.MASK:
+            # mask이지만 업데이트가 아닌 경우 width와 height가 없음
+            if attrs['width'] is None or attrs['height'] is None:
+                return super().validate(attrs)
+
+            attrs['points'] = crop_mask(attrs['points'], attrs['width'], attrs['height'])
+
+        return super().validate(attrs)
 
 def _convert_annotation(obj, keys):
     return OrderedDict([(key, obj[key]) for key in keys])
@@ -1346,6 +1423,15 @@ class IssueReadSerializer(serializers.ModelSerializer):
             'created_date': { 'allow_null': True },
             'updated_date': { 'allow_null': True },
         }
+
+
+class IssueContentSerializer(serializers.ModelSerializer):
+    task_id = serializers.ReadOnlyField(source="get_task_id", allow_null=True)
+
+    class Meta:
+        model = models.Issue
+        fields = ('job_id', 'frame', 'task_id', 'resolved')
+        read_only_fields = fields
 
 
 class IssueWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
@@ -1665,6 +1751,39 @@ class RelatedFileSerializer(serializers.ModelSerializer):
         model = models.RelatedFile
         fields = '__all__'
         read_only_fields = ('path',)
+
+
+class JobSerializer(serializers.Serializer):
+    etc = serializers.BooleanField()
+    state = serializers.CharField()
+    stage = serializers.CharField()
+    worker = serializers.CharField(allow_null=True)
+    project = serializers.CharField(allow_null=True)
+    task = serializers.CharField(allow_null=True)
+    labels = serializers.DictField()
+    id = serializers.IntegerField()
+
+
+class StatisticSerializer(serializers.Serializer):
+    jobs = serializers.ListField(child=JobSerializer(), required=True)
+    labels = serializers.DictField(required=True)
+
+
+class UmapSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    tx = serializers.ListField(child=serializers.FloatField())
+    ty = serializers.ListField(child=serializers.FloatField())
+    annotations = serializers.ListField(child=serializers.ListField())
+    result_image = serializers.CharField()
+
+    def to_representation(self, instance):
+        return {
+            'label': instance.label.name,
+            'tx': np.frombuffer(instance.tx, dtype=np.float32),
+            'ty': np.frombuffer(instance.ty, dtype=np.float32),
+            'annotations': json.loads(instance.annotations),
+            'result_image': instance.result_image,
+        }
 
 
 def _update_related_storages(instance, validated_data):

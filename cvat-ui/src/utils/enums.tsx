@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 export enum ProviderType {
     AWS_S3_BUCKET = 'AWS_S3_BUCKET',
     AZURE_CONTAINER = 'AZURE_CONTAINER',

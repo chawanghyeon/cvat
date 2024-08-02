@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import * as SVG from 'svg.js';
 import consts from './consts';
 import Crosshair from './crosshair';
@@ -314,7 +310,7 @@ export class InteractionHandlerImpl implements InteractionHandler {
                 'pointer-events': 'none',
                 opacity: 0.5,
             }).addClass('cvat_canvas_interact_intermediate_shape');
-            image.move(this.geometry.offset, this.geometry.offset);
+            image.move(this.geometry.offset + left, this.geometry.offset + top);
             this.drawnIntermediateShape = image;
 
             imageDataToDataURL(

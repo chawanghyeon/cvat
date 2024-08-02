@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import argparse
 import os.path as osp
 import re

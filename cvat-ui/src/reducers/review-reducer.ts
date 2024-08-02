@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import config from 'config';
 import { AnnotationActionTypes } from 'actions/annotation-actions';
 import { ReviewActionTypes } from 'actions/review-actions';
@@ -10,7 +6,7 @@ import { ReviewState } from '.';
 
 const defaultState: ReviewState = {
     issues: [],
-    latestComments: [],
+    latestComments: ['occlude', 'line'],
     frameIssues: [], // saved on the server and not saved on the server
     newIssuePosition: null,
     issuesHidden: false,

@@ -3,7 +3,7 @@ import data.utils
 import data.organizations
 
 # input: {
-#     "scope": <"view"|"list"|"update:state"|"update:stage"|"update:assignee""delete"|
+#     "scope": <"view"|"list"|"update:state"|"update:stage"|"update:worker"|"update:checker"|"delete"|
 #         "view:annotations"|"update:annotations"|"delete:annotations"|"view:data"|
 #         "export:annotations" | "export:dataset" |> or null,
 #     "auth": {
@@ -23,7 +23,9 @@ import data.organizations
 #     },
 #     "resource": {
 #         "id": <num>,
-#         "assignee": { "id": <num> },
+#         "stage": <"annotation"|"validation"|"acceptance">,
+#         "worker": { "id": <num> },
+#         "checker": { "id": <num> },
 #         "organization": { "id": <num> } or null,
 #         "project": {
 #             "owner": { "id": <num> },
@@ -36,8 +38,12 @@ import data.organizations
 #     }
 # }
 
-is_job_assignee {
-    input.resource.assignee.id == input.auth.user.id
+is_job_worker {
+    input.resource.worker.id == input.auth.user.id
+}
+
+is_job_checker {
+    input.resource.checker.id == input.auth.user.id
 }
 
 is_task_owner {
@@ -81,7 +87,15 @@ is_job_staff {
 }
 
 is_job_staff {
-    is_job_assignee
+    is_job_worker
+}
+
+is_job_staff {
+    is_job_checker
+}
+
+is_stage_not_acceptance {
+    input.resource.stage != utils.ACCEPTANCE
 }
 
 default allow = false
@@ -114,7 +128,8 @@ filter = [] { # Django Q object to filter list of entries
     utils.is_sandbox
     user := input.auth.user
     qobject := [
-        {"assignee_id": user.id},
+        {"worker_id": user.id},
+        {"checker_id": user.id}, "|",
         {"segment__task__owner_id": user.id}, "|",
         {"segment__task__assignee_id": user.id}, "|",
         {"segment__task__project__owner_id": user.id}, "|",
@@ -130,7 +145,8 @@ filter = [] { # Django Q object to filter list of entries
     organizations.has_perm(organizations.WORKER)
     user := input.auth.user
     qobject := [
-        {"assignee_id": user.id},
+        {"worker_id": user.id},
+        {"checker_id": user.id}, "|",
         {"segment__task__owner_id": user.id}, "|",
         {"segment__task__assignee_id": user.id}, "|",
         {"segment__task__project__owner_id": user.id}, "|",
@@ -185,21 +201,68 @@ allow {
 }
 
 allow {
-    { utils.UPDATE_STAGE, utils.UPDATE_ASSIGNEE }[input.scope]
+    { utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS }[input.scope]
+    is_stage_not_acceptance
     utils.is_sandbox
     utils.has_perm(utils.WORKER)
-    is_task_staff
+    is_job_staff
 }
 
 allow {
-    { utils.UPDATE_STAGE, utils.UPDATE_ASSIGNEE }[input.scope]
+    { utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS }[input.scope]
+    is_stage_not_acceptance
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.WORKER)
+    organizations.has_perm(organizations.WORKER)
+    is_job_staff
+}
+
+allow {
+    { utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS }[input.scope]
+    is_stage_not_acceptance
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.USER)
     organizations.has_perm(organizations.MAINTAINER)
 }
 
 allow {
-    { utils.UPDATE_STAGE, utils.UPDATE_ASSIGNEE }[input.scope]
+    { utils.UPDATE_STAGE, utils.UPDATE_WORKER }[input.scope]
+    utils.is_sandbox
+    utils.has_perm(utils.WORKER)
+    is_task_staff
+}
+
+allow {
+    { utils.UPDATE_STAGE, utils.UPDATE_WORKER }[input.scope]
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.USER)
+    organizations.has_perm(organizations.MAINTAINER)
+}
+
+allow {
+    { utils.UPDATE_STAGE, utils.UPDATE_WORKER }[input.scope]
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.WORKER)
+    organizations.has_perm(organizations.WORKER)
+    is_task_staff
+}
+
+allow {
+    { utils.UPDATE_STAGE, utils.UPDATE_CHECKER }[input.scope]
+    utils.is_sandbox
+    utils.has_perm(utils.WORKER)
+    is_task_staff
+}
+
+allow {
+    { utils.UPDATE_STAGE, utils.UPDATE_CHECKER }[input.scope]
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.USER)
+    organizations.has_perm(organizations.MAINTAINER)
+}
+
+allow {
+    { utils.UPDATE_STAGE, utils.UPDATE_CHECKER }[input.scope]
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.WORKER)
     organizations.has_perm(organizations.WORKER)

@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { AuthActions, AuthActionTypes } from 'actions/auth-actions';
 import { WebhooksActions, WebhooksActionsTypes } from 'actions/webhooks-actions';
 import { WebhooksState } from 'reducers';

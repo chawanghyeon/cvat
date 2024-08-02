@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { BoundariesActions, BoundariesActionTypes } from 'actions/boundaries-actions';
 import { AuthActions, AuthActionTypes } from 'actions/auth-actions';
 import { ShortcutsActions, ShortcutsActionsTypes } from 'actions/shortcuts-actions';
@@ -22,12 +18,13 @@ function formatShortcuts(shortcuts: KeyMapItem): string {
         .join(', ')}]`;
 }
 
-const defaultKeyMap = ({
+const defaultKeyMap = {
     SWITCH_SHORTCUTS: {
         name: 'Show shortcuts',
         description: 'Open/hide the list of available shortcuts',
         sequences: ['f1'],
         action: 'keydown',
+        tKey: 'switchShortcut',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_SETTINGS: {
@@ -35,6 +32,7 @@ const defaultKeyMap = ({
         description: 'Open/hide settings dialog',
         sequences: ['f2'],
         action: 'keydown',
+        tKey: 'switchSettings',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
 
@@ -43,6 +41,7 @@ const defaultKeyMap = ({
         description: 'Change locked state for all objects in the side bar',
         sequences: ['t l'],
         action: 'keydown',
+        tKey: 'switchAllLock',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_LOCK: {
@@ -50,6 +49,7 @@ const defaultKeyMap = ({
         description: 'Change locked state for an active object',
         sequences: ['l'],
         action: 'keydown',
+        tKey: 'switchLock',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_ALL_HIDDEN: {
@@ -57,6 +57,7 @@ const defaultKeyMap = ({
         description: 'Change hidden state for objects in the side bar',
         sequences: ['t h'],
         action: 'keydown',
+        tKey: 'switchAllHidden',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_HIDDEN: {
@@ -64,6 +65,7 @@ const defaultKeyMap = ({
         description: 'Change hidden state for an active object',
         sequences: ['h'],
         action: 'keydown',
+        tKey: 'switchHidden',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_OCCLUDED: {
@@ -71,6 +73,7 @@ const defaultKeyMap = ({
         description: 'Change occluded property for an active object',
         sequences: ['q', '/'],
         action: 'keydown',
+        tKey: 'switchOccluded',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_KEYFRAME: {
@@ -78,6 +81,7 @@ const defaultKeyMap = ({
         description: 'Change keyframe property for an active track',
         sequences: ['k'],
         action: 'keydown',
+        tKey: 'switchKeyframe',
         applicable: [DimensionType.DIMENSION_2D],
     },
     SWITCH_OUTSIDE: {
@@ -85,6 +89,7 @@ const defaultKeyMap = ({
         description: 'Change outside property for an active track',
         sequences: ['o'],
         action: 'keydown',
+        tKey: 'switchOutSide',
         applicable: [DimensionType.DIMENSION_2D],
     },
     DELETE_OBJECT: {
@@ -92,6 +97,7 @@ const defaultKeyMap = ({
         description: 'Delete an active object. Use shift to force delete of locked objects',
         sequences: ['del', 'shift+del'],
         action: 'keydown',
+        tKey: 'deleteObject',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     TO_BACKGROUND: {
@@ -99,6 +105,7 @@ const defaultKeyMap = ({
         description: 'Put an active object "farther" from the user (decrease z axis value)',
         sequences: ['-', '_'],
         action: 'keydown',
+        tKey: 'toBackground',
         applicable: [DimensionType.DIMENSION_2D],
     },
     TO_FOREGROUND: {
@@ -106,6 +113,7 @@ const defaultKeyMap = ({
         description: 'Put an active object "closer" to the user (increase z axis value)',
         sequences: ['+', '='],
         action: 'keydown',
+        tKey: 'toForeground',
         applicable: [DimensionType.DIMENSION_2D],
     },
     COPY_SHAPE: {
@@ -113,6 +121,7 @@ const defaultKeyMap = ({
         description: 'Copy shape to CVAT internal clipboard',
         sequences: ['ctrl+c'],
         action: 'keydown',
+        tKey: 'copyShape',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     PROPAGATE_OBJECT: {
@@ -120,6 +129,7 @@ const defaultKeyMap = ({
         description: 'Make a copy of the object on the following frames',
         sequences: ['ctrl+b'],
         action: 'keydown',
+        tKey: 'propagateObject',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     NEXT_KEY_FRAME: {
@@ -127,6 +137,7 @@ const defaultKeyMap = ({
         description: 'Go to the next keyframe of an active track',
         sequences: ['r'],
         action: 'keydown',
+        tKey: 'nextKeyFrame',
         applicable: [DimensionType.DIMENSION_2D],
     },
     PREV_KEY_FRAME: {
@@ -134,6 +145,7 @@ const defaultKeyMap = ({
         description: 'Go to the previous keyframe of an active track',
         sequences: ['e'],
         action: 'keydown',
+        tKey: 'prevKeyFrame',
         applicable: [DimensionType.DIMENSION_2D],
     },
 
@@ -142,6 +154,7 @@ const defaultKeyMap = ({
         description: 'Go to the next attribute',
         sequences: ['down'],
         action: 'keydown',
+        tKey: 'nextAttribute',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     PREVIOUS_ATTRIBUTE: {
@@ -149,6 +162,7 @@ const defaultKeyMap = ({
         description: 'Go to the previous attribute',
         sequences: ['up'],
         action: 'keydown',
+        tKey: 'previousAttribute',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     NEXT_OBJECT: {
@@ -156,6 +170,7 @@ const defaultKeyMap = ({
         description: 'Go to the next object',
         sequences: ['tab'],
         action: 'keydown',
+        tKey: 'nextObject',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     PREVIOUS_OBJECT: {
@@ -163,6 +178,7 @@ const defaultKeyMap = ({
         description: 'Go to the previous object',
         sequences: ['shift+tab'],
         action: 'keydown',
+        tKey: 'previousObject',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
 
@@ -171,6 +187,7 @@ const defaultKeyMap = ({
         description: 'Paste a shape from internal CVAT clipboard',
         sequences: ['ctrl+v'],
         action: 'keydown',
+        tKey: 'pasteShape',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_DRAW_MODE: {
@@ -179,6 +196,7 @@ const defaultKeyMap = ({
             'Repeat the latest procedure of drawing with the same parameters (shift to redraw an existing shape)',
         sequences: ['shift+n', 'n'],
         action: 'keydown',
+        tKey: 'switchDrawMode',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     OPEN_REVIEW_ISSUE: {
@@ -186,6 +204,7 @@ const defaultKeyMap = ({
         description: 'Create a new issues in the review workspace',
         sequences: ['n'],
         action: 'keydown',
+        tKey: 'openReviewIssue',
         applicable: [DimensionType.DIMENSION_2D],
     },
     SWITCH_MERGE_MODE: {
@@ -193,6 +212,7 @@ const defaultKeyMap = ({
         description: 'Activate or deactivate mode to merging shapes',
         sequences: ['m'],
         action: 'keydown',
+        tKey: 'switchMergeMode',
         applicable: [DimensionType.DIMENSION_2D],
     },
     SWITCH_SPLIT_MODE: {
@@ -200,6 +220,7 @@ const defaultKeyMap = ({
         description: 'Activate or deactivate mode to splitting shapes',
         sequences: ['alt+m'],
         action: 'keydown',
+        tKey: 'switchSplitMode',
         applicable: [DimensionType.DIMENSION_2D],
     },
     SWITCH_GROUP_MODE: {
@@ -207,6 +228,7 @@ const defaultKeyMap = ({
         description: 'Activate or deactivate mode to grouping shapes',
         sequences: ['g'],
         action: 'keydown',
+        tKey: 'switchGroupMode',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     RESET_GROUP: {
@@ -214,6 +236,7 @@ const defaultKeyMap = ({
         description: 'Reset group for selected shapes (in group mode)',
         sequences: ['shift+g'],
         action: 'keyup',
+        tKey: 'resetGroup',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     CANCEL: {
@@ -221,6 +244,7 @@ const defaultKeyMap = ({
         description: 'Cancel any active canvas mode',
         sequences: ['esc'],
         action: 'keydown',
+        tKey: 'cancel',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     CLOCKWISE_ROTATION: {
@@ -228,6 +252,7 @@ const defaultKeyMap = ({
         description: 'Change image angle (add 90 degrees)',
         sequences: ['ctrl+r'],
         action: 'keydown',
+        tKey: 'clockwiseRotation',
         applicable: [DimensionType.DIMENSION_2D],
     },
     ANTICLOCKWISE_ROTATION: {
@@ -235,6 +260,7 @@ const defaultKeyMap = ({
         description: 'Change image angle (subtract 90 degrees)',
         sequences: ['ctrl+shift+r'],
         action: 'keydown',
+        tKey: 'anticlockwiseRotation',
         applicable: [DimensionType.DIMENSION_2D],
     },
 
@@ -243,6 +269,7 @@ const defaultKeyMap = ({
         description: 'Send all changes of annotations to the server',
         sequences: ['ctrl+s'],
         action: 'keydown',
+        tKey: 'saveJob',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     UNDO: {
@@ -250,6 +277,7 @@ const defaultKeyMap = ({
         description: 'Cancel the latest action related with objects',
         sequences: ['ctrl+z'],
         action: 'keydown',
+        tKey: 'undo',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     REDO: {
@@ -257,6 +285,7 @@ const defaultKeyMap = ({
         description: 'Cancel undo action',
         sequences: ['ctrl+shift+z', 'ctrl+y'],
         action: 'keydown',
+        tKey: 'redo',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     DELETE_FRAME: {
@@ -264,6 +293,7 @@ const defaultKeyMap = ({
         description: 'Delete frame',
         sequences: ['alt+del'],
         action: 'keydown',
+        tKey: 'deleteFrame',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     NEXT_FRAME: {
@@ -271,6 +301,7 @@ const defaultKeyMap = ({
         description: 'Go to the next frame',
         sequences: ['f'],
         action: 'keydown',
+        tKey: 'nextFrame',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     PREV_FRAME: {
@@ -278,6 +309,7 @@ const defaultKeyMap = ({
         description: 'Go to the previous frame',
         sequences: ['d'],
         action: 'keydown',
+        tKey: 'prevFrame',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     FORWARD_FRAME: {
@@ -285,6 +317,7 @@ const defaultKeyMap = ({
         description: 'Go forward with a step',
         sequences: ['v'],
         action: 'keydown',
+        tKey: 'forwardFrame',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     BACKWARD_FRAME: {
@@ -292,6 +325,7 @@ const defaultKeyMap = ({
         description: 'Go backward with a step',
         sequences: ['c'],
         action: 'keydown',
+        tKey: 'backwardFrame',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SEARCH_FORWARD: {
@@ -299,6 +333,7 @@ const defaultKeyMap = ({
         description: 'Search the next frame that satisfies to the filters',
         sequences: ['right'],
         action: 'keydown',
+        tKey: 'searchForward',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SEARCH_BACKWARD: {
@@ -306,6 +341,7 @@ const defaultKeyMap = ({
         description: 'Search the previous frame that satisfies to the filters',
         sequences: ['left'],
         action: 'keydown',
+        tKey: 'searchBackward',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     PLAY_PAUSE: {
@@ -313,6 +349,7 @@ const defaultKeyMap = ({
         description: 'Start/stop automatic changing frames',
         sequences: ['space'],
         action: 'keydown',
+        tKey: 'playPause',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     FOCUS_INPUT_FRAME: {
@@ -321,6 +358,7 @@ const defaultKeyMap = ({
         sequences: ['`'],
         displayedSequences: ['~'],
         action: 'keydown',
+        tKey: 'focusInputFrame',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_AUTOMATIC_BORDERING: {
@@ -328,6 +366,7 @@ const defaultKeyMap = ({
         description: 'Switch automatic bordering for polygons and polylines during drawing/editing',
         sequences: ['ctrl'],
         action: 'keydown',
+        tKey: 'switchAutomaticBordering',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     SWITCH_TOOLS_BLOCKER_STATE: {
@@ -335,6 +374,7 @@ const defaultKeyMap = ({
         description: 'Postpone running the algorithm for interaction tools',
         sequences: ['ctrl'],
         action: 'keydown',
+        tKey: 'switchToolsBlockerState',
         applicable: [DimensionType.DIMENSION_2D],
     },
     CHANGE_OBJECT_COLOR: {
@@ -342,6 +382,7 @@ const defaultKeyMap = ({
         description: 'Set the next color for an activated shape',
         sequences: ['enter'],
         action: 'keydown',
+        tKey: 'changeObjectColor',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     TOGGLE_LAYOUT_GRID: {
@@ -349,6 +390,7 @@ const defaultKeyMap = ({
         description: 'The grid is used to UI development',
         sequences: ['ctrl+alt+enter'],
         action: 'keydown',
+        tKey: 'toggleLayoutGrid',
         applicable: [DimensionType.DIMENSION_2D],
     },
     SWITCH_LABEL: {
@@ -356,6 +398,7 @@ const defaultKeyMap = ({
         description: 'Changes a label for an activated object or for the next drawn object if no objects are activated',
         sequences: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map((val: string): string => `ctrl+${val}`),
         action: 'keydown',
+        tKey: 'switchLabel',
         applicable: [DimensionType.DIMENSION_2D, DimensionType.DIMENSION_3D],
     },
     TILT_UP: {
@@ -363,6 +406,7 @@ const defaultKeyMap = ({
         description: 'Increases camera roll angle',
         sequences: ['shift+arrowup'],
         action: 'keydown',
+        tKey: 'tiltUp',
         applicable: [DimensionType.DIMENSION_3D],
     },
     TILT_DOWN: {
@@ -370,6 +414,7 @@ const defaultKeyMap = ({
         description: 'Decreases camera roll angle',
         sequences: ['shift+arrowdown'],
         action: 'keydown',
+        tKey: 'tiltDown',
         applicable: [DimensionType.DIMENSION_3D],
     },
     ROTATE_LEFT: {
@@ -377,6 +422,7 @@ const defaultKeyMap = ({
         description: 'Decreases camera pitch angle',
         sequences: ['shift+arrowleft'],
         action: 'keydown',
+        tKey: 'rotateLeft',
         applicable: [DimensionType.DIMENSION_3D],
     },
     ROTATE_RIGHT: {
@@ -384,6 +430,7 @@ const defaultKeyMap = ({
         description: 'Increases camera pitch angle',
         sequences: ['shift+arrowright'],
         action: 'keydown',
+        tKey: 'rotateRight',
         applicable: [DimensionType.DIMENSION_3D],
     },
     MOVE_UP: {
@@ -391,6 +438,7 @@ const defaultKeyMap = ({
         description: 'Move the camera up',
         sequences: ['alt+u'],
         action: 'keydown',
+        tKey: 'moveUp',
         applicable: [DimensionType.DIMENSION_3D],
     },
     MOVE_DOWN: {
@@ -398,6 +446,7 @@ const defaultKeyMap = ({
         description: 'Move the camera down',
         sequences: ['alt+o'],
         action: 'keydown',
+        tKey: 'moveDown',
         applicable: [DimensionType.DIMENSION_3D],
     },
     MOVE_LEFT: {
@@ -405,6 +454,7 @@ const defaultKeyMap = ({
         description: 'Move the camera left',
         sequences: ['alt+j'],
         action: 'keydown',
+        tKey: 'moveLeft',
         applicable: [DimensionType.DIMENSION_3D],
     },
     MOVE_RIGHT: {
@@ -412,13 +462,111 @@ const defaultKeyMap = ({
         description: 'Move the camera right',
         sequences: ['alt+l'],
         action: 'keydown',
+        tKey: 'moveRight',
         applicable: [DimensionType.DIMENSION_3D],
+    },
+    MOVE_OBJECT_UP: {
+        name: 'Object Move Up',
+        description: 'Move the object up',
+        sequences: ['up'],
+        action: 'keydown',
+        tKey: 'moveObjectUp',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    MOVE_OBJECT_DOWN: {
+        name: 'Object Move Down',
+        description: 'Move the object down',
+        sequences: ['down'],
+        action: 'keydown',
+        tKey: 'moveObjectDown',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    MOVE_OBJECT_LEFT: {
+        name: 'Object Move Left',
+        description: 'Move the object left',
+        sequences: ['left'],
+        action: 'keydown',
+        tKey: 'moveObjectLeft',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    MOVE_OBJECT_RIGHT: {
+        name: 'Object Move Right',
+        description: 'Move the object right',
+        sequences: ['right'],
+        action: 'keydown',
+        tKey: 'moveObjectRight',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_UP: {
+        name: 'Object Size Change Up',
+        description: 'Change the object size up',
+        sequences: ['shift+up'],
+        action: 'keydown',
+        tKey: 'changeObjectUp',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_DOWN: {
+        name: 'Object Size Change Down',
+        description: 'Change the object size down',
+        sequences: ['shift+down'],
+        action: 'keydown',
+        tKey: 'changeObjectDown',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_LEFT: {
+        name: 'Object Size Change Left',
+        description: 'Change the object size left',
+        sequences: ['shift+left'],
+        action: 'keydown',
+        tKey: 'changeObjectLeft',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_RIGHT: {
+        name: 'Object Size Change Right',
+        description: 'Change the object size right',
+        sequences: ['shift+right'],
+        action: 'keydown',
+        tKey: 'changeObjectRight',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_UP_MORE: {
+        name: 'Object Size Change Up More',
+        description: 'Change the object size up more',
+        sequences: ['ctrl+shift+up'],
+        action: 'keydown',
+        tKey: 'changeObjectUpMore',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_DOWN_MORE: {
+        name: 'Object Size Change Down More',
+        description: 'Change the object size down more',
+        sequences: ['ctrl+shift+down'],
+        action: 'keydown',
+        tKey: 'changeObjectDownMore',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_LEFT_MORE: {
+        name: 'Object Size Change Left More',
+        description: 'Change the object size left more',
+        sequences: ['ctrl+shift+left'],
+        action: 'keydown',
+        tKey: 'changeObjectLeftMore',
+        applicable: [DimensionType.DIMENSION_2D],
+    },
+    CHANGE_OBJECT_RIGHT_MORE: {
+        name: 'Object Size Change Right More',
+        description: 'Change the object size right more',
+        sequences: ['ctrl+shift+right'],
+        action: 'keydown',
+        tKey: 'changeObjectRightMore',
+        applicable: [DimensionType.DIMENSION_2D],
     },
     ZOOM_IN: {
         name: 'Camera Zoom In',
         description: 'Performs zoom in',
         sequences: ['alt+i'],
         action: 'keydown',
+        tKey: 'zoomIn',
         applicable: [DimensionType.DIMENSION_3D],
     },
     ZOOM_OUT: {
@@ -426,6 +574,7 @@ const defaultKeyMap = ({
         description: 'Performs zoom out',
         sequences: ['alt+k'],
         action: 'keydown',
+        tKey: 'zoomOut',
         applicable: [DimensionType.DIMENSION_3D],
     },
     CANCEL_SKELETON_EDGE: {
@@ -433,9 +582,10 @@ const defaultKeyMap = ({
         description: 'Interrupts drawing a new skeleton edge',
         sequences: ['esc'],
         action: 'keydown',
+        tKey: 'cancelSkeletonEdge',
         applicable: [DimensionType.DIMENSION_3D],
     },
-} as any) as KeyMap;
+} as any as KeyMap;
 
 const defaultState: ShortcutsState = {
     visibleShortcutsHelp: false,

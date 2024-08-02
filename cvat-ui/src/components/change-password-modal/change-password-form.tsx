@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Form from 'antd/lib/form';
 import { LockOutlined } from '@ant-design/icons';

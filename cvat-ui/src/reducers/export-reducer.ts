@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { ExportActions, ExportActionTypes } from 'actions/export-actions';
 import { omit } from 'lodash';
 import deepCopy from 'utils/deep-copy';

@@ -1,9 +1,3 @@
-
-# Copyright (C) 2018-2022 Intel Corporation
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import itertools
 import fnmatch
 import os
@@ -651,16 +645,18 @@ def _create_thread(
 
     # calculate chunk size if it isn't specified
     if db_data.chunk_size is None:
-        if isinstance(compressed_chunk_writer, ZipCompressedChunkWriter):
-            if not is_data_in_cloud:
-                w, h = extractor.get_image_size(0)
-            else:
-                img_properties = manifest[0]
-                w, h = img_properties['width'], img_properties['height']
-            area = h * w
-            db_data.chunk_size = max(2, min(72, 36 * 1920 * 1080 // area))
-        else:
-            db_data.chunk_size = 36
+        # chunk_size를 1로 고정, chunk_size가 낮을 수록 느리지만 메모리 사용량이 적음
+        # if isinstance(compressed_chunk_writer, ZipCompressedChunkWriter):
+        #     if not is_data_in_cloud:
+        #         w, h = extractor.get_image_size(0)
+        #     else:
+        #         img_properties = manifest[0]
+        #         w, h = img_properties['width'], img_properties['height']
+        #     area = h * w
+        #     db_data.chunk_size = max(2, min(72, 36 * 1920 * 1080 // area))
+        # else:
+        #     db_data.chunk_size = 36
+        db_data.chunk_size = 1
 
     video_path = ""
     video_size = (0, 0)

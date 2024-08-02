@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect, useState } from 'react';
 import Form from 'antd/lib/form';
 import notification from 'antd/lib/notification';

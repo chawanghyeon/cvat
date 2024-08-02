@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
@@ -79,11 +74,13 @@ function ModelRunnerDialog(props: StateToProps & DispatchToProps): JSX.Element {
     return (
         <Modal
             destroyOnClose
-            visible={visible}
+            open={visible}
             footer={[]}
             onCancel={(): void => closeDialog()}
             maskClosable
             title='Automatic annotation'
+            width={480}
+            className='cvat-model-runner-modal'
         >
             { taskInstance ? (
                 <DetectorRunner

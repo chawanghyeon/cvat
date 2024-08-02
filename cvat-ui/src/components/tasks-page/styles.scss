@@ -1,10 +1,29 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
-@import '../../styles.scss';
+
+.cvat-tasks-page-control-buttons-wrapper {
+    display: flex;
+    flex-direction: column;
+    background: $background-color-1;
+    padding: $grid-unit-size;
+    border-radius: 4px;
+    box-shadow: $box-shadow-base;
+
+    > * {
+        &:not(:first-child) {
+            margin-top: $grid-unit-size;
+        }
+
+        width: 100%;
+
+        .ant-upload {
+            width: 100%;
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+}
 
 .cvat-tasks-page {
     padding-top: $grid-unit-size * 2;
@@ -16,25 +35,28 @@
         > div {
             display: flex;
             justify-content: space-between;
+            padding-bottom: 15px;
+            border-bottom: 1px solid $background-color-1;
+            box-shadow: 0 1px 0 0 $border-color-2;
+        }
 
-            > .cvat-tasks-page-filters-wrapper {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 100%;
+        .cvat-tasks-page-header {
 
-                > div {
-                    > *:not(:last-child) {
-                        margin-right: $grid-unit-size;
-                    }
+            .ant-typography {
+                font-size: 22px;
+                color: $text-color;
+            }
+        }
 
-                    display: flex;
-                    margin-right: $grid-unit-size * 4;
-                }
+        // search field
+        .ant-input-search {
+            .ant-input-affix-wrapper {
+                border-radius: 6px;
+            }
 
-                .cvat-tasks-page-search-bar {
-                    width: $grid-unit-size * 32;
-                }
+            // search field 버튼 강제 제거 (검색 아이콘 suffix로 처리)
+            .ant-input-group-addon {
+                display: none;
             }
         }
     }
@@ -77,7 +99,44 @@
 
 .cvat-tasks-list {
     height: 100%;
-    overflow-y: auto;
+    margin-top: 25px;
+
+    .ant-card {
+        position: relative;
+        border-radius: 12px;
+
+        &-cover {
+            width: 100%;
+            height: 190px;
+            background-color: $background-color-1;
+            position: absolute;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #ffffff40;
+        }
+
+        &-body {
+            height: 190px;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+
+            .ant-typography-secondary {
+                font-size: 12px;
+                font-weight: 300;
+            }
+
+            &:hover {
+                box-shadow: 10px 10px 20px 0 #00000099;
+                border: 1px solid #ffffff33;
+                cursor: pointer;
+
+            }
+        }
+
+    }
 }
 
 .cvat-tasks-list-item {
@@ -92,28 +151,22 @@
     &:hover {
         border: 1px solid $border-color-hover;
     }
+}
 
-    .cvat-task-item-loading-preview,
-    .cvat-task-item-empty-preview {
-        .ant-spin {
-            position: inherit;
-        }
+.cvat-task-item-preview-wrapper {
+    height: 100%;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    scale: 1.1;
+    filter: blur(3px);
+    opacity: 0.3;
 
-        font-size: $grid-unit-size * 6;
-        text-align: center;
-    }
-
-    .cvat-task-item-preview-wrapper {
-        display: flex;
-        justify-content: center;
-        overflow: hidden;
-        margin: $grid-unit-size * 3;
-        margin-top: 0;
-
-        > .cvat-task-item-preview {
-            max-width: 140px;
-            max-height: 80px;
-        }
+    .ant-empty {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
     }
 }
 
@@ -127,26 +180,54 @@
     width: 100%;
 }
 
+// completed bar background
 .cvat-task-completed-progress {
-    color: $completed-progress-color;
-    fill: $completed-progress-color;
-    margin-right: 5px;
+    border: 1px solid $completed-progress-color;
+    border-radius: 20px;
+    display: flex;
+    padding: 0 10px;
+
+    &.ant-typography {
+        color: $completed-progress-color;
+        font-size: 12px;
+        font-weight: 300;
+    }
 }
 
-.cvat-task-completed-progress div.ant-progress-bg {
-    background: $completed-progress-color !important;
-}
-
+// in progress
 .cvat-task-progress-progress {
-    color: $inprogress-progress-color;
-    fill: $inprogress-progress-color;
-    margin-right: 5px;
+    border: 1px solid $inprogress-progress-color;
+    border-radius: 20px;
+    display: flex;
+    padding: 0 10px;
+
+    &.ant-typography {
+        color: $inprogress-progress-color;
+        font-size: 12px;
+        font-weight: 300;
+    }
 }
 
+// completed bar
+.cvat-projects-project-item-description {
+    .ant-progress-status-success .ant-progress-bg {
+        background-color: $completed-progress-color !important;
+    }
+}
+
+
+// new
 .cvat-task-pending-progress {
-    color: $pending-progress-color;
-    fill: $pending-progress-color;
-    margin-right: 5px;
+    border: 1px solid $pending-progress-color;
+    border-radius: 20px;
+    display: flex;
+    padding: 0 10px;
+
+    &.ant-typography {
+        color: $pending-progress-color;
+        font-size: 12px;
+        font-weight: 300;
+    }
 }
 
 .close-auto-annotation-icon {
@@ -158,19 +239,11 @@
     }
 }
 
-.cvat-item-open-task-actions {
-    margin-right: $grid-unit-size;
-    margin-top: $grid-unit-size;
-    display: flex;
-    align-items: center;
-    padding: $grid-unit-size;
-    line-height: 14px;
-}
-
-.cvat-item-open-task-button {
-    margin-right: 20px;
-}
-
 .cvat-item-task-name {
-    @extend .cvat-text-color;
+    color: $text-color;
+
+}
+
+.cvat-project-list-content {
+    width: 100%;
 }

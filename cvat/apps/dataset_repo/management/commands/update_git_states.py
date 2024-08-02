@@ -1,7 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.core.management.base import BaseCommand
 from cvat.apps.dataset_repo.dataset_repo import update_states
 import time

@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React from 'react';
 import { Row, Col } from 'antd/lib/grid';

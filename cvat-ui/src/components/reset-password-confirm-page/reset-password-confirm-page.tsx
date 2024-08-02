@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corp
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { connect } from 'react-redux';
 import Title from 'antd/lib/typography/Title';
@@ -37,15 +32,14 @@ const mapDispatchToProps: DispatchToProps = {
 };
 
 function ResetPasswordPagePageComponent(props: ResetPasswordConfirmPageComponentProps): JSX.Element {
+    const { fetching, onResetPasswordConfirm } = props;
     const sizes = {
         xs: { span: 14 },
         sm: { span: 14 },
         md: { span: 10 },
-        lg: { span: 4 },
-        xl: { span: 4 },
+        lg: { span: 8 },
+        xl: { span: 6 },
     };
-
-    const { fetching, onResetPasswordConfirm } = props;
 
     const { Content } = Layout;
 
@@ -54,7 +48,7 @@ function ResetPasswordPagePageComponent(props: ResetPasswordConfirmPageComponent
             <Content>
                 <Row justify='center' align='middle' style={{ height: '100%' }}>
                     <Col {...sizes}>
-                        <Title level={2}> Change password </Title>
+                        <Title level={2} className='cvat-text-color'> Change password </Title>
                         <ResetPasswordConfirmForm
                             fetching={fetching}
                             onSubmit={(resetPasswordConfirmData: ResetPasswordConfirmData): void => {

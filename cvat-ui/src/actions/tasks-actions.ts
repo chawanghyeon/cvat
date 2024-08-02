@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { AnyAction, Dispatch, ActionCreator } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { TasksQuery, StorageLocation } from 'reducers';
@@ -16,6 +11,8 @@ export enum TasksActionTypes {
     GET_TASKS = 'GET_TASKS',
     GET_TASKS_SUCCESS = 'GET_TASKS_SUCCESS',
     GET_TASKS_FAILED = 'GET_TASKS_FAILED',
+    GET_TASKSISSUES_SUCCESS = 'GET_TASKSISSUES_SUCCESS',
+    GET_TASKSISSUES_FAILED = 'GET_TASKSISSUES_FAILED',
     DELETE_TASK = 'DELETE_TASK',
     DELETE_TASK_SUCCESS = 'DELETE_TASK_SUCCESS',
     DELETE_TASK_FAILED = 'DELETE_TASK_FAILED',
@@ -26,6 +23,39 @@ export enum TasksActionTypes {
     GET_TASK_PREVIEW = 'GET_TASK_PREVIEW',
     GET_TASK_PREVIEW_SUCCESS = 'GET_TASK_PREVIEW_SUCCESS',
     GET_TASK_PREVIEW_FAILED = 'GET_TASK_PREVIEW_FAILED',
+}
+
+export function getTasksIssuesSuccess(array: any[]): AnyAction {
+    const action = {
+        type: TasksActionTypes.GET_TASKSISSUES_SUCCESS,
+        payload: { array },
+    };
+    return action;
+}
+
+function getTasksIssuesFailed(error: any): AnyAction {
+    const action = {
+        type: TasksActionTypes.GET_TASKSISSUES_FAILED,
+        payload: { error },
+    };
+    return action;
+}
+
+export function getTasksIssuesAsync(id: number): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+    return async (dispatch: ActionCreator<Dispatch>): Promise<void> => {
+        let result = null;
+
+        try {
+            result = await cvat.tasksIssues.get(id);
+        } catch (error) {
+            dispatch(getTasksIssuesFailed(error));
+            return;
+        }
+
+        const array = Array.from(result);
+
+        dispatch(getTasksIssuesSuccess(array));
+    };
 }
 
 function getTasks(query: Partial<TasksQuery>, updateQuery: boolean): AnyAction {

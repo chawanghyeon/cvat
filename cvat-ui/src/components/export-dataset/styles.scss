@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
 
 .cvat-modal-export-option-item > .ant-select-item-option-content,
@@ -12,6 +8,37 @@
     }
 }
 
-.cvat-modal-export-switch-use-default-storage {
-    display: table-cell;
+.cvat-modal-export-form {
+
+    .ant-form-item {
+        margin-bottom: 5px;
+        width: 100%;
+
+        &-label {
+            text-align: left;
+
+            > label {
+                color: $text-color;
+
+                &::before {
+                    content: none !important;
+                }
+
+                &::after {
+                    content: '';
+                }
+
+                // 필수 항목일 경우 * 추가
+                &.ant-form-item-required::after {
+                    content: '*';
+                    color: #ff4d4f;
+                }
+            }
+        }
+    }
+
+    // 이미지 저장 text
+    .ant-checkbox-wrapper {
+        color: white;
+    }
 }

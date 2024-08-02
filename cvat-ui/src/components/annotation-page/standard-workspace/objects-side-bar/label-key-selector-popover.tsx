@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { useSelector } from 'react-redux';
 import Popover from 'antd/lib/popover';
@@ -10,7 +6,8 @@ import { Row, Col } from 'antd/lib/grid';
 import Text from 'antd/lib/typography/Text';
 
 import { CombinedState } from 'reducers';
-import CVATTooltip from 'components/common/cvat-tooltip';
+import { Label } from 'cvat-core-wrapper';
+import { Badge } from 'antd';
 
 interface LabelKeySelectorPopoverProps {
     updateLabelShortcutKey(updatedKey: string, labelID: number): void;
@@ -31,7 +28,7 @@ function PopoverContent(props: LabelKeySelectorPopoverContentProps): JSX.Element
 
     return (
         <div className='cvat-label-item-setup-shortcut-popover'>
-            {[['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['0']].map((arr, i_) => (
+            {[['1', '2'], ['3', '4'], ['5', '6'], ['7', '8'], ['9', '0']].map((arr, i_) => (
                 <Row justify='space-around' gutter={[16, 16]} key={i_}>
                     {arr.map((i) => {
                         const previousLabelID = keyToLabelMapping[i];
@@ -39,18 +36,23 @@ function PopoverContent(props: LabelKeySelectorPopoverContentProps): JSX.Element
                             labels.filter((label: any): boolean => label.id === previousLabelID)[0]?.name ||
                               'undefined' :
                             'None';
+                        const labelColor = Number.isInteger(previousLabelID) ?
+                            labels.find((label: Label): boolean => label.id === previousLabelID).color : '#2C2D2E';
+
+                        const style: React.CSSProperties = labelName === 'None' ?
+                            { background: 'transparent', border: '1px solid #414142', opacity: '0.6' } : {};
 
                         return (
-                            <Col key={i} span={8}>
-                                <CVATTooltip title={labelName}>
-                                    <Button
-                                        className='cvat-label-item-shortcut-button'
-                                        onClick={() => updateLabelShortcutKey(i, labelID)}
-                                    >
-                                        <Text>{`${i}:`}</Text>
-                                        <Text type='secondary'>{labelName}</Text>
-                                    </Button>
-                                </CVATTooltip>
+                            <Col key={i} span={12}>
+                                <Button
+                                    className='cvat-label-item-shortcut-button'
+                                    onClick={() => updateLabelShortcutKey(i, labelID)}
+                                    style={style}
+                                >
+                                    <Badge color={labelColor} size='default' />
+                                    <Text>{`${i}:`}</Text>
+                                    <Text type='secondary'>{labelName}</Text>
+                                </Button>
                             </Col>
                         );
                     })}
@@ -60,7 +62,7 @@ function PopoverContent(props: LabelKeySelectorPopoverContentProps): JSX.Element
     );
 }
 
-const MemoizedContent = React.memo(PopoverContent);
+export const MemoizedContent = React.memo(PopoverContent);
 
 function LabelKeySelectorPopover(props: LabelKeySelectorPopoverProps): JSX.Element {
     const {

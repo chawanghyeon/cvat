@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 import Text from 'antd/lib/typography/Text';

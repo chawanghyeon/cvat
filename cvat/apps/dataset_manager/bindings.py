@@ -1,9 +1,3 @@
-
-# Copyright (C) 2019-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import os.path as osp
 import sys
 from collections import namedtuple
@@ -617,11 +611,14 @@ class JobData(CommonData):
                     ("username", self._db_task.owner.username),
                     ("email", self._db_task.owner.email)
                 ]) if self._db_task.owner else ""),
-
-                ("assignee", OrderedDict([
-                    ("username", self._db_job.assignee.username),
-                    ("email", self._db_job.assignee.email)
-                ]) if self._db_job.assignee else ""),
+                ("worker", OrderedDict([
+                    ("username", self._db_job.worker.username),
+                    ("email", self._db_job.worker.email)
+                ]) if self._db_job.worker else ""),
+                ("checker", OrderedDict([
+                    ("username", self._db_job.checker.username),
+                    ("email", self._db_job.checker.email)
+                ]) if self._db_job.checker else ""),
             ])),
             ("dumped", str(timezone.localtime(timezone.now()))),
         ])
@@ -858,7 +855,7 @@ class ProjectData(InstanceLabelData):
 
     def _init_tasks(self):
         self._db_tasks: OrderedDict[int, Task] = OrderedDict(
-            ((db_task.id, db_task) for db_task in self._db_project.tasks.order_by("subset","id").all())
+            ((db_task.id, db_task) for db_task in self._db_project.tasks.order_by("subset", "id").all())
         )
 
         subsets = set()
@@ -1044,7 +1041,7 @@ class ProjectData(InstanceLabelData):
                     task_id=task_id,
                     subset=frame_info["subset"],
                     idx=idx,
-                    id=frame_info.get('id',0),
+                    id=frame_info.get('id', 0),
                     frame=abs_frame,
                     name=frame_info["path"],
                     height=frame_info["height"],
@@ -1805,7 +1802,7 @@ def import_dm_annotations(dm_dataset: dm.Dataset, instance_data: Union[ProjectDa
                                 'group': group_map.get(ann.group, 0),
                                 'source': source,
                                 'shapes': [],
-                                'elements':{},
+                                'elements': {},
                             }
 
                         track = instance_data.TrackedShape(

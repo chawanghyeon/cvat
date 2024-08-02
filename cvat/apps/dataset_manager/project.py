@@ -1,8 +1,3 @@
-# Copyright (C) 2021-2022 Intel Corporation
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import os
 from tempfile import TemporaryDirectory
 import rq
@@ -20,14 +15,14 @@ from .bindings import ProjectData, load_dataset_data
 from .formats.registry import make_exporter, make_importer
 
 def export_project(project_id, dst_file, format_name,
-        server_url=None, save_images=False):
+        server_url=None, save_images=False, *args, **kwargs):
     # For big tasks dump function may run for a long time and
     # we dont need to acquire lock after the task has been initialized from DB.
     # But there is the bug with corrupted dump file in case 2 or
     # more dump request received at the same time:
     # https://github.com/opencv/cvat/issues/217
     with transaction.atomic():
-        project = ProjectAnnotationAndData(project_id)
+        project = ProjectAnnotationAndData(project_id, *args, **kwargs)
         project.init_from_db()
 
     exporter = make_exporter(format_name)
@@ -35,7 +30,7 @@ def export_project(project_id, dst_file, format_name,
         project.export(f, exporter, host=server_url, save_images=save_images)
 
 class ProjectAnnotationAndData:
-    def __init__(self, pk: int):
+    def __init__(self, pk: int, *args, **kwargs):
         self.db_project = models.Project.objects.get(id=pk)
         self.db_tasks = models.Task.objects.filter(project__id=pk).order_by('id')
 
@@ -43,24 +38,26 @@ class ProjectAnnotationAndData:
         self.annotation_irs: dict[int, AnnotationIR] = dict()
 
         self.tasks_to_add: list[models.Task] = []
+        self.args = args
+        self.kwargs = kwargs
 
     def reset(self):
         for annotation_ir in self.annotation_irs.values():
             annotation_ir.reset()
 
-    def put(self, tasks_data: Mapping[int,Any]):
+    def put(self, tasks_data: Mapping[int, Any]):
         for task_id, data in tasks_data.items():
             self.task_annotations[task_id].put(data)
 
-    def create(self, tasks_data: Mapping[int,Any]):
+    def create(self, tasks_data: Mapping[int, Any]):
         for task_id, data in tasks_data.items():
             self.task_annotations[task_id].create(data)
 
-    def update(self, tasks_data: Mapping[int,Any]):
+    def update(self, tasks_data: Mapping[int, Any]):
         for task_id, data in tasks_data.items():
             self.task_annotations[task_id].update(data)
 
-    def delete(self, tasks_data: Mapping[int,Any]=None):
+    def delete(self, tasks_data: Mapping[int, Any]=None):
         if tasks_data is not None:
             for task_id, data in tasks_data.items():
                 self.task_annotations[task_id].put(data)
@@ -88,7 +85,7 @@ class ProjectAnnotationAndData:
             'data_id': db_data.id,
             'project_id': self.db_project.id
         })
-        data = {k:v for k, v in data_serializer.data.items()}
+        data = {k: v for k, v in data_serializer.data.items()}
         data['use_zip_chunks'] = data_serializer.validated_data['use_zip_chunks']
         data['use_cache'] = data_serializer.validated_data['use_cache']
         data['copy_data'] = data_serializer.validated_data['copy_data']
@@ -119,7 +116,7 @@ class ProjectAnnotationAndData:
         self.reset()
 
         for task in self.db_tasks:
-            annotation = TaskAnnotation(pk=task.id)
+            annotation = TaskAnnotation(pk=task.id, *self.args, **self.kwargs)
             annotation.init_from_db()
             self.task_annotations[task.id] = annotation
             self.annotation_irs[task.id] = annotation.ir_data

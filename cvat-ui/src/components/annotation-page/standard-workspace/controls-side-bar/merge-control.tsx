@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 
@@ -69,7 +64,7 @@ function MergeControl(props: Props): JSX.Element {
                 keyMap={{ SWITCH_MERGE_MODE: shortcuts.SWITCH_MERGE_MODE.details }}
                 handlers={shortcutHandlers}
             />
-            <CVATTooltip title={`Merge shapes/tracks ${shortcuts.SWITCH_MERGE_MODE.displayValue}`} placement='right'>
+            <CVATTooltip title={`Merge shapes/tracks ${shortcuts.SWITCH_MERGE_MODE.displayValue}`} placement='bottom'>
                 <Icon {...dynamicIconProps} component={MergeIcon} />
             </CVATTooltip>
         </>

@@ -1,8 +1,3 @@
-# Copyright (C) 2021-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from distutils.util import strtobool
 from django.conf import settings
 from django.db import models
@@ -24,6 +19,12 @@ class Organization(models.Model):
         return self.slug
     class Meta:
         default_permissions = ()
+
+    def get_labels(self):
+        from cvat.apps.engine.models import Label
+        projects = self.projects.all()
+        labels = Label.objects.filter(project__in=projects)
+        return labels
 
 class Membership(models.Model):
     WORKER = 'worker'

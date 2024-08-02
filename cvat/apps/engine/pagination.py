@@ -1,7 +1,3 @@
-# Copyright (C) 2019-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import sys
 from rest_framework.pagination import PageNumberPagination
 

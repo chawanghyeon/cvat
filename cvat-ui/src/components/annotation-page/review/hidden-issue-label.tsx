@@ -1,17 +1,14 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, {
     ReactPortal, useEffect, useRef,
 } from 'react';
 import ReactDOM from 'react-dom';
 import Tag from 'antd/lib/tag';
-import { CheckCircleOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { WarningOutlined } from '@ant-design/icons';
 
 import { Issue } from 'cvat-core-wrapper';
 import CVATTooltip from 'components/common/cvat-tooltip';
+import Icon from '@ant-design/icons';
+import { ConfirmIcon, WarningIcon } from 'icons';
 
 interface Props {
     issue: Issue;
@@ -63,9 +60,9 @@ export default function HiddenIssueLabel(props: Props): ReactPortal {
                 className='cvat-hidden-issue-label'
             >
                 {resolved ? (
-                    <CheckCircleOutlined className='cvat-hidden-issue-resolved-indicator' />
+                    <Icon component={ConfirmIcon} className='cvat-hidden-issue-resolved-indicator' />
                 ) : (
-                    <CloseCircleOutlined className='cvat-hidden-issue-unsolved-indicator' />
+                    <Icon component={WarningIcon} className='cvat-hidden-issue-unsolved-indicator' />
                 )}
                 {comments[0]?.message || <WarningOutlined />}
             </Tag>

@@ -1,6 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
 import React, { useEffect, useState } from 'react';
 import Icon from '@ant-design/icons';
 import { ClearIcon } from 'icons';

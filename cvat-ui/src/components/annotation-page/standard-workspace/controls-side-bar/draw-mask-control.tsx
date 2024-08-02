@@ -1,32 +1,20 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
-import Popover from 'antd/lib/popover';
 import Icon from '@ant-design/icons';
 
 import { Canvas } from 'cvat-canvas-wrapper';
 import { BrushIcon } from 'icons';
-import { ShapeType } from 'reducers';
-
-import DrawShapePopoverContainer from 'containers/annotation-page/standard-workspace/controls-side-bar/draw-shape-popover';
-import withVisibilityHandling from './handle-popover-visibility';
 
 export interface Props {
     canvasInstance: Canvas;
     isDrawing: boolean;
     disabled?: boolean;
+    onDraw: () => void;
 }
 
-const CustomPopover = withVisibilityHandling(Popover, 'draw-mask');
-function DrawPointsControl(props: Props): JSX.Element {
-    const { canvasInstance, isDrawing, disabled } = props;
-    const dynamicPopoverProps = isDrawing ? {
-        overlayStyle: {
-            display: 'none',
-        },
-    } : {};
+function DrawMaskControl(props: Props): JSX.Element {
+    const {
+        canvasInstance, isDrawing, disabled, onDraw,
+    } = props;
 
     const dynamicIconProps = isDrawing ? {
         className: 'cvat-draw-mask-control cvat-active-canvas-control',
@@ -35,20 +23,16 @@ function DrawPointsControl(props: Props): JSX.Element {
         },
     } : {
         className: 'cvat-draw-mask-control',
+        onClick: (): void => {
+            onDraw();
+        },
     };
 
     return disabled ? (
         <Icon className='cvat-draw-mask-control cvat-disabled-canvas-control' component={BrushIcon} />
     ) : (
-        <CustomPopover
-            {...dynamicPopoverProps}
-            overlayClassName='cvat-draw-shape-popover'
-            placement='right'
-            content={<DrawShapePopoverContainer shapeType={ShapeType.MASK} />}
-        >
-            <Icon {...dynamicIconProps} component={BrushIcon} />
-        </CustomPopover>
+        <Icon {...dynamicIconProps} component={BrushIcon} />
     );
 }
 
-export default React.memo(DrawPointsControl);
+export default React.memo(DrawMaskControl);

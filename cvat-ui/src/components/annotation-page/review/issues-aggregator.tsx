@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -28,6 +24,7 @@ export default function IssueAggregatorComponent(): JSX.Element | null {
     const [geometry, setGeometry] = useState<Canvas['geometry'] | null>(null);
     const issueLabels: JSX.Element[] = [];
     const issueDialogs: JSX.Element[] = [];
+    const positionMap = new Map<number, number>();
 
     useEffect(() => {
         if (canvasInstance instanceof Canvas) {
@@ -55,15 +52,17 @@ export default function IssueAggregatorComponent(): JSX.Element | null {
     useEffect(() => {
         if (canvasInstance instanceof Canvas) {
             type IssueRegionSet = Record<number, { hidden: boolean; points: number[] }>;
-            const regions = !issuesHidden ? frameIssues
-                .filter((_issue: any) => !issuesResolvedHidden || !_issue.resolved)
-                .reduce((acc: IssueRegionSet, issue: any): IssueRegionSet => {
-                    acc[issue.id] = {
-                        points: issue.position,
-                        hidden: issue.resolved,
-                    };
-                    return acc;
-                }, {}) : {};
+            const regions = !issuesHidden
+                ? frameIssues
+                      .filter((_issue: any) => !issuesResolvedHidden || !_issue.resolved)
+                      .reduce((acc: IssueRegionSet, issue: any): IssueRegionSet => {
+                          acc[issue.id] = {
+                              points: issue.position,
+                              hidden: issue.resolved,
+                          };
+                          return acc;
+                      }, {})
+                : {};
 
             if (newIssuePosition) {
                 // regions[0] is always empty because key is an id of an issue (<0, >0 are possible)
@@ -85,6 +84,29 @@ export default function IssueAggregatorComponent(): JSX.Element | null {
         }
     }, [newIssuePosition, frameIssues, issuesResolvedHidden, issuesHidden, canvasInstance]);
 
+    useEffect(() => {
+        function handleOutsideClick(event) {
+            const issueDialogElement = document.querySelector('.cvat-issue-dialog');
+            const clickedElement = event.target;
+
+            // 클릭한 요소가 .cvat-issue-dialog의 자식 요소인지 여부를 확인
+            const isClickedInsideIssueDialog = issueDialogElement && issueDialogElement.contains(clickedElement);
+
+            // 클릭한 요소가 .cvat-issue-dialog의 자식 요소가 아닌 경우에만 닫기 동작 수행
+            if (!isClickedInsideIssueDialog) {
+                // 닫기 동작 실행
+                setExpandedIssue(null); // 예시로, 닫기 동작을 실행하는 함수 호출
+            }
+        }
+
+        document.addEventListener('click', handleOutsideClick);
+
+        // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
+        return () => {
+            document.removeEventListener('click', handleOutsideClick);
+        };
+    }, [expandedIssue]); // expandedIssue가 변경될 때마다 useEffect가 재실행되도록 설정
+
     if (!(canvasInstance instanceof Canvas) || !canvasIsReady || !geometry) {
         return null;
     }
@@ -93,11 +115,22 @@ export default function IssueAggregatorComponent(): JSX.Element | null {
         if (issuesHidden) break;
         const issueResolved = issue.resolved;
         if (issuesResolvedHidden && issueResolved) continue;
-        const offset = 15;
-        const translated = issue.position.map((coord: number): number => coord + geometry.offset);
-        const minX = Math.min(...translated.filter((_: number, idx: number): boolean => idx % 2 === 0)) + offset;
-        const minY = Math.min(...translated.filter((_: number, idx: number): boolean => idx % 2 !== 0)) + offset;
+
         const { id } = issue;
+        const offset = 15;
+
+        const translated = issue.position.map((coord: number): number => coord + geometry.offset);
+        const minX = Math.min(...translated.filter((_: number, idx: number): boolean => idx % 2 === 0));
+        const minY = Math.min(...translated.filter((_: number, idx: number): boolean => idx % 2 !== 0));
+        const maxX = Math.max(...translated.filter((_: number, idx: number): boolean => idx % 2 === 0));
+        const maxY = Math.max(...translated.filter((_: number, idx: number): boolean => idx % 2 !== 0));
+        const offsetWidth = (maxX - minX) / 2.0;
+        const offsetHeight = (maxY - minY) / 2.0;
+        let hiddenX = 2.0;
+        let hiddenY = 2.0;
+        let hiddenOffsetWidth = (maxX - minX) / hiddenX;
+        let hiddenOffsetHeight = (maxX - minX) / hiddenY;
+
         const highlight = (): void => {
             const element = window.document.getElementById(`cvat_canvas_issue_region_${id}`);
             if (element) {
@@ -119,8 +152,8 @@ export default function IssueAggregatorComponent(): JSX.Element | null {
                 <IssueDialog
                     key={issue.id}
                     issue={issue}
-                    top={minY}
-                    left={minX}
+                    top={minY + offsetHeight}
+                    left={minX + offsetWidth}
                     angle={-geometry.angle}
                     scale={1 / geometry.scale}
                     isFetching={issueFetching !== null}
@@ -142,13 +175,46 @@ export default function IssueAggregatorComponent(): JSX.Element | null {
                     }}
                 />,
             );
-        } else {
+        } else if (issue.comments.length) {
+            let positionNumber = 0;
+            const positionSum = minY + hiddenOffsetHeight - offset;
+            if (!positionMap.has(positionSum)) positionMap.set(positionSum, 0);
+            else {
+                positionNumber = Number(positionMap.get(positionSum)) + 1;
+                positionMap.set(positionSum, positionNumber);
+            }
+
+            if (positionNumber === 1) {
+                hiddenX = 1.4;
+                hiddenOffsetWidth = (maxX - minX) / hiddenX;
+                hiddenY = 7.0;
+                hiddenOffsetHeight = (maxX - minX) / hiddenY;
+            }
+            if (positionNumber === 2) {
+                hiddenX = 1.4;
+                hiddenOffsetWidth = (maxX - minX) / hiddenX;
+                hiddenY = 1.2;
+                hiddenOffsetHeight = (maxX - minX) / hiddenY;
+            }
+            if (positionNumber === 3) {
+                hiddenX = 10.0;
+                hiddenOffsetWidth = (maxX - minX) / hiddenX;
+                hiddenY = 1.2;
+                hiddenOffsetHeight = (maxX - minX) / hiddenY;
+            }
+            if (positionNumber === 4) {
+                hiddenX = 10.0;
+                hiddenOffsetWidth = (maxX - minX) / hiddenX;
+                hiddenY = 7.0;
+                hiddenOffsetHeight = (maxX - minX) / hiddenY;
+            }
+
             issueLabels.push(
                 <HiddenIssueLabel
                     key={issue.id}
                     issue={issue}
-                    top={minY}
-                    left={minX}
+                    top={minY + hiddenOffsetHeight - offset}
+                    left={minX + hiddenOffsetWidth}
                     angle={-geometry.angle}
                     scale={1 / geometry.scale}
                     resolved={issueResolved}
@@ -161,14 +227,15 @@ export default function IssueAggregatorComponent(): JSX.Element | null {
             );
         }
     }
+    positionMap.clear();
 
     const translated = newIssuePosition ? newIssuePosition.map((coord: number): number => coord + geometry.offset) : [];
-    const createLeft = translated.length ?
-        Math.max(...translated.filter((_: number, idx: number): boolean => idx % 2 === 0)) :
-        null;
-    const createTop = translated.length ?
-        Math.min(...translated.filter((_: number, idx: number): boolean => idx % 2 !== 0)) :
-        null;
+    const createLeft = translated.length
+        ? Math.min(...translated.filter((_: number, idx: number): boolean => idx % 2 === 0))
+        : null;
+    const createTop = translated.length
+        ? Math.max(...translated.filter((_: number, idx: number): boolean => idx % 2 !== 0))
+        : null;
 
     return (
         <>

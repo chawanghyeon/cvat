@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
 
 .cvat-create-work-form-wrapper {
@@ -17,29 +13,135 @@
     }
 
     > div > span {
-        font-size: 36px;
+        font-size: 28px;
     }
 
     .cvat-create-task-content {
         margin-top: 20px;
         width: 100%;
         height: auto;
-        border: 1px solid $border-color-1;
-        border-radius: 3px;
-        padding: 20px;
-        background: $background-color-1;
         text-align: initial;
 
-        > div:not(first-child) {
-            margin-top: 10px;
+        > .ant-row {
+            width: 100%;
+            border-bottom: 1px solid;
+            box-shadow: 0 1px 0 0 $border-color-2;
+            padding: 15px 0;
+
+            &:last-child {
+                border: none;
+                box-shadow: none;
+            }
+        }
+
+        .ant-form-item {
+            margin-bottom: 0;
+
+            &-label > label {
+                &.ant-form-item-required::after {
+                    content: " *";
+                    color: #ff4d4f;
+                }
+
+                &.ant-form-item-required::before {
+                    content: unset;
+                }
+            }
+        }
+
+        .ant-select-selector input {
+            color: $text-color;
+        }
+
+        // upload style
+        .cvat-upload-drag {
+            .ant-upload-list-text-container {
+                color: $text-color;
+                height: 35px;
+
+                .ant-upload-list-item {
+                    height: auto;
+
+                    &-info {
+                        padding: 5px;
+                        border-radius: 6px;
+
+                        &:hover {
+                            background-color: $select-color;
+                        }
+                    }
+
+                    &-name {
+                        font-weight: 200;
+                    }
+                }
+            }
+        }
+
+        // Advanced configuration style
+        .ant-collapse {
+
+            .ant-row {
+                height: 70px;
+                border-bottom: 1px dashed #acacb57e;
+                align-items: center;
+                padding: 0;
+                box-shadow: none;
+
+                &:last-child {
+                    border: none;
+                }
+            }
+
+            .ant-input-number {
+                width: 100%;
+                height: 38px;
+
+                &:hover {
+                    .ant-input-number-handler-down {
+                        border: none;
+                    }
+                }
+
+                &-handler-wrap {
+                    margin-right: 5px;
+                }
+
+                &-group-addon {
+                    background-color: $select-color;
+                    border: none;
+                    border-top-right-radius: 6px;
+                    border-bottom-right-radius: 6px;
+                    border-left: 1px solid $border-color-2;
+                }
+            }
+
+            .ant-form-item {
+                margin-bottom: 0;
+            }
+
+            &-content {
+                > .ant-collapse-content-box {
+                    padding: 0 20px;
+                }
+            }
+        }
+
+        span.ant-radio + * {
+            color: $text-color;
         }
 
         .cvat-project-search-field {
             width: 100%;
         }
-    }
 
-    .cvat-settings-switch {
-        display: table-cell;
+        &-footer {
+            margin-top: 40px;
+
+            button {
+                height: 40px;
+                width: 150px;
+            }
+        }
     }
 }

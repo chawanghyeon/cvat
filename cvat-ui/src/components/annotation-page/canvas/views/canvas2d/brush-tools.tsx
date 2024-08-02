@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './brush-toolbox-styles.scss';
 
 import React, { useEffect, useState } from 'react';
@@ -9,17 +5,18 @@ import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'antd/lib/button';
 import Icon, { VerticalAlignBottomOutlined } from '@ant-design/icons';
-import InputNumber from 'antd/lib/input-number';
-import Select from 'antd/lib/select';
+// import InputNumber from 'antd/lib/input-number';
+// import Select from 'antd/lib/select';
 
 import { filterApplicableForType } from 'utils/filter-applicable-labels';
 import { getCore, Label, LabelType } from 'cvat-core-wrapper';
 import { Canvas, CanvasMode } from 'cvat-canvas-wrapper';
 import {
-    BrushIcon, EraserIcon, PolygonMinusIcon, PolygonPlusIcon,
+    // BrushIcon, EraserIcon,
+    PolygonMinusIcon, PolygonPlusIcon,
     PlusIcon, CheckIcon, MoveIcon,
 } from 'icons';
-import CVATTooltip from 'components/common/cvat-tooltip';
+// import CVATTooltip from 'components/common/cvat-tooltip';
 import { CombinedState, ObjectType, ShapeType } from 'reducers';
 import LabelSelector from 'components/label-selector/label-selector';
 import { rememberObject, updateCanvasBrushTools } from 'actions/annotation-actions';
@@ -41,7 +38,7 @@ function BrushTools(): React.ReactPortal | null {
     const { visible } = config;
 
     const [editableState, setEditableState] = useState<any | null>(null);
-    const [currentTool, setCurrentTool] = useState<'brush' | 'eraser' | 'polygon-plus' | 'polygon-minus'>('brush');
+    const [currentTool, setCurrentTool] = useState<'brush' | 'eraser' | 'polygon-plus' | 'polygon-minus'>('polygon-plus');
     const [brushForm, setBrushForm] = useState<'circle' | 'square'>('circle');
     const [[top, left], setTopLeft] = useState([0, 0]);
     const [brushSize, setBrushSize] = useState(10);
@@ -202,7 +199,7 @@ function BrushTools(): React.ReactPortal | null {
                 />
             )}
             <hr />
-            <Button
+            {/* <Button
                 type='text'
                 className={['cvat-brush-tools-brush', ...(currentTool === 'brush' ? ['cvat-brush-tools-active-tool'] : [])].join(' ')}
                 icon={<Icon component={BrushIcon} />}
@@ -213,7 +210,7 @@ function BrushTools(): React.ReactPortal | null {
                 className={['cvat-brush-tools-eraser', ...(currentTool === 'eraser' ? ['cvat-brush-tools-active-tool'] : [])].join(' ')}
                 icon={<Icon component={EraserIcon} />}
                 onClick={() => setCurrentTool('eraser')}
-            />
+            /> */}
             <Button
                 type='text'
                 className={['cvat-brush-tools-polygon-plus', ...(currentTool === 'polygon-plus' ? ['cvat-brush-tools-active-tool'] : [])].join(' ')}
@@ -226,7 +223,7 @@ function BrushTools(): React.ReactPortal | null {
                 icon={<Icon component={PolygonMinusIcon} />}
                 onClick={() => setCurrentTool('polygon-minus')}
             />
-            { ['brush', 'eraser'].includes(currentTool) ? (
+            {/* { ['brush', 'eraser'].includes(currentTool) ? (
                 <CVATTooltip title='Brush size [Hold Alt + Right Mouse Click + Drag Left/Right]'>
                     <InputNumber
                         className='cvat-brush-tools-brush-size'
@@ -253,7 +250,7 @@ function BrushTools(): React.ReactPortal | null {
                     <Select.Option value='circle'>Circle</Select.Option>
                     <Select.Option value='square'>Square</Select.Option>
                 </Select>
-            ) : null}
+            ) : null} */}
             <Button
                 type='text'
                 className={['cvat-brush-tools-underlying-pixels', ...(removeUnderlyingPixels ? ['cvat-brush-tools-active-tool'] : [])].join(' ')}

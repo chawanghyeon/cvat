@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 export interface Master {
     subscribe(listener: Listener): void;
     unsubscribe(listener: Listener): void;

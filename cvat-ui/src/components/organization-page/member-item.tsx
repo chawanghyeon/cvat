@@ -1,14 +1,12 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Select from 'antd/lib/select';
 import Text from 'antd/lib/typography/Text';
 import { Row, Col } from 'antd/lib/grid';
 import moment from 'moment';
-import { DeleteOutlined } from '@ant-design/icons';
+import Icon from '@ant-design/icons';
 import Modal from 'antd/lib/modal';
+import { IllustWarningIcon, TrashGrayIcon } from 'icons';
+import { useTranslation } from 'react-i18next';
 
 export interface Props {
     membershipInstance: any;
@@ -17,31 +15,35 @@ export interface Props {
 }
 
 function MemberItem(props: Props): JSX.Element {
-    const {
-        membershipInstance, onRemoveMembership, onUpdateMembershipRole,
-    } = props;
-    const {
-        user, joined_date: joinedDate, role, invitation,
-    } = membershipInstance;
-    const { username, firstName, lastName } = user;
+    const { t } = useTranslation();
+    const { membershipInstance, onRemoveMembership, onUpdateMembershipRole } = props;
+    const { user, joined_date: joinedDate, role, invitation } = membershipInstance;
+    const { username } = user;
 
     return (
         <Row className='cvat-organization-member-item' justify='space-between'>
             <Col span={5} className='cvat-organization-member-item-username'>
-                <Text strong>{username}</Text>
+                <Text strong className='cvat-text-color'>
+                    {username}
+                </Text>
             </Col>
-            <Col span={6} className='cvat-organization-member-item-name'>
-                <Text strong>{`${firstName || ''} ${lastName || ''}`}</Text>
-            </Col>
-            <Col span={8} className='cvat-organization-member-item-dates'>
+            <Col span={12} offset={1} className='cvat-organization-member-item-dates'>
                 {invitation ? (
                     <Text type='secondary'>
-                        {`Invited ${moment(invitation.created_date).fromNow()} ${invitation.owner ? `by ${invitation.owner.username}` : ''}`}
+                        {`Invited ${moment(invitation.created_date).fromNow()} `}
+                        {invitation.owner ? (
+                            <>
+                                {'by '}
+                                <span className='cvat-text-color'>{invitation.owner.username}</span>
+                            </>
+                        ) : (
+                            ''
+                        )}
+                        {joinedDate ? `  (Joined ${moment(joinedDate).fromNow()})` : ''}
                     </Text>
                 ) : null}
-                {joinedDate ? <Text type='secondary'>{`Joined ${moment(joinedDate).fromNow()}`}</Text> : null}
             </Col>
-            <Col span={3} className='cvat-organization-member-item-role'>
+            <Col span={4} className='cvat-organization-member-item-role'>
                 <Select
                     onChange={(_role: string) => {
                         onUpdateMembershipRole(_role);
@@ -53,21 +55,30 @@ function MemberItem(props: Props): JSX.Element {
                         <Select.Option value='owner'>Owner</Select.Option>
                     ) : (
                         <>
-                            <Select.Option value='worker'>Worker</Select.Option>
-                            <Select.Option value='supervisor'>Supervisor</Select.Option>
-                            <Select.Option value='maintainer'>Maintainer</Select.Option>
+                            <Select.Option value='worker'>{t('organizations.user.worker')}</Select.Option>
+                            <Select.Option value='supervisor'>{t('organizations.user.supervisor')}</Select.Option>
+                            <Select.Option value='maintainer'>{t('organizations.user.maintainer')}</Select.Option>
                         </>
                     )}
                 </Select>
             </Col>
             <Col span={1} className='cvat-organization-member-item-remove'>
                 {role !== 'owner' ? (
-                    <DeleteOutlined
+                    <Icon
+                        component={TrashGrayIcon}
                         onClick={() => {
                             Modal.confirm({
                                 className: 'cvat-modal-organization-member-remove',
                                 title: `You are removing "${username}" from this organization`,
-                                content: 'The person will not have access to the organization data anymore. Continue?',
+                                content: (
+                                    <div style={{ textAlign: 'center' }}>
+                                        <Icon component={IllustWarningIcon} />
+                                        <br />
+                                        <Text>
+                                            The person will not have access to the organization data anymore. Continue?
+                                        </Text>
+                                    </div>
+                                ),
                                 okText: 'Yes, remove',
                                 okButtonProps: {
                                     danger: true,

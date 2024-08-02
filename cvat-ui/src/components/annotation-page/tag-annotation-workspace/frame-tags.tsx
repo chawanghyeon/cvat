@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState, useEffect } from 'react';
 import Tag from 'antd/lib/tag';
 import { connect } from 'react-redux';

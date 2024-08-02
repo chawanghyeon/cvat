@@ -7,8 +7,6 @@
     "build": "tsc && webpack --config ./webpack.config.js",
     "server": "nodemon --watch config --exec 'webpack-dev-server --config ./webpack.config.js --mode=development --open'"
   },
-  "author": "CVAT.ai",
-  "license": "MIT",
   "browserslist": [
     "Chrome >= 63",
     "Firefox > 58",
@@ -17,9 +15,11 @@
   ],
   "devDependencies": {},
   "dependencies": {
-    "cvat-core": "link:./../cvat-core",
+    "@types/skmeans": "^0.11.4",
     "@types/three": "^0.125.3",
     "camera-controls": "^1.25.3",
+    "cvat-core": "link:./../cvat-core",
+    "skmeans": "^0.11.3",
     "three": "^0.126.1"
   }
 }

@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { combineReducers, Reducer } from 'redux';
 import authReducer from './auth-reducer';
 import projectsReducer from './projects-reducer';
@@ -24,6 +19,7 @@ import importReducer from './import-reducer';
 import cloudStoragesReducer from './cloud-storages-reducer';
 import organizationsReducer from './organizations-reducer';
 import webhooksReducer from './webhooks-reducer';
+import modalReducer from './modal-reducer';
 
 export default function createRootReducer(): Reducer {
     return combineReducers({
@@ -47,5 +43,6 @@ export default function createRootReducer(): Reducer {
         cloudStorages: cloudStoragesReducer,
         organizations: organizationsReducer,
         webhooks: webhooksReducer,
+        modal: modalReducer,
     });
 }

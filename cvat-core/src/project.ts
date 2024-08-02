@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import _ from 'lodash';
 import { DimensionType, ProjectStatus, StorageLocation } from './enums';
 import { Storage } from './storage';

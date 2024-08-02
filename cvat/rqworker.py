@@ -1,9 +1,6 @@
-# Copyright (C) 2018-2022 Intel Corporation
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from rq import Worker
+from cvat.settings.base import MODEL_PATH
+from cvat.utils.encoding import Model
 
 import cvat.utils.remote_debugger as debug
 
@@ -35,6 +32,12 @@ class SimpleWorker(Worker):
     def execute_job(self, *args, **kwargs):
         """Execute job in same thread/process, do not fork()"""
         return self.perform_job(*args, **kwargs)
+
+
+class EncodeWorker(Worker):
+    def __init__(self, *args, **kwargs):
+        self.model = Model(MODEL_PATH)
+        super().__init__(*args, **kwargs)
 
 
 if debug.is_debugging_enabled():

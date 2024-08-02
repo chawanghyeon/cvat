@@ -1,22 +1,18 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Tabs from 'antd/lib/tabs';
-import Text from 'antd/lib/typography/Text';
+import Tabs, { TabsProps } from 'antd/lib/tabs';
 import Modal from 'antd/lib/modal/Modal';
 import Button from 'antd/lib/button';
 import notification from 'antd/lib/notification';
 import Tooltip from 'antd/lib/tooltip';
-import { PlayCircleOutlined, LaptopOutlined } from '@ant-design/icons';
+import { CloseOutlined } from '@ant-design/icons';
 
 import { setSettings } from 'actions/settings-actions';
 import WorkspaceSettingsContainer from 'containers/header/settings-modal/workspace-settings';
 import PlayerSettingsContainer from 'containers/header/settings-modal/player-settings';
 import { CombinedState } from 'reducers';
+import DesignSettingsComponent from './design-settings';
 
 interface SettingsModalProps {
     visible: boolean;
@@ -68,51 +64,48 @@ const SettingsModal = (props: SettingsModalProps): JSX.Element => {
         }
     }, []);
 
+    const tabItem: TabsProps['items'] = [
+        {
+            key: 'player',
+            label: 'Player',
+            children: <PlayerSettingsContainer />,
+        },
+        {
+            key: 'workspace',
+            label: 'Workspace',
+            children: <WorkspaceSettingsContainer />,
+        },
+        {
+            key: 'design',
+            label: 'Design',
+            children: <DesignSettingsComponent />,
+        },
+    ];
+
     return (
         <Modal
             title='Settings'
-            visible={visible}
+            open={visible}
             onCancel={onClose}
-            width={800}
+            width={700}
             className='cvat-settings-modal'
+            bodyStyle={{ backgroundColor: 'black' }}
+            closeIcon={<CloseOutlined style={{ color: '#D0D0D8' }} />}
             footer={(
                 <>
+                    <Button className='cvat-close-settings-button' type='default' onClick={onClose}>
+                        cancel
+                    </Button>
                     <Tooltip title='Will save settings from this page and appearance settings on standard workspace page in browser'>
                         <Button className='cvat-save-settings-button' type='primary' onClick={onSaveSettings}>
-                            Save
+                            OK
                         </Button>
                     </Tooltip>
-                    <Button className='cvat-close-settings-button' type='default' onClick={onClose}>
-                        Close
-                    </Button>
                 </>
             )}
         >
             <div className='cvat-settings-tabs'>
-                <Tabs type='card' tabBarStyle={{ marginBottom: '0px', marginLeft: '-1px' }}>
-                    <Tabs.TabPane
-                        tab={(
-                            <span>
-                                <PlayCircleOutlined />
-                                <Text>Player</Text>
-                            </span>
-                        )}
-                        key='player'
-                    >
-                        <PlayerSettingsContainer />
-                    </Tabs.TabPane>
-                    <Tabs.TabPane
-                        tab={(
-                            <span>
-                                <LaptopOutlined />
-                                <Text>Workspace</Text>
-                            </span>
-                        )}
-                        key='workspace'
-                    >
-                        <WorkspaceSettingsContainer />
-                    </Tabs.TabPane>
-                </Tabs>
+                <Tabs type='card' tabBarStyle={{ marginBottom: '0px' }} items={tabItem} />
             </div>
         </Modal>
     );

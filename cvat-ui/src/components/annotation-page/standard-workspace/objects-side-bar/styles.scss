@@ -1,41 +1,11 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import 'base.scss';
+@import '../../../header/styles.scss';
 
-.cvat-objects-appearance-collapse.ant-collapse {
-    width: 100%;
-    border-radius: 0;
-
-    > .ant-collapse-item {
-        border: none;
-
-        > .ant-collapse-header {
-            padding-top: 2.5px;
-            padding-bottom: 2.5px;
-            background: $header-color;
-            border-radius: 0;
-            height: 25px;
-
-            .ant-collapse-arrow {
-                padding: 0;
-                top: $grid-unit-size;
-            }
-        }
-
-        > .ant-collapse-content {
-            background: $background-color-2;
-            border-bottom: none;
-            padding-bottom: $grid-unit-size * 3;
-
-            > .ant-collapse-content-box {
-                padding: 10px;
-                padding-bottom: 0;
-            }
-        }
-    }
+.ant-layout-sider-zero-width-trigger::after {
+    top: 10px;
+    right: none;
+    border-left: 1px solid #fafafa;
+    height: 50%;
 }
 
 .cvat-object-sidebar-icon {
@@ -77,10 +47,21 @@
     }
 }
 
+.cvat-objects-sidebar-objects-list-header {
+    @extend .cvat-objects-sidebar-issues-list-header;
+
+    > span.header-title {
+        color: $text-color;
+    }
+}
+
+
+// objects-side-bar.tsx
+// Sidebar Header
 .cvat-objects-sidebar-issues-list-header {
     background: $objects-bar-tabs-color;
     padding: $grid-unit-size;
-    height: $grid-unit-size * 4;
+    height: 40px;
     box-sizing: border-box;
 
     > div > div {
@@ -99,6 +80,14 @@
             }
         }
     }
+    // Sidebar > Issues > header text
+    .cvat-objects-sidebar-issues-list-header-text {
+        color: white;
+        font-weight: 500;
+        margin-left: 5px;
+        position: relative;
+        bottom: 3px;
+    }
 }
 
 .cvat-objects-sidebar-issues-list {
@@ -108,10 +97,11 @@
     overflow-x: hidden;
 }
 
+//Sidebar Issues
 .cvat-objects-sidebar-issue-item {
-    width: 100%;
-    margin: 1px;
-    padding: 2px;
+    @extend .cvat-objects-sidebar-label-item;
+    background-color: #414142 !important;
+    display: flex;
 
     &:hover {
         padding: 0;
@@ -123,6 +113,14 @@
 
     > .ant-alert.ant-alert-with-description {
         padding: $grid-unit-size $grid-unit-size $grid-unit-size $grid-unit-size * 8;
+    }
+    // Issues Text
+    .ant-typography {
+        margin-left: 10px;
+    }
+
+    svg {
+        margin-left: 10px;
     }
 }
 
@@ -155,22 +153,52 @@
 
 .cvat-objects-sidebar-states-list {
     background-color: $background-color-2;
-    height: calc(100% - 50px);
+    // height: calc(100% - 50px);
+    height: 100%;
     overflow-y: auto;
+
+    > div {
+        align-items: center;
+    }
+
+    .cvat-objects-sidebar-state-active-item {
+        background-color: gray;
+
+        .cvat-objects-sidebar-state-item-color {
+            > div > div {
+                display: block;
+            }
+        }
+    }
 }
 
-.cvat-objects-sidebar-z-layer-mark {
-    text-align: center;
+.cvat-objects-sidebar-state-item-color {
+    width: 30px;
+    margin-left: 5px;
+
+    // dot
+    > div {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        position: relative;
+        margin: 0 auto;
+
+        // inner dot
+        > div {
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+            border-radius: 50%;
+            border: 2px solid $text-color;
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            display: none;
+        }
+    }
 }
 
-.cvat-objects-sidebar-state-item.cvat-objects-sidebar-state-active-item {
-    border-top: 2px solid $object-item-border-color;
-    border-right: 2px solid $object-item-border-color;
-    border-bottom: 2px solid $object-item-border-color;
-    padding: 3px 1px 1px 3px;
-}
-
-.cvat-objects-sidebar-state-item-color,
 .cvat-objects-sidebar-label-item-color {
     border: 1px solid $object-item-border-color;
     width: 7px;
@@ -183,7 +211,7 @@
 
 .cvat-objects-sidebar-state-item {
     width: 100%;
-    padding: 5px 3px 3px 3px;
+    padding: 12px 6px;
     opacity: 1;
 
     > div:nth-child(1) {
@@ -211,42 +239,54 @@
             @extend .cvat-object-sidebar-icon;
         }
     }
-}
 
-.cvat-objects-sidebar-state-item-collapse,
-.cvat-objects-sidebar-state-item-elements-collapse {
-    border: unset;
-    background: unset;
-    width: 100%;
+    & &-object-type-text {
+        font-size: 10px;
+        line-height: 2;
+        color: #ACACB5 !important;
+    }
 
-    > .ant-collapse-item {
-        background: inherit;
-        border: none;
+    // object item 하단 style
+    &-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        border-top: 1px solid #2c2d2e;
+        width: 90%;
+        margin: 0 auto;
+    }
 
-        > .ant-collapse-header {
-            align-items: baseline;
-            padding-top: 2px;
-            padding-bottom: 2px;
-
-            .ant-collapse-arrow {
-                padding: 0;
-                top: $grid-unit-size;
-            }
-        }
-
-        > .ant-collapse-content {
-            > .ant-collapse-content-box {
-                padding: 0;
-            }
-
-            border: unset;
-            background: inherit;
-        }
+    &-details {
+        border-bottom: 2px solid $object-item-border-color;
+        box-shadow: 0px 1px 0 0 #656568;
+        padding: 0 16px;
     }
 }
 
 .cvat-object-item-attribute-wrapper {
-    margin-top: 5px;
+    padding: 10px 0;
+    border-bottom: 1px solid #2C2D2E;
+
+    &:last-child {
+        border: none;
+    }
+}
+
+.cvat-item-attributes-button {
+    color: $text-color;
+    font-size: 12px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+
+    span[role='img'] {
+        margin-left: 8px;
+    }
+
+    span:not([role='img']) {
+        color: $text-color;
+    }
 }
 
 .cvat-object-item-select-attribute {
@@ -262,27 +302,14 @@
 }
 
 .cvat-object-item-radio-attribute {
-    border: 1px double $border-color-hover;
-    border-radius: 7px 7px 7px 7px;
 
-    > legend {
-        text-align: center;
-        width: unset;
-        text-overflow: ellipsis;
-        max-width: 80%;
-        overflow: hidden;
-        max-height: 1.2em;
-        font-size: 1em;
-        margin: 0;
-
-        > span {
-            padding: 0 10px;
-        }
-    }
-
-    > .ant-radio-group {
-        display: grid;
+    &.ant-radio-group {
+        // display: grid;
         padding: 1px 5px 1px 5px;
+
+        span {
+            color: $text-color;
+        }
     }
 }
 
@@ -300,13 +327,24 @@
     padding: 3px 1px 1px 3px;
 }
 
-.cvat-objects-sidebar-label-item {
-    height: 2.5em;
-    border-bottom: 1px solid $border-color-1;
-    padding: 5px 3px 3px 3px;
 
-    span {
-        @extend .cvat-object-sidebar-icon;
+// labels-list.tsx
+// Sidebar Header for 'Labels'
+.cvat-objects-sidebar-labels-header {
+    background-color: $objects-bar-tabs-color;
+    color: $text-color !important;
+    padding: 8px 10px;
+}
+
+.cvat-objects-sidebar-label-item {
+    height: 50px;
+    align-items: center;
+    border-bottom: 2px solid $object-item-border-color;
+    box-shadow: 0 0 1px 1px $border-color-3;
+    background-color: #4E4F51;
+
+    .ant-typography.cvat-text {
+        color: $text-color;
     }
 
     > div:nth-child(2) {
@@ -316,20 +354,59 @@
         font-size: 1em;
     }
 
-    &:hover {
-        @extend .cvat-objects-sidebar-label-active-item;
+    &:last-child {
+        border-bottom: 1px solid $object-item-border-color;
+    }
+
+    .cvat-label-item-button-lock {
+        margin-left: 8px;
     }
 }
 
 .cvat-label-item-color {
     background: rgb(25, 184, 14);
-    height: 80%;
-    width: 90%;
-    border-radius: $grid-unit-size * 0.5;
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+
+    > div {
+        background-color: transparent;
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        left: -50%;
+        top: -50%;
+        border: 2px solid $text-color;
+        border-radius: 50%;
+
+        &.cvat-label-item-color-disabled {
+            display: none;
+        }
+    }
 }
 
-.cvat-label-item-setup-shortcut-button {
-    border-color: $objects-bar-icons-color;
+.cvat-label-item-setup-shortcut-button.ant-btn-default {
+    background-color: #1F1F20;
+    border-radius: 6px;
+    width: 40px;
+    color: $text-color;
+    border: none;
+
+    > span {
+        font-weight: 100;
+    }
+
+    &:hover, &:focus, &:active {
+        background-color: #1F1F20;
+        color: $text-color;
+        border: none;
+    }
+
+    &::after {
+        box-shadow: none;
+    }
 }
 
 .cvat-label-item-setup-shortcut-popover {
@@ -344,12 +421,32 @@
             display: flex;
             justify-content: center;
 
-            > button {
-                width: $grid-unit-size * 15;
+            > button.ant-btn-default {
+                @extend .cvat-label-item-setup-shortcut-button;
+                background-color: #2C2D2E;
+                width: 175px;
+                height: 36px;
                 overflow-x: hidden;
+                display: flex;
+                align-items: center;
+                transition: none;
 
-                span:first-child {
-                    margin-right: $grid-unit-size;
+                span {
+                    color: $text-color !important;
+
+                    &:first-child {
+                        width: 20px;
+
+                        > span {
+                            width: 10px;
+                            height: 10px;
+                        }
+
+                    }
+
+                    &:nth-child(2) {
+                        margin-right: $grid-unit-size;
+                    }
                 }
             }
         }
@@ -369,6 +466,12 @@
     .ant-checkbox-wrapper {
         margin-left: 0;
     }
+
+    .ant-radio-button-wrapper-checked {
+        background: $background-color-2;
+        border: 0;
+        color: $popover-text-color;
+    }
 }
 
 .cvat-context-menu-item.ant-menu-item {
@@ -378,21 +481,51 @@
 }
 
 .cvat-object-item-menu {
-    > li {
-        padding: 0;
+    @extend .cvat-header-menu;
+    min-width: 200px;
 
-        > button {
-            padding: 5px 32px;
-            color: $text-color;
+    > li.ant-dropdown-menu-item {
+        padding: 5px 10px;
+
+        button {
             width: 100%;
-            height: 100%;
-            text-align: left;
+            min-width: 165px;
+            display: flex;
+            flex-direction: row-reverse;
+            align-items: center;
+            padding: 5px;
+
+            > span:not([role='img']) {
+                color: $text-color;
+                margin-left: 0;
+            }
+
+            > span[role='img'] {
+                margin-left: auto;
+            }
         }
     }
 }
 
-.cvat-label-color-picker .sketch-picker {
-    box-shadow: unset !important;
+.cvat-item-buttons-track {
+    width: 85%;
+    margin: 0 auto;
+    padding: 8px;
+}
+
+.cvat-label-color-picker {
+    background-color: black;
+    border-radius: 6px;
+    padding-bottom: 0;
+
+    .ant-typography {
+        padding: 5px;
+    }
+    .circle-picker {
+        div > div {
+            margin: 5px !important;
+        }
+    }
 }
 
 .cvat-states-ordering-selector {
@@ -402,7 +535,14 @@
 }
 
 .cvat-objects-sidebar-label-item-disabled {
-    opacity: 0.5;
+    background-color: $background-color-2;
+
+    .cvat-label-item-button-lock,
+    .cvat-label-item-button-hidden {
+        > svg > path {
+            stroke: $border-color-3;
+        }
+    }
 }
 
 .cvat-workspace-settings-approx-poly-threshold {
@@ -411,41 +551,37 @@
     }
 }
 
-.cvat-approx-poly-threshold-wrapper {
-    @extend .cvat-workspace-settings-approx-poly-threshold;
-
-    width: $grid-unit-size * 32;
-    position: absolute;
-    background: $background-color-2;
-    top: 8px;
-    left: 50%;
-    border-radius: 6px;
-    border: 1px solid $border-color-3;
-    z-index: 100;
-    padding: $grid-unit-size * 0.5 $grid-unit-size * 2 $grid-unit-size * 0.5 $grid-unit-size * 0.5;
-
-    .ant-slider-mark {
-        position: static;
-        margin-top: 4px;
-        pointer-events: none;
-    }
-}
-
 .cvat-objects-sidebar-state-item-elements {
-    padding: $grid-unit-size * 0.5;
-    border: 1px solid $object-item-border-color;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid $border-color-3;
     border-bottom: 0;
-    padding-top: 1px;
-    padding-left: 1px;
-    padding-right: 1px;
-    padding-bottom: 2px;
 
-    &:last-child {
-        border-bottom: 1px solid $object-item-border-color;
+    .cvat-objects-button {
+        width: 45%;
+    }
+
+    &.cvat-objects-sidebar-state-active-element {
+        background-color: #1F1F20;
+    }
+
+    .cvat-objects-sidebar-state-item-color {
+        width: auto;
     }
 }
 
-.cvat-objects-sidebar-state-item-elements.cvat-objects-sidebar-state-active-element {
-    border: 2px dashed $object-item-border-color;
-    padding: 0;
+.flexbox-fix {
+    width: 360px;
+    >div{
+        width: 25px !important;
+        height: 25px !important;
+        >span>div {
+            border-radius: 13px !important;
+        }
+    }
+}
+
+.sketch-picker {
+    background-color: black;
 }

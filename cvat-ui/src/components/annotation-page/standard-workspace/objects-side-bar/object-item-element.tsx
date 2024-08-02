@@ -6,7 +6,7 @@ import { ObjectState } from 'cvat-core-wrapper';
 import { CombinedState } from 'reducers';
 import { activateObject } from 'actions/annotation-actions';
 import ObjectButtonsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-buttons';
-import ItemDetailsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-item-details';
+import { Badge } from 'antd';
 import { getColor } from './shared';
 
 interface OwnProps {
@@ -42,23 +42,22 @@ function ObjectItemElementComponent(props: OwnProps): JSX.Element {
             onMouseLeave={onMouseLeave}
             key={clientID}
             className={elementClassName}
-            style={{ background: `${elementColor}` }}
         >
-            <Text
-                type='secondary'
-                style={{ fontSize: 10 }}
-                className='cvat-objects-sidebar-state-item-object-type-text'
-            >
-                {`${element.label.name} [${element.shapeType.toUpperCase()}]`}
-            </Text>
-            <ObjectButtonsContainer readonly={readonly} clientID={element.clientID} />
-            {!!element.label.attributes.length && (
-                <ItemDetailsContainer
-                    readonly={readonly}
-                    parentID={parentID}
-                    clientID={clientID}
-                />
-            )}
+            <div className='cvat-objects-sidebar-state-item-color'>
+                <Badge color={elementColor} />
+                <Text
+                    type='secondary'
+                    style={{ fontSize: 12 }}
+                >
+                    {`${element.label.name} [${element.shapeType.toUpperCase()}]`}
+                </Text>
+            </div>
+            <ObjectButtonsContainer
+                readonly={readonly}
+                clientID={element.clientID}
+                isTrack={false}
+                isContextMenu={false}
+            />
         </div>
     );
 }

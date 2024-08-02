@@ -1,14 +1,7 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
-import { withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import Text from 'antd/lib/typography/Text';
 import { Row, Col } from 'antd/lib/grid';
-import Button from 'antd/lib/button';
 import { MoreOutlined } from '@ant-design/icons';
 import Dropdown from 'antd/lib/dropdown';
 import Progress from 'antd/lib/progress';
@@ -17,9 +10,10 @@ import moment from 'moment';
 import ActionsMenuContainer from 'containers/actions-menu/actions-menu';
 import Preview from 'components/common/preview';
 import { ActiveInference } from 'reducers';
-import AutomaticAnnotationProgress from './automatic-annotation-progress';
+import { Card } from 'antd';
+import { useTranslation } from 'react-i18next';
 
-export interface TaskItemProps {
+interface TaskItemProps {
     taskInstance: any;
     deleted: boolean;
     hidden: boolean;
@@ -27,174 +21,121 @@ export interface TaskItemProps {
     cancelAutoAnnotation(): void;
 }
 
-class TaskItemComponent extends React.PureComponent<TaskItemProps & RouteComponentProps> {
-    private renderPreview(): JSX.Element {
-        const { taskInstance } = this.props;
+const TaskItemComponent: React.FC<TaskItemProps & RouteComponentProps> = ({
+    taskInstance,
+    deleted,
+    hidden,
+    activeInference,
+    cancelAutoAnnotation,
+    history,
+}) => {
+    const { t } = useTranslation();
+    // eslint-disable-next-line arrow-body-style
+    const renderPreview = (): JSX.Element => {
         return (
-            <Col span={4}>
-                <Preview
-                    task={taskInstance}
-                    loadingClassName='cvat-task-item-loading-preview'
-                    emptyPreviewClassName='cvat-task-item-empty-preview'
-                    previewWrapperClassName='cvat-task-item-preview-wrapper'
-                    previewClassName='cvat-task-item-preview'
-                />
-            </Col>
+            <Preview
+                task={taskInstance}
+                loadingClassName='cvat-task-item-loading-preview'
+                previewWrapperClassName='cvat-task-item-preview-wrapper'
+            />
         );
-    }
+    };
 
-    private renderDescription(): JSX.Element {
-        // Task info
-        const { taskInstance } = this.props;
-        const { id } = taskInstance;
+    const renderDescription = (): JSX.Element => {
         const owner = taskInstance.owner ? taskInstance.owner.username : null;
-        const updated = moment(taskInstance.updatedDate).fromNow();
-        const created = moment(taskInstance.createdDate).format('MMMM Do YYYY');
-
-        // Get and truncate a task name
         const name = `${taskInstance.name.substring(0, 70)}${taskInstance.name.length > 70 ? '...' : ''}`;
 
         return (
-            <Col span={10} className='cvat-task-item-description'>
-                <Text strong type='secondary' className='cvat-item-task-id'>{`#${id}: `}</Text>
-                <Text strong className='cvat-item-task-name'>
-                    {name}
-                </Text>
-                <br />
-                {owner && (
-                    <>
-                        <Text type='secondary'>{`Created ${owner ? `by ${owner}` : ''} on ${created}`}</Text>
-                        <br />
-                    </>
-                )}
-                <Text type='secondary'>{`Last updated ${updated}`}</Text>
-            </Col>
+            <Row className='cvat-task-item-description'>
+                <Col span={22}>
+                    <span className='cvat-item-task-name'>{name}</span>
+                    <br />
+                    {owner && <Text type='secondary'>{owner}</Text>}
+                </Col>
+                <Col span={2} onClick={(e) => e.stopPropagation()}>
+                    <Dropdown dropdownRender={() => <ActionsMenuContainer taskInstance={taskInstance} />}>
+                        <MoreOutlined className='cvat-menu-icon' />
+                    </Dropdown>
+                </Col>
+            </Row>
         );
-    }
+    };
 
-    private renderProgress(): JSX.Element {
-        const { taskInstance, activeInference, cancelAutoAnnotation } = this.props;
-        // Count number of jobs and performed jobs
+    const renderProgress = (): JSX.Element => {
         const numOfJobs = taskInstance.progress.totalJobs;
         const numOfCompleted = taskInstance.progress.completedJobs;
+        const jobIds = taskInstance.progress.ids;
 
-        // Progress appearance depends on number of jobs
         let progressColor = null;
         let progressText = null;
         if (numOfCompleted && numOfCompleted === numOfJobs) {
             progressColor = 'cvat-task-completed-progress';
-            progressText = (
-                <Text strong className={progressColor}>
-                    Completed
-                </Text>
-            );
+            progressText = <Text className={progressColor}>{t('filter.jobs.state.completed')}</Text>;
         } else if (numOfCompleted) {
             progressColor = 'cvat-task-progress-progress';
-            progressText = (
-                <Text strong className={progressColor}>
-                    In Progress
-                </Text>
-            );
+            progressText = <Text className={progressColor}>{t('filter.jobs.state.in Progress')}</Text>;
         } else {
             progressColor = 'cvat-task-pending-progress';
-            progressText = (
-                <Text strong className={progressColor}>
-                    Pending
-                </Text>
-            );
+            progressText = <Text className={progressColor}>{t('filter.jobs.state.new')}</Text>;
         }
 
         const jobsProgress = numOfCompleted / numOfJobs;
 
         return (
-            <Col span={6}>
+            <>
                 <Row justify='space-between' align='top'>
+                    <Col>{progressText}</Col>
                     <Col>
-                        <svg height='8' width='8' className={progressColor}>
-                            <circle cx='4' cy='4' r='4' strokeWidth='0' />
-                        </svg>
-                        {progressText}
-                    </Col>
-                    <Col>
-                        <Text type='secondary'>{`${numOfCompleted} of ${numOfJobs} jobs`}</Text>
+                        <Text type='secondary'>{`Job ID: ${Math.min(...jobIds)} ~ ${Math.max(...jobIds)}`}</Text>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={24}>
                         <Progress
-                            className={`${progressColor} cvat-task-progress`}
+                            className='cvat-task-progress'
                             percent={jobsProgress * 100}
-                            strokeColor='#1890FF'
+                            strokeColor='#FFFFFF'
                             showInfo={false}
                             strokeWidth={5}
                             size='small'
                         />
                     </Col>
                 </Row>
-                <AutomaticAnnotationProgress
-                    activeInference={activeInference}
-                    cancelAutoAnnotation={cancelAutoAnnotation}
-                />
-            </Col>
+            </>
         );
-    }
+    };
 
-    private renderNavigation(): JSX.Element {
-        const { taskInstance, history } = this.props;
-        const { id } = taskInstance;
+    const renderFooter = (): JSX.Element => {
+        const { updatedDate } = taskInstance;
 
         return (
-            <Col span={4}>
-                <Row justify='end'>
-                    <Col>
-                        <Button
-                            className='cvat-item-open-task-button'
-                            type='primary'
-                            size='large'
-                            ghost
-                            href={`/tasks/${id}`}
-                            onClick={(e: React.MouseEvent): void => {
-                                e.preventDefault();
-                                history.push(`/tasks/${id}`);
-                            }}
-                        >
-                            Open
-                        </Button>
-                    </Col>
-                </Row>
-                <Row justify='end'>
-                    <Dropdown overlay={<ActionsMenuContainer taskInstance={taskInstance} />}>
-                        <Col className='cvat-item-open-task-actions'>
-                            <Text className='cvat-text-color'>Actions</Text>
-                            <MoreOutlined className='cvat-menu-icon' />
-                        </Col>
-                    </Dropdown>
-                </Row>
-            </Col>
+            <>
+                <Text type='secondary'>{t('time.LastUpdated')} | </Text>
+                <Text type='secondary'>{moment(updatedDate).fromNow()}</Text>
+            </>
         );
-    }
+    };
 
-    public render(): JSX.Element {
-        const { deleted, hidden } = this.props;
-        const style = {};
-        if (deleted) {
-            (style as any).pointerEvents = 'none';
-            (style as any).opacity = 0.5;
+    const handleClick = () => {
+        if (!deleted) {
+            history.push(`/tasks/${taskInstance.id}`);
         }
+    };
 
-        if (hidden) {
-            (style as any).display = 'none';
-        }
+    const style = {
+        ...(deleted && { pointerEvents: 'none', opacity: 0.5 }),
+        ...(hidden && { display: 'none' }),
+    };
 
-        return (
-            <Row className='cvat-tasks-list-item' justify='center' align='top' style={{ ...style }}>
-                {this.renderPreview()}
-                {this.renderDescription()}
-                {this.renderProgress()}
-                {this.renderNavigation()}
-            </Row>
-        );
-    }
-}
+    return (
+        <Card bordered={false} cover={renderPreview()} onClick={handleClick} style={style}>
+            {renderDescription()}
+            <div style={{ marginTop: 'auto' }}>
+                {renderProgress()}
+                {renderFooter()}
+            </div>
+        </Card>
+    );
+};
 
 export default withRouter(TaskItemComponent);

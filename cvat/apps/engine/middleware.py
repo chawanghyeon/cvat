@@ -1,7 +1,3 @@
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from uuid import uuid4
 
 class RequestTrackingMiddleware:

@@ -1,56 +1,60 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
+@import '../tasks-page/styles.scss';
 
 .cvat-project-page {
     overflow-y: auto;
     height: 100%;
+
+    .ant-empty {
+        margin-top: 20px;
+    }
 }
 
 .cvat-project-page-tasks-bar {
-    margin: $grid-unit-size * 2 0;
+    padding: 15px 0;
+    margin-top: 50px;
+    border-bottom: 1px solid $background-color-1;
+    box-shadow: 0 1px 0 0 $border-color-2;
+
+    .cvat-project-page-tasks-header {
+        font-size: 22px;
+
+        > span {
+            color: white;
+        }
+    }
 
     > div {
         display: flex;
         justify-content: space-between;
 
-        > .cvat-project-page-tasks-filters-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        // 검색 bar가 포함된 box 영역
+        .cvat-project-search-box {
             width: 100%;
+            justify-content: flex-end;
+        }
 
-            > div {
-                > *:not(:last-child) {
-                    margin-right: $grid-unit-size;
-                }
+        .cvat-project-page-tasks-search-bar {
 
-                display: flex;
-                margin-right: $grid-unit-size * 4;
+            .ant-input-group > .ant-input-affix-wrapper {
+                border-radius: 6px;
             }
 
-            .cvat-project-page-tasks-search-bar {
-                width: $grid-unit-size * 32;
+            .ant-input-group-addon {
+                display: none;
             }
         }
     }
 }
 
+
+// Project Detail Page
 .cvat-project-details {
     width: 100%;
     height: auto;
-    border: 1px solid $border-color-1;
     border-radius: 3px;
-    padding: $grid-unit-size * 2;
     margin: $grid-unit-size * 2 0;
-    background: $background-color-1;
-
-    .ant-row:nth-child(1) {
-        margin-bottom: $grid-unit-size * 2;
-    }
+    background: #2C2D2E;
 
     .ant-row:nth-child(2) .ant-col:nth-child(2) > span {
         margin-right: $grid-unit-size;
@@ -66,28 +70,109 @@
         margin-top: $grid-unit-size * 2;
         margin-bottom: $grid-unit-size * 2;
     }
-}
-
-.ant-menu.cvat-project-actions-menu {
-    box-shadow: 0 0 17px rgba(0, 0, 0, 0.2);
-
-    > li:hover {
-        background-color: $hover-menu-color;
+    // Project > Details > Title
+    h4.ant-typography {
+        border: 1px solid $border-color-3;
+        border-radius: 5px;
+        height: 46px;
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 10px;
+        color: $text-color;
     }
 
-    .ant-menu-submenu-title {
-        margin: 0;
-        width: 13em;
+    div.ant-typography-edit-content {
+        left: 0;
+        margin-top: 0;
+
+        > textarea {
+            color: $text-color;
+            height: auto;
+        }
+    }
+
+    // 'Raw' area
+    textarea.ant-input.cvat-raw-labels-viewer {
+        border: none;
+        margin-top: 0px;
     }
 }
 
+.cvat-project-tasks-list {
+    @extend .cvat-tasks-list;
+}
+
+
+// Project > Details > 'Actions' button
 .cvat-project-page-actions-button {
     display: flex;
     align-items: center;
-    line-height: 14px;
+    width: 200px;
+    height: 46px;
+    justify-content: space-between;
+
+    // Project > Details > 'Actions' Icon
+    .anticon svg {
+        color: #ACACB5;
+    }
+
+    &.ant-btn-default:hover, &.ant-btn-default:focus {
+        background-color: $background-color-4;
+        border-color: $text-color;
+        color: $text-color;
+
+        > span[role='img'] > svg {
+            color: $text-color;
+        }
+    }
+}
+
+// Project > Details > '이전으로 이동' Arrow Icon
+.cvat-project-page-goback-button {
+    padding-left: 0px;
+    .anticon svg {
+        color: #9AB0FF;
+    }
 }
 
 .cvat-project-tasks-pagination {
     display: flex;
     justify-content: center;
+}
+.cvat-project-description {
+    .ant-divider-vertical {
+        margin: 0;
+        border-color: $border-color-3;
+    }
+}
+
+.cvat-project-details-progressbar {
+    margin: 15px 0;
+
+    > div {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+// 작업자 할당
+.cvat-project-details-user-selector {
+    width: 100%;
+
+    &-header.ant-typography {
+        color: $text-color;
+        line-height: 40px;
+    }
+
+    .ant-select-selector .ant-select-selection {
+        &-search-input {
+            height: 40px;
+        }
+
+        &-placeholder {
+            left: 30px !important;
+            line-height: 40px;
+        }
+    }
 }

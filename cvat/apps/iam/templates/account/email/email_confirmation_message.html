@@ -127,14 +127,24 @@
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
           <tr>
             <td align="center" valign="bottom">
-              <a href="https://www.cvat.ai/" target="_blank" style="display: inline-block;">
-                <img
-                  src="https://github.com/opencv/cvat/blob/develop/site/content/en/images/cvat_poster_with_name.png?raw=true"
-                  alt="Logo"
-                  border="0"
-                  width="100%"
-                  style="display: block; width: 100%;"
-                >
+              <a href="https://www.agilegrowth.co.kr/" target="_blank" style="display: inline-block;">
+                {% if 'templates/salmon.png' %}
+                  <img
+                    src="https://agileworks.ai:9443{% static 'templates/salmon.png' %}"
+                    alt="Logo"
+                    border="0"
+                    width="100%"
+                    style="display: block; width: 100%;"
+                  >
+                {% else %}
+                  <img
+                    src="https://avatars.githubusercontent.com/u/115076446?s=200&v=4"
+                    alt="Logo"
+                    border="0"
+                    width="100%"
+                    style="display: block; width: 100%;"
+                  >
+                {% endif %}
               </a>
             </td>
           </tr>
@@ -189,7 +199,7 @@
             <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
               {% blocktrans with site_name=current_site.name site_domain=current_site.domain %}
               <p>
-                Thank you for signing up for CVAT!
+                Thank you for signing up for SALMON!
               </p>
               <p style="margin: 0;">
                 To complete registration and start annotating, simply tap the button below and confirm your email address.
@@ -209,13 +219,13 @@
                   <td align="center" bgcolor="#ffffff" style="padding: 12px;">
                     <table border="0" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td align="center" bgcolor="#FCA836" style="border-radius: 6px;">
+                        <td align="center" bgcolor="#ff8165" style="border-radius: 6px;">
                           <a
                             href="{{ activate_url }}"
                             target="_blank"
-                            style="display: inline-block; padding: 16px 36px;"
-                                  "font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;"
-                                  "font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;"
+                            style="display: inline-block; padding: 16px 36px;
+                                  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+                                  font-size: 16px; color: #ffffff; text-decoration: none !important; border-radius: 6px;"
                             rel="noopener noreferrer"
                           >
                             Confirm

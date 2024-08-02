@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState } from 'react';
 import Divider from 'antd/lib/divider';
 import Select from 'antd/lib/select';

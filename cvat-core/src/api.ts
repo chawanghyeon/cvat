@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 /**
  * External API which should be used by for development
  * @module API
@@ -167,9 +162,19 @@ function build() {
                 return result;
             },
         },
+        tasksIssues: {
+            async get(id:number) {
+                const result = await PluginRegistry.apiWrapper(cvat.tasksIssues.get, id);
+                return result;
+            },
+        },
         jobs: {
             async get(filter = {}) {
                 const result = await PluginRegistry.apiWrapper(cvat.jobs.get, filter);
+                return result;
+            },
+            async getGuides(projectId:number) {
+                const result = await PluginRegistry.apiWrapper(cvat.jobs.getGuides, projectId);
                 return result;
             },
         },
@@ -216,6 +221,10 @@ function build() {
             },
             async providers() {
                 const result = await PluginRegistry.apiWrapper(cvat.lambda.providers);
+                return result;
+            },
+            async openai() {
+                const result = await PluginRegistry.apiWrapper(cvat.lambda.openai);
                 return result;
             },
         },
@@ -283,6 +292,26 @@ function build() {
                 const result = await PluginRegistry.apiWrapper(cvat.organizations.deactivate);
                 return result;
             },
+            async getStatistic(userId: any) {
+                const result = await PluginRegistry.apiWrapper(cvat.organizations.getStatistic, userId);
+                return result;
+            },
+            async getUmap(labedId: any) {
+                const result = await PluginRegistry.apiWrapper(cvat.organizations.getUmap, labedId);
+                return result;
+            }
+        },
+        labels: {
+            async get(filter = {}) {
+                const result = await PluginRegistry.apiWrapper(cvat.labels.get, filter);
+                return result;
+            },
+        },
+        frames: {
+            async getData(tid, jid, chunk) {
+                const result = await PluginRegistry.apiWrapper(cvat.frames.getData, tid, jid, chunk);
+                return result;
+            },
         },
         webhooks: {
             async get(filter: any) {
@@ -321,6 +350,8 @@ function build() {
     cvat.enums = Object.freeze(cvat.enums);
     cvat.cloudStorages = Object.freeze(cvat.cloudStorages);
     cvat.organizations = Object.freeze(cvat.organizations);
+    cvat.labels = Object.freeze(cvat.labels);
+    cvat.frames = Object.freeze(cvat.frames);
 
     const implemented = Object.freeze(implementAPI(cvat));
     return implemented;

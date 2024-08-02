@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Config } from 'react-awesome-query-builder';
 
 export const config: Partial<Config> = {

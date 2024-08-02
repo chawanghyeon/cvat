@@ -1,7 +1,3 @@
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import 'react-grid-layout/css/styles.css';
 
@@ -148,7 +144,7 @@ function CanvasLayout({ type }: { type?: DimensionType }): JSX.Element {
     const canvasBackgroundColor = useSelector((state: CombinedState) => state.settings.player.canvasBackgroundColor);
 
     const computeRowHeight = (): number => {
-        const container = window.document.getElementsByClassName('cvat-annotation-header')[0];
+        const container = window.document.getElementsByClassName('cvat-annotation-header')[0] ?? window.document.getElementsByClassName('cvat-review-header')[0]
         let containerHeight = window.innerHeight;
         if (container) {
             containerHeight = window.innerHeight - container.getBoundingClientRect().bottom;

@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import Axios from 'axios';
 
 Axios.defaults.withCredentials = true;

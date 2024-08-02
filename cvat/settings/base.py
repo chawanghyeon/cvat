@@ -1,8 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 """
 Django settings for CVAT project.
 
@@ -23,11 +18,13 @@ import subprocess
 import sys
 from distutils.util import strtobool
 from enum import Enum
+import urllib
 
 from corsheaders.defaults import default_headers
 from logstash_async.constants import constants as logstash_async_constants
 
 from cvat import __version__
+from cvat.utils.logging_formatter import NoColorFormatter
 
 mimetypes.add_type("application/wasm", ".wasm", True)
 
@@ -36,7 +33,7 @@ from pathlib import Path
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = str(Path(__file__).parents[2])
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,192.168.219.160').split(',')
 INTERNAL_IPS = ['127.0.0.1']
 
 try:
@@ -65,7 +62,7 @@ def generate_ssh_keys():
         keys_to_add = ' '.join(os.path.join(ssh_dir, f) for f in keys_to_add)
         subprocess.run(['ssh-add {}'.format(keys_to_add)], # nosec
             shell=True,
-            stderr = subprocess.PIPE,
+            stderr=subprocess.PIPE,
             # lets set the timeout if ssh-add requires a input passphrase for key
             # otherwise the process will be freezed
             timeout=30,
@@ -105,7 +102,7 @@ except Exception as ex:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'cvat.utils.admin_config.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -140,9 +137,14 @@ INSTALLED_APPS = [
     'cvat.apps.webhooks',
     'cvat.apps.health',
     'cvat.apps.events',
+    'django_user_agents',
 ]
 
-SITE_ID = 1
+SITE_ID = 2
+
+# Name of cache backend to cache user agents. If it not specified default
+# cache alias will be used. Set to `None` to disable caching.
+USER_AGENTS_CACHE = None
 
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
@@ -224,6 +226,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dj_pagination.middleware.PaginationMiddleware',
     'cvat.apps.iam.views.ContextMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 UI_URL = ''
@@ -262,7 +265,7 @@ IAM_DEFAULT_ROLES = ['user']
 IAM_ADMIN_ROLE = 'admin'
 # Index in the list below corresponds to the priority (0 has highest priority)
 IAM_ROLES = [IAM_ADMIN_ROLE, 'business', 'user', 'worker']
-IAM_OPA_HOST = 'http://opa:8181'
+IAM_OPA_HOST = f"http://{os.getenv('IAM_OPA_HOST', 'localhost')}:8181"
 IAM_OPA_DATA_URL = f'{IAM_OPA_HOST}/v1/data'
 LOGIN_URL = 'rest_login'
 LOGIN_REDIRECT_URL = '/'
@@ -296,6 +299,8 @@ class CVAT_QUEUES(Enum):
     EXPORT_DATA = 'export'
     AUTO_ANNOTATION = 'annotation'
     WEBHOOKS = 'webhooks'
+    ENCODE = 'encode'
+    UMAP = 'umap'
 
 RQ_QUEUES = {
     CVAT_QUEUES.IMPORT_DATA.value: {
@@ -321,13 +326,23 @@ RQ_QUEUES = {
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': '1h'
+    },
+    CVAT_QUEUES.ENCODE.value: {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': '4h'
+    },
+    CVAT_QUEUES.UMAP.value: {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': '4h'
     }
 }
 
 NUCLIO = {
-    'SCHEME': os.getenv('CVAT_NUCLIO_SCHEME', 'http'),
-    'HOST': os.getenv('CVAT_NUCLIO_HOST', 'localhost'),
-    'PORT': int(os.getenv('CVAT_NUCLIO_PORT', 8070)),
+    'URL': os.getenv('NUCLIO_URL', 'http://localhost:8070'),
     'DEFAULT_TIMEOUT': int(os.getenv('CVAT_NUCLIO_DEFAULT_TIMEOUT', 120)),
     'FUNCTION_NAMESPACE': os.getenv('CVAT_NUCLIO_FUNCTION_NAMESPACE', 'nuclio')
 }
@@ -353,17 +368,21 @@ COMPRESS_JS_FILTERS = []  # No compression for js files (template literals were 
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+        # 사용자의 속성과 비슷한 패스워드를 사용하는 것을 방지
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # {
+    #     # 최소 8자리 이상의 패스워드를 사용하도록 강제
+    #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    # },
+    # {
+    #     # 패스워드 유효성 검사 중 하나로, 널리 알려진 공통 패스워드를 사용하는 것을 방지
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     # 이 유효성 검사기는 사용자의 패스워드가 숫자로만 이루어져 있는지 확인
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
 
 # Internationalization
@@ -371,7 +390,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = os.getenv('TZ', 'Etc/UTC')
+TIME_ZONE = os.getenv('TZ', 'Asia/Seoul')
 
 USE_I18N = True
 
@@ -388,9 +407,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 os.makedirs(STATIC_ROOT, exist_ok=True)
 
-# Make sure to update other config files when upading these directories
+# Make sure to update other config files when updating these directories
 DATA_ROOT = os.path.join(BASE_DIR, 'data')
-EVENTS_LOCAL_DB = os.path.join(DATA_ROOT,'events.db')
+
+EVENTS_LOCAL_DB = os.path.join(DATA_ROOT, 'events.db')
 os.makedirs(DATA_ROOT, exist_ok=True)
 if not os.path.exists(EVENTS_LOCAL_DB):
     open(EVENTS_LOCAL_DB, 'w').close()
@@ -444,7 +464,11 @@ LOGGING = {
         },
         'standard': {
             'format': '[%(asctime)s] %(levelname)s %(name)s: %(message)s'
-        }
+        },
+        'no_color': {
+            '()': NoColorFormatter,
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
+        },
     },
     'handlers': {
         'console': {
@@ -472,7 +496,15 @@ LOGGING = {
             'version': 1,
             'message_type': 'django',
             'database_path': EVENTS_LOCAL_DB,
-        }
+        },
+        'rq_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'INFO',
+            'filename': os.path.join(BASE_DIR, 'logs', 'cvat_rq.log'),
+            'formatter': 'no_color',
+            'maxBytes': 1024*1024*50, # 50 MB
+            'backupCount': 5,
+        },
     },
     'loggers': {
         'cvat.server': {
@@ -490,7 +522,12 @@ LOGGING = {
             'level': 'INFO',
             # set True for debug
             'propagate': False
-        }
+        },
+        'rq.worker': {
+            'handlers': ['rq_file'],
+            'level': 'INFO',
+            'propagate': True
+        },
     },
 }
 
@@ -509,20 +546,23 @@ RESTRICTIONS = {
     'analytics_visibility': True,
 }
 
+redis_ondisk_host = os.getenv('CVAT_REDIS_ONDISK_HOST', 'localhost')
+# The default port is not Redis's default port (6379).
+# This is so that a developer can run both in-mem Redis and on-disk Kvrocks on their machine
+# without running into a port conflict.
+redis_ondisk_port = os.getenv('CVAT_REDIS_ONDISK_PORT', 6666)
+redis_ondisk_password = os.getenv('CVAT_REDIS_ONDISK_PASSWORD', '')
+
 # http://www.grantjenks.com/docs/diskcache/tutorial.html#djangocache
 CACHES = {
    'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
-   'media' : {
-       'BACKEND' : 'diskcache.DjangoCache',
-       'LOCATION' : CACHE_ROOT,
-       'TIMEOUT' : None,
-       'SHARDS': 32,
-       'OPTIONS' : {
-            'size_limit' : 2 ** 40, # 1 Tb
-       }
-   }
+   'media': {
+       'BACKEND' : 'django.core.cache.backends.redis.RedisCache',
+       "LOCATION": f"redis://:{urllib.parse.quote(redis_ondisk_password)}@{redis_ondisk_host}:{redis_ondisk_port}",
+       'TIMEOUT' : 3600 * 24, # 1 day
+    }
 }
 
 USE_CACHE = True
@@ -565,13 +605,9 @@ SPECTACULAR_SETTINGS = {
     # Set VERSION to None if only the request version should be rendered.
     'VERSION': __version__,
     'CONTACT': {
-        'name': 'CVAT.ai team',
-        'url': 'https://github.com/cvat-ai/cvat',
-        'email': 'support@cvat.ai',
-    },
-    'LICENSE': {
-        'name': 'MIT License',
-        'url': 'https://en.wikipedia.org/wiki/MIT_License',
+        'name': 'AgileGrowth corp',
+        'url': 'https://www.agilegrowth.co.kr',
+        'email': 'cs@agilegrowth.co.kr',
     },
 
     'SERVE_PUBLIC': True,
@@ -642,3 +678,10 @@ CLICKHOUSE = {
         'PASSWORD': os.getenv('CLICKHOUSE_PASSWORD', 'user'),
     }
 }
+
+MODEL_PATH = os.path.join(BASE_DIR, 'encoder.onnx')
+
+# Openai API key Settings
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("Please set OPENAI API KEY")

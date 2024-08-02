@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import { connect, useDispatch } from 'react-redux';
@@ -11,12 +6,12 @@ import Notification from 'antd/lib/notification';
 import { DownloadOutlined, LoadingOutlined } from '@ant-design/icons';
 import Text from 'antd/lib/typography/Text';
 import Select from 'antd/lib/select';
+import Checkbox from 'antd/lib/checkbox';
 import Input from 'antd/lib/input';
 import Form from 'antd/lib/form';
-import Switch from 'antd/lib/switch';
-import Space from 'antd/lib/space';
-import TargetStorageField from 'components/storage/target-storage-field';
 import { CombinedState, StorageLocation } from 'reducers';
+import { Row, Col } from 'antd/lib/grid';
+
 import { exportActions, exportDatasetAsync } from 'actions/export-actions';
 import { getCore, Storage, StorageData } from 'cvat-core-wrapper';
 
@@ -28,6 +23,7 @@ type FormValues = {
     customName: string | undefined;
     targetStorage: StorageData;
     useProjectTargetStorage: boolean;
+    downloadOnlyAccepted: boolean;
 };
 
 const initialValues: FormValues = {
@@ -39,6 +35,7 @@ const initialValues: FormValues = {
         cloudStorageId: undefined,
     },
     useProjectTargetStorage: true,
+    downloadOnlyAccepted: false,
 };
 
 function ExportDatasetModal(props: StateToProps): JSX.Element {
@@ -47,9 +44,7 @@ function ExportDatasetModal(props: StateToProps): JSX.Element {
         instance,
         current,
     } = props;
-
     const [instanceType, setInstanceType] = useState('');
-
     const [useDefaultTargetStorage, setUseDefaultTargetStorage] = useState(true);
     const [form] = Form.useForm();
     const [targetStorage, setTargetStorage] = useState<StorageData>({
@@ -57,7 +52,6 @@ function ExportDatasetModal(props: StateToProps): JSX.Element {
     });
     const [defaultStorageLocation, setDefaultStorageLocation] = useState(StorageLocation.LOCAL);
     const [defaultStorageCloudId, setDefaultStorageCloudId] = useState<number | null>(null);
-    const [helpMessage, setHelpMessage] = useState('');
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -103,12 +97,6 @@ function ExportDatasetModal(props: StateToProps): JSX.Element {
         }
     }, [instance]);
 
-    useEffect(() => {
-        // eslint-disable-next-line prefer-template
-        setHelpMessage(`Export to ${(defaultStorageLocation) ? defaultStorageLocation.split('_')[0] : 'local'} ` +
-                        `storage ${(defaultStorageCloudId) ? `№${defaultStorageCloudId}` : ''}`);
-    }, [defaultStorageLocation, defaultStorageCloudId]);
-
     const closeModal = (): void => {
         setUseDefaultTargetStorage(true);
         setTargetStorage({ location: StorageLocation.LOCAL });
@@ -127,9 +115,10 @@ function ExportDatasetModal(props: StateToProps): JSX.Element {
                     useDefaultTargetStorage,
                     useDefaultTargetStorage ? new Storage({
                         location: defaultStorageLocation,
-                        cloudStorageId: defaultStorageCloudId,
+                        cloudStorageId: defaultStorageCloudId || undefined,
                     }) : new Storage(targetStorage),
-                    values.customName ? `${values.customName}.zip` : null,
+                    values.downloadOnlyAccepted,
+                    values.customName ? `${values.customName}.zip` : undefined,
                 ),
             );
             closeModal();
@@ -137,8 +126,8 @@ function ExportDatasetModal(props: StateToProps): JSX.Element {
             Notification.info({
                 message: `${resource} export started`,
                 description:
-                    `${resource} export was started for ${instanceType}. ` +
-                    `Download will start automatically as soon as the ${resource} is ready.`,
+                `${resource} export was started for ${instanceType}. ` +
+                `Download will start automatically as soon as the ${resource} is ready.`,
                 className: `cvat-notification-notice-export-${instanceType.split(' ')[0]}-start`,
             });
         },
@@ -147,77 +136,82 @@ function ExportDatasetModal(props: StateToProps): JSX.Element {
 
     return (
         <Modal
-            title={<Text strong>{`Export ${instanceType} as a dataset`}</Text>}
-            visible={!!instance}
+            title={`Export ${instanceType} as a dataset`}
+            open={!!instance}
             onCancel={closeModal}
             onOk={() => form.submit()}
-            className={`cvat-modal-export-${instanceType.split(' ')[0]}`}
+            className={`cvat-modal-export-${instanceType.split(' ')[0]} cvat-modal-export-form`}
             destroyOnClose
+            width={450}
         >
             <Form
                 name='Export dataset'
                 form={form}
-                layout='vertical'
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 20 }}
                 initialValues={initialValues}
                 onFinish={handleExport}
             >
-                <Form.Item
-                    name='selectedFormat'
-                    label={<Text strong>Export format</Text>}
-                    rules={[{ required: true, message: 'Format must be selected' }]}
-                >
-                    <Select virtual={false} placeholder='Select dataset format' className='cvat-modal-export-select'>
-                        {dumpers
-                            .sort((a: any, b: any) => a.name.localeCompare(b.name))
-                            .filter((dumper: any): boolean => dumper.dimension === instance?.dimension)
-                            .map(
-                                (dumper: any): JSX.Element => {
-                                    const pending = (instance && current ? current : [])
-                                        .includes(dumper.name);
-                                    const disabled = !dumper.enabled || pending;
-                                    return (
-                                        <Select.Option
-                                            value={dumper.name}
-                                            key={dumper.name}
-                                            disabled={disabled}
-                                            className='cvat-modal-export-option-item'
-                                        >
-                                            <DownloadOutlined />
-                                            <Text disabled={disabled}>{dumper.name}</Text>
-                                            {pending && <LoadingOutlined style={{ marginLeft: 10 }} />}
-                                        </Select.Option>
-                                    );
-                                },
-                            )}
-                    </Select>
-                </Form.Item>
-                <Space>
-                    <Form.Item name='saveImages' className='cvat-modal-export-switch-use-default-storage'>
-                        <Switch className='cvat-modal-export-save-images' />
+                <Row className='cvat-modal-export-form-format'>
+                    <Form.Item
+                        name='selectedFormat'
+                        label='Format'
+                        rules={[{ required: true, message: 'Format must be selected' }]}
+                    >
+                        <Select virtual={false} placeholder='Select dataset format' className='cvat-modal-export-select'>
+                            {dumpers
+                                .sort((a: any, b: any) => a.name.localeCompare(b.name))
+                                .filter((dumper: any): boolean => dumper.dimension === instance?.dimension)
+                                .map(
+                                    (dumper: any): JSX.Element => {
+                                        const pending = (instance && current ? current : [])
+                                            .includes(dumper.name);
+                                        const disabled = !dumper.enabled || pending;
+                                        return (
+                                            <Select.Option
+                                                value={dumper.name}
+                                                key={dumper.name}
+                                                disabled={disabled}
+                                                className='cvat-modal-export-option-item'
+                                            >
+                                                <DownloadOutlined />
+                                                <Text disabled={disabled}>{dumper.name}</Text>
+                                                {pending && <LoadingOutlined style={{ marginLeft: 10 }} />}
+                                            </Select.Option>
+                                        );
+                                    },
+                                )}
+                        </Select>
                     </Form.Item>
-                    <Text strong>Save images</Text>
-                </Space>
-
-                <Form.Item label={<Text strong>Custom name</Text>} name='customName'>
+                </Row>
+                <Row>
+                    <Col push={4} span={20}>
+                        <Form.Item name='saveImages' valuePropName='checked'>
+                            <Checkbox>Save images</Checkbox>
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Form.Item name='customName' label='Name'>
                     <Input
                         placeholder='Custom name for a dataset'
-                        suffix='.zip'
                         className='cvat-modal-export-filename-input'
+                        suffix={<Text>.zip</Text>}
                     />
                 </Form.Item>
-                <TargetStorageField
-                    instanceId={instance?.id}
-                    switchDescription='Use default settings'
-                    switchHelpMessage={helpMessage}
-                    useDefaultStorage={useDefaultTargetStorage}
-                    storageDescription='Specify target storage for export dataset'
-                    locationValue={targetStorage.location}
-                    onChangeUseDefaultStorage={(value: boolean) => setUseDefaultTargetStorage(value)}
-                    onChangeStorage={(value: StorageData) => setTargetStorage(value)}
-                    onChangeLocationValue={(value: StorageLocation) => {
-                        setTargetStorage({ location: value });
-                    }}
-                />
+                <Row>
+                    <Col push={4} span={20}>
+                        <Form.Item name='downloadOnlyAccepted' valuePropName='checked'>
+                            <Checkbox
+                                defaultChecked={false}
+                                onChange={(event: any): void => {
+                                    initialValues.downloadOnlyAccepted = event.target.checked;
+                                }}
+                            >
+                                Download only accepted jobs
+                            </Checkbox>
+                        </Form.Item>
+                    </Col>
+                </Row>
             </Form>
         </Modal>
     );

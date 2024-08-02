@@ -1,10 +1,6 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { connect } from 'react-redux';
 
-import { Canvas } from 'cvat-canvas-wrapper';
+import { Canvas, CuboidDrawingMethod, RectDrawingMethod } from 'cvat-canvas-wrapper';
 import {
     mergeObjects,
     groupObjects,
@@ -14,9 +10,12 @@ import {
     repeatDrawShapeAsync,
     pasteShapeAsync,
     resetAnnotationsGroup,
+    rememberObject,
 } from 'actions/annotation-actions';
 import ControlsSideBarComponent from 'components/annotation-page/standard-workspace/controls-side-bar/controls-side-bar';
-import { ActiveControl, CombinedState, Rotation } from 'reducers';
+import {
+    ActiveControl, CombinedState, ObjectType, Rotation, ShapeType,
+} from 'reducers';
 import { KeyMap } from 'utils/mousetrap-react';
 
 interface StateToProps {
@@ -27,6 +26,8 @@ interface StateToProps {
     normalizedKeyMap: Record<string, string>;
     labels: any[];
     frameData: any;
+    activeShapeType: ShapeType;
+    selectedLabelID: number;
 }
 
 interface DispatchToProps {
@@ -38,12 +39,21 @@ interface DispatchToProps {
     repeatDrawShape(): void;
     pasteShape(): void;
     redrawShape(): void;
+    onDrawStart(
+        shapeType: ShapeType,
+        labelID: number,
+        objectType: ObjectType,
+        points?: number,
+        rectDrawingMethod?: RectDrawingMethod,
+        cuboidDrawingMethod?: CuboidDrawingMethod,
+    ): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
     const {
         annotation: {
             canvas: { instance: canvasInstance, activeControl },
+            drawing: { activeShapeType, activeLabelID },
             job: { labels },
             player: {
                 frame: { data: frameData },
@@ -55,6 +65,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
         shortcuts: { keyMap, normalizedKeyMap },
     } = state;
 
+    const selectedLabelID = activeLabelID ?? labels[0]?.id;
+
     return {
         rotateAll,
         canvasInstance: canvasInstance as Canvas,
@@ -63,6 +75,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
         normalizedKeyMap,
         keyMap,
         frameData,
+        activeShapeType,
+        selectedLabelID,
     };
 }
 
@@ -91,6 +105,25 @@ function dispatchToProps(dispatch: any): DispatchToProps {
         },
         redrawShape(): void {
             dispatch(redrawShapeAsync());
+        },
+        onDrawStart(
+            shapeType: ShapeType,
+            labelID: number,
+            objectType: ObjectType,
+            points?: number,
+            rectDrawingMethod?: RectDrawingMethod,
+            cuboidDrawingMethod?: CuboidDrawingMethod,
+        ): void {
+            dispatch(
+                rememberObject({
+                    activeObjectType: objectType,
+                    activeShapeType: shapeType,
+                    activeLabelID: labelID,
+                    activeNumOfPoints: points,
+                    activeRectDrawingMethod: rectDrawingMethod,
+                    activeCuboidDrawingMethod: cuboidDrawingMethod,
+                }),
+            );
         },
     };
 }

@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 /// <reference types="resize-observer-browser" />
 
 import { SmallDashOutlined } from '@ant-design/icons';
@@ -35,7 +30,7 @@ export function ExtraControlsControl(): JSX.Element {
 
     return (
         <Popover
-            defaultVisible // we must render it at least one between using
+            defaultOpen // we must render it at least one between using
             trigger={initialized ? 'hover' : 'click'} // trigger='hover' allows to close the popover by body click
             placement='right'
             overlayStyle={{ display: initialized ? '' : 'none' }}
@@ -52,7 +47,7 @@ export function ExtraControlsControl(): JSX.Element {
 export default function ControlVisibilityObserver<P = {}>(
     ControlComponent: React.FunctionComponent<P> | ConnectedComponent<any, any>,
 ): React.FunctionComponent<P> {
-    let visibilityHeightThreshold = 0; // minimum value of height when element can be pushed to main panel
+    let visibilityWidthThreshold = 0; // minimum value of width when element can be pushed to main panel
 
     return (props: P): JSX.Element | null => {
         const ref = useRef<HTMLDivElement>(null);
@@ -63,23 +58,23 @@ export default function ControlVisibilityObserver<P = {}>(
                 const wrapper = ref.current;
                 const parentElement = ref.current.parentElement as HTMLElement;
 
-                const reservedHeight = 45; // for itself
+                const reservedWidth = 45; // for itself
                 const observer = new ResizeObserver(() => {
                     // when parent size was changed, check again can we put the control
                     // into the side panel or not
-                    const availableHeight = parentElement.offsetHeight;
-                    setVisible(availableHeight - reservedHeight >= visibilityHeightThreshold);
+                    const availableWidth = parentElement.offsetWidth;
+                    setVisible(availableWidth - reservedWidth >= visibilityWidthThreshold);
                 });
 
                 if (ref && ref.current) {
-                    const availableHeight = parentElement.offsetHeight;
+                    const availableWidth = parentElement.offsetWidth;
                     // when first mount, remember bottom coordinate which equal to minimum parent width
                     // to put the control into side panel
-                    visibilityHeightThreshold = wrapper.offsetTop + wrapper.offsetHeight;
+                    visibilityWidthThreshold = wrapper.offsetLeft + wrapper.offsetWidth;
                     // start observing parent size
                     observer.observe(ref.current.parentElement as HTMLElement);
                     // then put it to extra controls if parent height is not enough
-                    setVisible(availableHeight - reservedHeight >= visibilityHeightThreshold);
+                    setVisible(availableWidth - reservedWidth >= visibilityWidthThreshold);
                 }
 
                 return () => {

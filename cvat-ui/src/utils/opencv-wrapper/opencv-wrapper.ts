@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { getCore } from 'cvat-core-wrapper';
 import HistogramEqualizationImplementation, { HistogramEqualization } from './histogram-equalization';
 import TrackerMImplementation from './tracker-mil';
@@ -12,10 +8,20 @@ const core = getCore();
 const baseURL = core.config.backendAPI.slice(0, -7);
 
 export interface Segmentation {
-    intelligentScissorsFactory: (onChangeToolsBlockerState:(event:string)=>void) => IntelligentScissors;
+    intelligentScissorsFactory: (onChangeToolsBlockerState: (event: string) => void) => IntelligentScissors;
+}
+
+export interface MatSpace {
+    empty: () => any;
+    fromData: (width: number, height: number, type: MatType, data: number[]) => any;
+}
+
+export interface MatVectorSpace {
+    empty: () => any;
 }
 
 export interface Contours {
+    findContours: (src: any, contours: any) => number[][];
     approxPoly: (points: number[] | any, threshold: number, closed?: boolean) => number[][];
 }
 
@@ -25,6 +31,12 @@ export interface ImgProc {
 
 export interface Tracking {
     trackerMIL: OpenCVTracker;
+}
+
+export enum MatType {
+    CV_8UC1,
+    CV_8UC3,
+    CV_8UC4,
 }
 
 export class OpenCVWrapper {
@@ -38,6 +50,12 @@ export class OpenCVWrapper {
         this.cv = null;
         this.onProgress = null;
         this.injectionProcess = null;
+    }
+
+    private checkInitialization() {
+        if (!this.initialized) {
+            throw new Error('Need to initialize OpenCV first');
+        }
     }
 
     private async inject(): Promise<void> {
@@ -109,13 +127,55 @@ export class OpenCVWrapper {
         return !!this.injectionProcess;
     }
 
-    public get contours(): Contours {
-        if (!this.initialized) {
-            throw new Error('Need to initialize OpenCV first');
-        }
-
+    public get mat(): MatSpace {
+        this.checkInitialization();
         const { cv } = this;
         return {
+            empty: () => new cv.Mat(),
+
+            fromData: (width: number, height: number, type: MatType, data: number[]) => {
+                const typeToCVType = {
+                    [MatType.CV_8UC1]: cv.CV_8UC1,
+                    [MatType.CV_8UC3]: cv.CV_8UC3,
+                    [MatType.CV_8UC4]: cv.CV_8UC4,
+                };
+
+                const mat = cv.matFromArray(height, width, typeToCVType[type], data);
+                return mat;
+            },
+        };
+    }
+
+    public get matVector(): MatVectorSpace {
+        this.checkInitialization();
+        const { cv } = this;
+        return {
+            empty: () => new cv.MatVector(),
+        };
+    }
+
+    public get contours(): Contours {
+        this.checkInitialization();
+        const { cv } = this;
+        return {
+            findContours: (src: any, contours: any): number[][] => {
+                const jsContours: number[][] = [];
+                const hierarchy = new cv.Mat();
+                try {
+                    cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE);
+                    for (let i = 0; i < contours.size(); i++) {
+                        const contour = contours.get(i);
+                        jsContours.push(Array.from(contour.data32S));
+                        contour.delete();
+                    }
+                } finally {
+                    hierarchy.delete();
+                }
+
+                const longest = jsContours.sort((arr1, arr2) => arr2.length - arr1.length)[0];
+                return [longest];
+            },
+
             approxPoly: (points: number[] | number[][], threshold: number, closed = true): number[][] => {
                 const isArrayOfArrays = Array.isArray(points[0]);
                 if (points.length < 3) {
@@ -143,30 +203,22 @@ export class OpenCVWrapper {
     }
 
     public get segmentation(): Segmentation {
-        if (!this.initialized) {
-            throw new Error('Need to initialize OpenCV first');
-        }
-
+        this.checkInitialization();
         return {
-            intelligentScissorsFactory:
-            (onChangeToolsBlockerState:
-            (event:string)=>void) => new IntelligentScissorsImplementation(this.cv, onChangeToolsBlockerState),
+            intelligentScissorsFactory: (onChangeToolsBlockerState: (event: string) => void) =>
+                new IntelligentScissorsImplementation(this.cv, onChangeToolsBlockerState),
         };
     }
 
     public get imgproc(): ImgProc {
-        if (!this.initialized) {
-            throw new Error('Need to initialize OpenCV first');
-        }
+        this.checkInitialization();
         return {
             hist: () => new HistogramEqualizationImplementation(this.cv),
         };
     }
 
     public get tracking(): Tracking {
-        if (!this.initialized) {
-            throw new Error('Need to initialize OpenCV first');
-        }
+        this.checkInitialization();
         return {
             trackerMIL: {
                 model: () => new TrackerMImplementation(this.cv),

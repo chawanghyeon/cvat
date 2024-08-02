@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import { Indexable } from 'reducers';
 import SortingComponent from './sorting';

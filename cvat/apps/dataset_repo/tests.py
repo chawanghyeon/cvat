@@ -1,8 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from itertools import product
 from io import BytesIO
 from PIL import Image

@@ -1,7 +1,3 @@
-# Copyright (C) 2021-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import math
 import cv2
 import numpy as np

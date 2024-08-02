@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corp
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React from 'react';
 import Button from 'antd/lib/button';
@@ -102,7 +97,7 @@ export default function Feedback(): JSX.Element {
                 placement='leftTop'
                 title={<Text className='cvat-text-color'>Help to make CVAT better</Text>}
                 content={renderContent()}
-                visible={visible}
+                open={visible}
                 overlayClassName='cvat-feedback-popover'
             >
                 <Button

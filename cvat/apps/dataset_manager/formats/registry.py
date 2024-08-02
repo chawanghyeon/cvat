@@ -1,7 +1,3 @@
-# Copyright (C) 2020-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from datumaro.components.project import Environment
 from cvat.apps.engine.models import DimensionType
 

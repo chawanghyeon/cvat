@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useEffect, useState } from 'react';
 import Select from 'antd/lib/select';
@@ -87,13 +83,13 @@ export default function StorageField(props: Props): JSX.Element {
                     >
                         Local
                     </Option>
-                    <Option
+                    {/* <Option
                         value={StorageLocation.CLOUD_STORAGE}
                         key={`${storageType}-${StorageLocation.CLOUD_STORAGE.toLowerCase()}`}
                         className={`cvat-select-${storageType}-location`}
                     >
                         Cloud storage
-                    </Option>
+                    </Option> */}
                 </Select>
             </Form.Item>
             {locationValue === StorageLocation.CLOUD_STORAGE && renderCloudStorage()}

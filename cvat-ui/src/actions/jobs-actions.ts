@@ -1,12 +1,8 @@
-// Copyright (C) 2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { ActionUnion, createAction, ThunkAction } from 'utils/redux';
 import { getCore } from 'cvat-core-wrapper';
 import { JobsQuery, Job } from 'reducers';
 import { filterNull } from 'utils/filter-null';
+import { closeJob } from './annotation-actions';
 
 const cvat = getCore();
 
@@ -17,6 +13,8 @@ export enum JobsActionTypes {
     GET_JOB_PREVIEW = 'GET_JOB_PREVIEW',
     GET_JOB_PREVIEW_SUCCESS = 'GET_JOB_PREVIEW_SUCCESS',
     GET_JOB_PREVIEW_FAILED = 'GET_JOB_PREVIEW_FAILED',
+    GET_JOB_GUIDE_SUCCESS = 'GET_JOB_GUIDE_SUCCESS',
+    GET_JOB_GUIDE_FAILED = 'GET_JOB_GUIDE_FAILED',
 }
 
 interface JobsList extends Array<any> {
@@ -38,9 +36,21 @@ const jobsActions = {
     getJobPreviewFailed: (jobID: number, error: any) => (
         createAction(JobsActionTypes.GET_JOB_PREVIEW_FAILED, { jobID, error })
     ),
+    getJobGuideSuccess: (guide: any) => createAction(JobsActionTypes.GET_JOB_GUIDE_SUCCESS, { guide }),
+    getJobGuideFailed: (error: any) => createAction(JobsActionTypes.GET_JOB_GUIDE_FAILED, { error }),
 };
 
 export type JobsActions = ActionUnion<typeof jobsActions>;
+
+export const getJobGuideAsync =
+    (projectId: number): ThunkAction => async (dispatch) => {
+        try {
+            const guide = await cvat.jobs.getGuides(projectId);
+            dispatch(jobsActions.getJobGuideSuccess(guide));
+        } catch (error) {
+            dispatch(jobsActions.getJobsFailed(error));
+        }
+    };
 
 export const getJobsAsync = (query: JobsQuery): ThunkAction => async (dispatch) => {
     try {
@@ -50,6 +60,7 @@ export const getJobsAsync = (query: JobsQuery): ThunkAction => async (dispatch) 
         dispatch(jobsActions.getJobs(filteredQuery as JobsQuery));
         const jobs = await cvat.jobs.get(filteredQuery);
         dispatch(jobsActions.getJobsSuccess(jobs));
+        dispatch(closeJob());
     } catch (error) {
         dispatch(jobsActions.getJobsFailed(error));
     }

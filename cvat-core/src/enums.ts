@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier = MIT
-
 export enum ShareFileType {
     DIR = 'DIR',
     REG = 'REG',
@@ -32,6 +27,11 @@ export enum JobState {
     IN_PROGRESS = 'in progress',
     COMPLETED = 'completed',
     REJECTED = 'rejected',
+}
+
+export enum JobType {
+    ANNOTATION = 'annotation',
+    GROUND_TRUTH = 'ground_truth',
 }
 
 export enum DimensionType {
@@ -91,7 +91,7 @@ export enum LogType {
     uploadAnnotations = 'upload:annotations',
     exception = 'send:exception',
     sendTaskInfo = 'send:task_info',
-
+    exitJob = 'exit:job',
     drawObject = 'draw:object',
     pasteObject = 'paste:object',
     copyObject = 'copy:object',
@@ -117,6 +117,9 @@ export enum LogType {
     debugInfo = 'send:debug_info',
 
     clickElement = 'click:element',
+
+    access = 'view:access',
+    view = 'view:page',
 }
 
 export enum HistoryActions {
@@ -162,36 +165,36 @@ export enum ModelReturnType {
 }
 
 export const colors = [
-    '#33ddff',
-    '#fa3253',
-    '#34d1b7',
-    '#ff007c',
-    '#ff6037',
-    '#ddff33',
-    '#24b353',
-    '#b83df5',
-    '#66ff66',
-    '#32b7fa',
-    '#ffcc33',
-    '#83e070',
-    '#fafa37',
-    '#5986b3',
-    '#8c78f0',
-    '#ff6a4d',
-    '#f078f0',
-    '#2a7dd1',
-    '#b25050',
-    '#cc3366',
-    '#cc9933',
-    '#aaf0d1',
-    '#ff00cc',
-    '#3df53d',
-    '#fa32b7',
-    '#fa7dbb',
-    '#ff355e',
-    '#f59331',
-    '#3d3df5',
-    '#733380',
+    '#4970FB',
+    '#31D2B5',
+    '#FF7E07',
+    '#FB2C38',
+    '#FFE70F',
+    '#91D880',
+    '#AC76F1',
+    '#49B0FB',
+    '#FF32FF',
+    '#00FFFF',
+    '#9AB0FF',
+    '#A3FFF4',
+    '#FFBC95',
+    '#FB6E77',
+    '#FFF9BF',
+    '#D0FFC5',
+    '#DDC2FF',
+    '#B7E1FF',
+    '#FFC5FF',
+    '#C6FFFF',
+    '#0D42FF',
+    '#257768',
+    '#A44F00',
+    '#A72D34',
+    '#CBB80A',
+    '#1D7806',
+    '#5D27A1',
+    '#0068B2',
+    '#AD0FAD',
+    '#008E8E',
 ];
 
 export enum CloudStorageProviderType {

@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React from 'react';
 import Layout from 'antd/lib/layout';
@@ -13,15 +8,23 @@ import ObjectSideBarComponent from 'components/annotation-page/standard-workspac
 import ObjectsListContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/objects-list';
 import CanvasContextMenuContainer from 'containers/annotation-page/canvas/canvas-context-menu';
 import IssueAggregatorComponent from 'components/annotation-page/review/issues-aggregator';
+import ObjectsLeftSideBarComponent from 'components/annotation-page/standard-workspace/objects-side-bar/objects-left-side-bar';
 
 export default function ReviewWorkspaceComponent(): JSX.Element {
     return (
-        <Layout hasSider className='cvat-review-workspace'>
-            <ControlsSideBarContainer />
-            <CanvasLayout />
-            <ObjectSideBarComponent objectsList={<ObjectsListContainer readonly />} />
-            <CanvasContextMenuContainer readonly />
-            <IssueAggregatorComponent />
-        </Layout>
+        <>
+            <Layout.Header className='cvat-review-header'>
+                <ControlsSideBarContainer />
+            </Layout.Header>
+            <Layout.Content className='cvat-annotation-layout-content'>
+                <Layout hasSider className='cvat-review-workspace'>
+                    <ObjectsLeftSideBarComponent objectsList={<ObjectsListContainer readonly />} />
+                    <CanvasLayout />
+                    <ObjectSideBarComponent objectsList={<ObjectsListContainer readonly />} />
+                    <CanvasContextMenuContainer readonly />
+                    <IssueAggregatorComponent />
+                </Layout>
+            </Layout.Content>
+        </>
     );
 }

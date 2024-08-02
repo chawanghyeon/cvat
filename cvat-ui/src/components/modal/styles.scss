@@ -1,0 +1,204 @@
+$primary-white: #fff;
+$primary-black: #000;
+$primary-blue: #e2e2e2;
+$e2e2e2: #e2e2e2;
+
+$transition: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+$dialog-transition-show: opacity 0.5s $transition, top 0.5s $transition;
+$dialog-transition-hide: opacity 0.5s $transition, top 1s $transition;
+
+$dialog-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+
+$dialog-border-radius: 34px;
+
+$dialog-font-size: 18px;
+$dialog-font-weight: 500;
+$dialog-line-height: normal;
+$dialog-padding: 20px;
+
+$dialog-button-padding: 5px 20px;
+
+$dialog-button-hover-transform: scale(1.2);
+
+$dialog-gap: 20px;
+$dialog-footer-gap: 10px;
+
+$dialog-button-border: 1px solid $e2e2e2;
+
+$dialog-backdrop-color: rgba(0, 0, 0, 0.5);
+
+.backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: $dialog-backdrop-color;
+    z-index: 10001;
+
+    &.show {
+        display: block;
+    }
+}
+
+.dialogContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    background-color: #1f1f20;
+    border-radius: $dialog-border-radius;
+    display: flex;
+    flex-direction: column;
+    box-shadow: $dialog-shadow;
+    z-index: 10002;
+    padding: $dialog-padding;
+    opacity: 0;
+    pointer-events: none;
+
+    &.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    &.six {
+        transform: scale(1);
+
+        .dialogBody {
+            background: rgba(0, 0, 0, 0);
+            animation: fadeIn 0.5s $transition forwards;
+
+            .modal {
+                background-color: transparent;
+                animation: modalFadeIn 0.5s 0.8s $transition forwards;
+
+                h2,
+                p {
+                    opacity: 0;
+                    position: relative;
+                    animation: modalContentFadeIn 0.5s 1s $transition forwards;
+                }
+
+                .modal-svg {
+                    rect {
+                        animation: sketchIn 0.5s 0.3s $transition forwards;
+                    }
+                }
+            }
+        }
+
+        &.out {
+            animation: quickScaleDown 0s 0.5s linear forwards;
+
+            .dialogBody {
+                animation: fadeOut 0.5s $transition forwards;
+
+                .modal {
+                    animation: modalFadeOut 0.5s $transition forwards;
+
+                    h2,
+                    p {
+                        animation: modalContentFadeOut 0.5s $transition forwards;
+                    }
+
+                    .modal-svg {
+                        rect {
+                            animation: sketchOut 0.5s $transition forwards;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.dialogHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dialogTitle {
+    font-size: $dialog-font-size;
+    font-weight: $dialog-font-weight;
+    line-height: $dialog-line-height;
+}
+
+.closeBtn {
+    font-size: 20px;
+    cursor: pointer;
+    border: none;
+    color: $primary-white;
+    background-color: #1f1f20;
+
+    &:hover {
+        color: $primary-white;
+    }
+
+    span {
+        display: inline-block;
+        font-size: 2rem;
+        font-weight: bold;
+        transition: transform 0.2s ease;
+
+        &:hover {
+            transform: $dialog-button-hover-transform;
+        }
+    }
+}
+
+.dialogBody {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: $dialog-padding;
+    color: #000;
+    font-size: $dialog-font-size;
+    font-weight: $dialog-font-weight;
+    line-height: $dialog-line-height;
+    gap: $dialog-gap;
+
+    > div {
+        width: 90%;
+        height: 90%;
+    }
+}
+
+.dialogFooter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $dialog-footer-gap;
+}
+
+.actionButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: $dialog-border-radius;
+    padding: $dialog-button-padding;
+
+    &.apply {
+        background: $primary-blue !important;
+        border: none;
+        color: $primary-white !important;
+    }
+
+    &.cancel {
+        background: $primary-white !important;
+        border: $dialog-button-border;
+        color: $primary-blue !important;
+    }
+
+    font-size: $dialog-font-size;
+    font-weight: $dialog-font-weight;
+    line-height: $dialog-line-height;
+    cursor: pointer;
+}

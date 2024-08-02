@@ -1,7 +1,3 @@
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from dateutil import parser as datetime_parser
 import datetime
 import json

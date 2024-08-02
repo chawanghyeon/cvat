@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import {
     ActionCreator, AnyAction, Dispatch, Store,
 } from 'redux';
@@ -150,6 +145,7 @@ export enum AnnotationActionTypes {
     SPLIT_ANNOTATIONS_SUCCESS = 'SPLIT_ANNOTATIONS_SUCCESS',
     SPLIT_ANNOTATIONS_FAILED = 'SPLIT_ANNOTATIONS_FAILED',
     COLLAPSE_SIDEBAR = 'COLLAPSE_SIDEBAR',
+    COLLAPSE_LEFT_SIDEBAR = 'COLLAPSE_LEFT_SIDEBAR',
     COLLAPSE_APPEARANCE = 'COLLAPSE_APPEARANCE',
     COLLAPSE_OBJECT_ITEMS = 'COLLAPSE_OBJECT_ITEMS',
     ACTIVATE_OBJECT = 'ACTIVATE_OBJECT',
@@ -539,6 +535,13 @@ export function activateObject(
 export function collapseSidebar(): AnyAction {
     return {
         type: AnnotationActionTypes.COLLAPSE_SIDEBAR,
+        payload: {},
+    };
+}
+
+export function collapseLeftSidebar(): AnyAction {
+    return {
+        type: AnnotationActionTypes.COLLAPSE_LEFT_SIDEBAR,
         payload: {},
     };
 }
@@ -935,10 +938,18 @@ export function getJobAsync(
 
             loadJobEvent.close(await jobInfoGenerator(job));
 
+            const userInstance = (await cvat.users.get({ self: true }))[0];
+
+            // 작업 시작 시간 처음 어노테이션을 만들었을 때로 변경
+            // if (job.worker && userInstance.id === job.worker.id) {
+            //     await job.updateTime();
+            // }
+
             const openTime = Date.now();
             dispatch({
                 type: AnnotationActionTypes.GET_JOB_SUCCESS,
                 payload: {
+                    userInstance,
                     openTime,
                     job,
                     issues,
@@ -1329,6 +1340,7 @@ export function searchEmptyFrameAsync(sessionInstance: any, frameFrom: number, f
 }
 
 const ShapeTypeToControl: Record<ShapeType, ActiveControl> = {
+    [ShapeType.SHAPE]: ActiveControl.DRAW_SHAPE,
     [ShapeType.RECTANGLE]: ActiveControl.DRAW_RECTANGLE,
     [ShapeType.POLYLINE]: ActiveControl.DRAW_POLYLINE,
     [ShapeType.POLYGON]: ActiveControl.DRAW_POLYGON,

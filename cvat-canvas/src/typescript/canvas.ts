@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import {
     Mode,
     DrawData,
@@ -45,6 +40,7 @@ interface Canvas {
     split(splitData: SplitData): void;
     merge(mergeData: MergeData): void;
     select(objectState: any): void;
+    keyControls(key: KeyboardEvent): void;
 
     fitCanvas(): void;
     bitmap(enable: boolean): void;
@@ -152,6 +148,9 @@ class CanvasImpl implements Canvas {
         this.model.select(objectState);
     }
 
+    public keyControls(key: KeyboardEvent): void {
+        this.view.keyControls(key);
+    }
     public mode(): Mode {
         return this.model.mode;
     }

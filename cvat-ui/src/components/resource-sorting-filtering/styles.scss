@@ -1,12 +1,11 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
+@import '../jobs-page/styles.scss';
 
 .cvat-resource-page-filters {
+    @extend .cvat-jobs-page-top-bar;
     display: flex;
     align-items: center;
+    margin-bottom: 0;
 
     span[aria-label=down] {
         margin-right: $grid-unit-size;
@@ -18,7 +17,12 @@
         &:last-child {
             margin-right: 0;
         }
+
+        &.filter-btn {
+            width: 120px;
+        }
     }
+
 }
 
 .cvat-resource-page-recent-filters-list {
@@ -85,16 +89,37 @@
 .cvat-resource-page-sorting-list,
 .cvat-resource-page-predefined-filters-list,
 .cvat-resource-page-recent-filters-list {
-    background: white;
-    padding: $grid-unit-size;
-    border-radius: 4px;
+    background: $background-color-1;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
     box-shadow: $box-shadow-base;
 
     .ant-checkbox-wrapper {
-        margin-bottom: $grid-unit-size;
+        border-bottom: 1px solid $border-color-2;
         margin-left: 0;
+        padding: 6px 10px;
+    }
+
+    .ant-checkbox + span {
+        color: $text-color;
+        font-weight: 200;
+    }
+
+    button.ant-btn {
+        font-size: 12px;
+        padding: 0 10px;
+        width: 100%;
+
+        &.ant-btn-default {
+            background-color: #D0D0D8;
+            border: none;
+            color: #000;
+
+            &:hover, &:focus {
+                background-color: #F0F0F7;
+            }
+        }
     }
 }
 

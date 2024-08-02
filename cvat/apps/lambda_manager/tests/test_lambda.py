@@ -1,8 +1,3 @@
-# Copyright (C) 2021-2022 Intel Corporation
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import json
 from collections import OrderedDict
 from io import BytesIO
@@ -1025,10 +1020,10 @@ class Issue4996_Cases(_LambdaTestCaseBase):
         }, org_id=org_id)
         assert response.status_code == status.HTTP_200_OK
 
-    def _set_job_assignee(self, job: int, assignee: Optional[int], *,
+    def _set_job_worker(self, job: int, worker: Optional[int], *,
             org_id: Optional[int] = None):
         response = self._patch_request(f'/api/jobs/{job}', user=self.admin, data={
-            'assignee': assignee,
+            'worker': worker,
         }, org_id=org_id)
         assert response.status_code == status.HTTP_200_OK
 
@@ -1104,7 +1099,7 @@ class Issue4996_Cases(_LambdaTestCaseBase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_can_call_function_for_job_worker_in_org__deny_job_assigned_worker_with_task_request(self):
-        self._set_job_assignee(self.job['id'], self.user.id, org_id=self.org['id'])
+        self._set_job_worker(self.job['id'], self.user.id, org_id=self.org['id'])
 
         data = self.common_data.copy()
         with self.subTest(job=None, assignee='job'):
@@ -1113,7 +1108,7 @@ class Issue4996_Cases(_LambdaTestCaseBase):
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_can_call_function_for_job_worker_in_org__allow_job_assigned_worker_with_job_request(self):
-        self._set_job_assignee(self.job['id'], self.user.id, org_id=self.org['id'])
+        self._set_job_worker(self.job['id'], self.user.id, org_id=self.org['id'])
 
         data = self.common_data.copy()
         data.update(self._get_valid_job_params())
@@ -1123,7 +1118,7 @@ class Issue4996_Cases(_LambdaTestCaseBase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_can_check_job_boundaries_in_function_call__fail_for_frame_outside_job(self):
-        self._set_job_assignee(self.job['id'], self.user.id, org_id=self.org['id'])
+        self._set_job_worker(self.job['id'], self.user.id, org_id=self.org['id'])
 
         data = self.common_data.copy()
         data.update(self._get_invalid_job_params())
@@ -1133,7 +1128,7 @@ class Issue4996_Cases(_LambdaTestCaseBase):
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_can_check_job_boundaries_in_function_call__ok_for_frame_inside_job(self):
-        self._set_job_assignee(self.job['id'], self.user.id, org_id=self.org['id'])
+        self._set_job_worker(self.job['id'], self.user.id, org_id=self.org['id'])
 
         data = self.common_data.copy()
         data.update(self._get_valid_job_params())

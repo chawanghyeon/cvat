@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { RefObject } from 'react';
 import { Row, Col } from 'antd/lib/grid';
 import Input from 'antd/lib/input';
@@ -202,7 +197,7 @@ export default class RawViewer extends React.PureComponent<Props> {
         const convertedLabels = convertLabels(labels);
         const textLabels = JSON.stringify(convertedLabels, null, 2);
         return (
-            <Form layout='vertical' onFinish={this.handleSubmit} ref={this.formRef}>
+            <Form layout='vertical' onFinish={this.handleSubmit} ref={this.formRef} className='cvat-raw-viewer'>
                 <Form.Item name='labels' initialValue={textLabels} rules={[{ validator: validateLabels }]}>
                     <Input.TextArea
                         onPaste={(e: React.ClipboardEvent) => {

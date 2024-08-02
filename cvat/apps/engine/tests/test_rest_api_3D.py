@@ -1,9 +1,3 @@
-# Copyright (C) 2020-2022 Intel Corporation
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
-
 import io
 import os
 import os.path as osp
@@ -254,7 +248,7 @@ class _DbTestBase(APITestCase):
                                   osp.join(tmp_dir, "meta.json"),
                                   osp.join(tmp_dir, "ds0", "ann", "000001.pcd.json"),
                                   osp.join(tmp_dir, "ds0", "ann", "000002.pcd.json"),
-                                  osp.join(tmp_dir, "ds0", "ann","000003.pcd.json")]
+                                  osp.join(tmp_dir, "ds0", "ann", "000003.pcd.json")]
                 if related_files:
                     checking_files.extend([osp.join(tmp_dir, "ds0", "related_images", "000001.pcd_pcd", "000001.png.json"),
                                   osp.join(tmp_dir, "ds0", "related_images", "000002.pcd_pcd", "000002.png.json"),

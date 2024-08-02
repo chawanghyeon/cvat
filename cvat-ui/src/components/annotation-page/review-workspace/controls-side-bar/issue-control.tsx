@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 
@@ -26,7 +22,7 @@ function CreateIssueControl(props: Props): JSX.Element {
         disabled ? (
             <Icon component={RectangleIcon} className='cvat-issue-control cvat-disabled-canvas-control' />
         ) : (
-            <CVATTooltip title='Open an issue' placement='right'>
+            <CVATTooltip title='Open an issue' placement='bottom'>
                 <Icon
                     component={RectangleIcon}
                     className={

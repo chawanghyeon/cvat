@@ -1,14 +1,8 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import 'base.scss';
 
 .cvat-organization-page {
     height: 100%;
-    padding-top: $grid-unit-size * 2;
-    width: $grid-unit-size * 120;
+    width: $grid-unit-size * 110;
     margin: 0 auto;
 
     .ant-empty {
@@ -18,11 +12,83 @@
         transform: translate(-50%, -50%);
     }
 
-    > div:nth-child(1) {
+    .cvat-organization-top-bar {
+        padding: 16px 0;
+        border-bottom: 1px solid black;
+        box-shadow: 0 1px 0 0 $border-color-2;
+
+        svg {
+            color: #9ab0ff;
+        }
+    }
+
+    .cvat-organization-details {
         align-items: flex-end;
+        padding: 20px 0;
+        border-bottom: 1px solid black;
+        box-shadow: 0 1px 0 0 $border-color-2;
+
+        h4 {
+            border: 1px solid #ffffff1a;
+            border-radius: 6px;
+            color: $text-color;
+            padding: 10px;
+            margin-right: 10px;
+        }
 
         .cvat-organization-top-bar-buttons-block {
             text-align: right;
+            margin-bottom: 0.7em;
+
+            .ant-btn-primary {
+                height: 50px;
+            }
+        }
+
+        .ant-divider-vertical {
+            border-color: $border-color-3;
+        }
+
+        .ant-row {
+            width: -webkit-fill-available;
+            padding: 10px 0;
+        }
+
+        &-label {
+            display: block;
+            padding: 5px;
+        }
+
+        .cvat-organization-top-bar-editable {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background-color: $select-color;
+            border-radius: 6px;
+            padding: 10px;
+
+            span[role='img'] {
+                margin-right: 10px;
+                scale: 1.2;
+
+                > svg {
+                    color: #656568;
+                }
+            }
+
+            &.ant-typography-edit-content {
+                margin: 0;
+                left: 0;
+
+                &::before {
+                    content: icon;
+                }
+
+                > .ant-typography-edit-content-confirm {
+                    bottom: unset;
+                }
+            }
         }
 
         .cvat-organization-top-bar-descriptions {
@@ -82,11 +148,10 @@
         }
     }
 
-    > div:nth-child(2) {
+    > div:nth-child(3) {
         overflow: auto;
         height: auto;
-        max-height: 60%;
-        margin-top: $grid-unit-size;
+        margin-top: 20px;
     }
 
     @media screen and (min-height: 900px) {
@@ -103,11 +168,10 @@
 }
 
 .cvat-organization-member-item {
-    border: 1px solid $border-color-1;
-    border-radius: 3px;
-    padding: $grid-unit-size;
-    background: $background-color-1;
-    margin-top: $grid-unit-size;
+    border: 1px solid #ffffff1a;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin-top: 10px;
     align-items: center;
 
     > .cvat-organization-member-item-username,
@@ -118,12 +182,15 @@
     }
 
     > .cvat-organization-member-item-dates {
-        font-size: 12px;
-        display: grid;
+        font-size: 13px;
     }
 
     > .cvat-organization-member-item-remove {
         text-align: center;
+
+        > span {
+            vertical-align: middle;
+        }
     }
 
     > .cvat-organization-member-item-role {
@@ -136,8 +203,7 @@
 .cvat-organization-members-pagination-block {
     display: flex;
     justify-content: center;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 20px;
 }
 
 .cvat-remove-organization-submit {
@@ -148,8 +214,136 @@
 
 .cvat-organization-invitation-field {
     align-items: baseline;
+
+    span[role='img'] {
+        > svg {
+            vertical-align: text-bottom;
+        }
+    }
 }
 
-.cvat-organization-page-actions-button {
-    padding-right: $grid-unit-size * 0.5;
+.cvat-organization-invitation-modal {
+    button.cvat-add-field {
+        width: 100%;
+        border: 1px solid #ffffff3a;
+        background-color: transparent;
+        color: $text-color;
+        height: 35px;
+
+        &:hover {
+            border-color: #ffffff9a;
+            color: $text-color;
+        }
+        &:focus {
+            color: $text-color;
+        }
+
+        span[role='img'] {
+            line-height: 24px;
+            float: right;
+
+            > svg {
+                vertical-align: text-bottom;
+            }
+        }
+    }
+}
+
+.cvat-organization-list {
+
+    &-top-bar {
+        padding: 16px 0;
+
+        // header 영역
+        > div {
+            padding-bottom: 15px;
+            border-bottom: 1px solid;
+            box-shadow: 0 1px 0 0 #414142;
+        }
+
+        .cvat-organization-header {
+            margin-bottom: 10px;
+            font-size: 22px;
+            color: $text-color;
+            font-weight: bold;
+        }
+    }
+
+    &-content {
+        .ant-card {
+            background-color: transparent;
+            border-radius: 10px;
+            border: 1px solid #ffffff1a;
+
+            &-body {
+                padding: 15px 20px;
+                height: 140px;
+                position: relative;
+
+                span[role='img'] {
+                    scale: 1.3;
+                }
+            }
+
+            &:hover {
+                border-color: #ffffff3a;
+                box-shadow: 10px 10px 20px 0 #00000060;
+                cursor: pointer;
+            }
+        }
+
+        .more-btn {
+            position: absolute;
+            top: 10px;
+            right: 5px;
+        }
+
+        .cvat-organization-bottom-box {
+            position: absolute;
+            bottom: 15px;
+
+            > div {
+                color: $text-color;
+                font-weight: 200;
+                font-size: 12px;
+                opacity: 0.5;
+
+                .ant-divider {
+                    border: 1px solid $text-color;
+                }
+            }
+        }
+    }
+
+}
+
+.cvat-organization-actions-menu {
+    width: 125px;
+
+    .ant-dropdown-menu-item {
+        line-height: 25px;
+    }
+
+    &-icon {
+        width: 20px;
+        height: 20px;
+        margin-left: auto;
+
+        > svg > path {
+            stroke: #D0D0D8;
+        }
+    }
+}
+
+.cvat-remove-organization {
+    .ant-modal-content > .ant-modal-body {
+        padding: 10px 0;
+    }
+
+    .ant-modal-confirm {
+        &-content {
+            margin-left: 0 !important;
+            margin: 25px 0;
+        }
+    }
 }

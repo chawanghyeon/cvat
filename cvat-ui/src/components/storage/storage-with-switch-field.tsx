@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React from 'react';
 import Form from 'antd/lib/form';
@@ -64,7 +60,7 @@ export default function StorageWithSwitchField(props: Props): JSX.Element {
                                 }}
                             />
                         </Form.Item>
-                        <Text strong>{switchDescription}</Text>
+                        <Text className='cvat-text-color' strong>{switchDescription}</Text>
                         {(switchHelpMessage) ? (
                             <Tooltip title={switchHelpMessage}>
                                 <QuestionCircleOutlined />
@@ -79,7 +75,7 @@ export default function StorageWithSwitchField(props: Props): JSX.Element {
                         label={(
                             <>
                                 <Space>
-                                    {storageLabel}
+                                    <Text>{storageLabel}</Text>
                                     <CVATTooltip title={storageDescription}>
                                         <QuestionCircleOutlined
                                             style={{ opacity: 0.5 }}

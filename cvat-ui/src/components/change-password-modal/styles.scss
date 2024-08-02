@@ -1,0 +1,15 @@
+@import '../../base.scss';
+
+.cvat-modal-change-password {
+
+    .ant-form-item {
+
+        &:last-child {
+            margin-bottom: 0;
+
+            .ant-btn {
+                width: 100%;
+            }
+        }
+    }
+}

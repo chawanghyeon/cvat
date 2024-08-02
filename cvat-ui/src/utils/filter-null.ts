@@ -1,7 +1,3 @@
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Indexable } from 'reducers';
 
 export function filterNull<Type>(obj: Type): Type {

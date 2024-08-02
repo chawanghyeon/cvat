@@ -1,11 +1,7 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import message from 'antd/lib/message';
+import Text from 'antd/lib/typography/Text';
 
 import { LabelType } from 'cvat-core-wrapper';
 import { CombinedState, ObjectType } from 'reducers';
@@ -80,6 +76,11 @@ function LabelsListComponent(): JSX.Element {
                     const labelIsApplicable = label.type === LabelType.ANY ||
                         activatedState.shapeType === label.type || bothAreTags;
                     if (activatedState && labelIsApplicable) {
+                        if (label.type !== activatedState.label.type) {
+                            message.destroy();
+                            message.error(`"${label.name}"의 타입이 현재 Label 타입과 다릅니다.`);
+                            return;
+                        }
                         activatedState.label = label;
                         dispatch(updateAnnotationsAsync([activatedState]));
                     }
@@ -98,19 +99,23 @@ function LabelsListComponent(): JSX.Element {
     };
 
     return (
-        <div className='cvat-objects-sidebar-labels-list'>
-            <GlobalHotKeys keyMap={subKeyMap} handlers={handlers} />
-            {labelIDs.map(
-                (labelID: number): JSX.Element => (
-                    <LabelItemContainer
-                        key={labelID}
-                        labelID={labelID}
-                        keyToLabelMapping={keyToLabelMapping}
-                        updateLabelShortcutKey={updateLabelShortcutKey}
-                    />
-                ),
-            )}
-        </div>
+        <>
+            <Text className='cvat-objects-sidebar-labels-header'> Labels </Text>
+            <div className='cvat-objects-sidebar-labels-list'>
+                <GlobalHotKeys keyMap={subKeyMap} handlers={handlers} />
+                {labelIDs.map(
+                    (labelID: number): JSX.Element => (
+                        <LabelItemContainer
+                            key={labelID}
+                            labelID={labelID}
+                            keyToLabelMapping={keyToLabelMapping}
+                            updateLabelShortcutKey={updateLabelShortcutKey}
+                        />
+                    ),
+                )}
+            </div>
+        </>
+
     );
 }
 

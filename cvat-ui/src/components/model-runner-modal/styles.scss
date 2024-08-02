@@ -1,11 +1,22 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
 
-.cvat-run-model-content > div:not(first-child) {
-    margin-top: 10px;
+.cvat-run-model-content {
+    hr {
+        background-color: #414142;
+        border: none;
+        margin: 15px 0;
+    }
+
+    > div:not(first-child) {
+        margin-top: 10px;
+    }
+
+    .detector-runner-convert-masks-to-polygons-wrapper,
+    .detector-runner-clean-previous-annotations-wrapper {
+        > button {
+            margin-right: 10px;
+        }
+    }
 }
 
 .cvat-run-model-content-remove-mapping-icon {
@@ -16,9 +27,29 @@
     padding-left: $grid-unit-size * 4;
 }
 
-.detector-runner-clean-previous-annotations-wrapper,
-.detector-runner-convert-masks-to-polygons-wrapper {
-    span {
-        margin-left: $grid-unit-size;
+.cvat-model-runner-modal {
+
+    .ant-tag {
+        background-color: $background-color-4;
+        width: 100%;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 6px;
+
+        .ant-badge-status-text {
+            color: $text-color;
+        }
+    }
+
+    .cvat-danger-circle-icon {
+        vertical-align: text-top;
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+
+    .ant-checkbox-wrapper {
+        color: $text-color;
     }
 }

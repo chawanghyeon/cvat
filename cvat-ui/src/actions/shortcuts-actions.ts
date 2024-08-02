@@ -1,6 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
 import { ActionUnion, createAction } from 'utils/redux';
 
 export enum ShortcutsActionsTypes {

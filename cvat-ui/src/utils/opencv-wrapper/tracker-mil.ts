@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { clamp } from 'utils/math';
 import { TrackerModel, TrackingResult } from './opencv-interfaces';
 

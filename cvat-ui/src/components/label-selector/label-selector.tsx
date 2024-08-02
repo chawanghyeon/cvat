@@ -1,11 +1,5 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect, useState } from 'react';
 import Select, { SelectProps } from 'antd/lib/select';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OptionData, OptionGroupData } from 'rc-select/lib/interface';
 
 interface Props extends SelectProps<string> {
     labels: any[];
@@ -35,11 +29,12 @@ export default function LabelSelector(props: Props): JSX.Element {
 
     return (
         <Select
+            style={{ color: 'white' }}
             virtual={false}
             {...rest}
             {...dynamicProps}
             showSearch
-            filterOption={(input: string, option?: OptionData | OptionGroupData) => {
+            filterOption={(input: string, option?: any) => {
                 if (option) {
                     const { children } = option.props;
                     if (typeof children === 'string') {
@@ -49,7 +44,6 @@ export default function LabelSelector(props: Props): JSX.Element {
 
                 return false;
             }}
-            defaultValue={labels[0].id}
             onChange={(newValue: string) => {
                 const [label] = labels.filter((_label: any): boolean => _label.id === +newValue);
                 if (label) {

@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
 import { Row, Col } from 'antd/lib/grid';
@@ -13,12 +9,17 @@ import Input from 'antd/lib/input';
 import { SortingComponent, ResourceFilterHOC, defaultVisibility } from 'components/resource-sorting-filtering';
 
 import {
-    localStorageRecentKeyword, localStorageRecentCapacity,
-    predefinedFilterValues, config,
+    localStorageRecentKeyword,
+    localStorageRecentCapacity,
+    predefinedFilterValues,
+    config,
 } from './cloud-storages-filter-configuration';
 
 const FilteringComponent = ResourceFilterHOC(
-    config, localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues,
+    config,
+    localStorageRecentKeyword,
+    localStorageRecentCapacity,
+    predefinedFilterValues,
 );
 
 interface Props {
@@ -29,15 +30,16 @@ interface Props {
 }
 
 export default function StoragesTopBar(props: Props): JSX.Element {
-    const {
-        query, onApplyFilter, onApplySorting, onApplySearch,
-    } = props;
+    const { query, onApplyFilter, onApplySorting, onApplySearch } = props;
     const history = useHistory();
     const [visibility, setVisibility] = useState(defaultVisibility);
 
     return (
         <Row justify='space-between' align='middle' className='cvat-cloud-storages-list-top-bar'>
-            <Col span={24}>
+            {/* <Col span={4} style={{ color: 'red' }}>
+                <h1>Projects</h1>
+            </Col> */}
+            <Col span={20}>
                 <div className='cvat-cloudstorages-page-filters-wrapper'>
                     <Input.Search
                         enterButton
@@ -46,16 +48,25 @@ export default function StoragesTopBar(props: Props): JSX.Element {
                         }}
                         defaultValue={query.search || ''}
                         className='cvat-cloudstorages-page-tasks-search-bar'
-                        placeholder='Search ...'
+                        placeholder='검색'
                     />
                     <div>
                         <SortingComponent
                             visible={visibility.sorting}
-                            onVisibleChange={(visible: boolean) => (
+                            onVisibleChange={(visible: boolean) =>
                                 setVisibility({ ...defaultVisibility, sorting: visible })
-                            )}
+                            }
                             defaultFields={query.sort?.split(',') || ['-ID']}
-                            sortingFields={['ID', 'Provider type', 'Updated date', 'Display name', 'Resource', 'Credentials type', 'Owner', 'Description']}
+                            sortingFields={[
+                                'ID',
+                                'Provider type',
+                                'Updated date',
+                                'Display name',
+                                'Resource',
+                                'Credentials type',
+                                'Owner',
+                                'Description',
+                            ]}
                             onApplySorting={(sorting: string | null) => {
                                 onApplySorting(sorting);
                             }}
@@ -65,15 +76,15 @@ export default function StoragesTopBar(props: Props): JSX.Element {
                             predefinedVisible={visibility.predefined}
                             builderVisible={visibility.builder}
                             recentVisible={visibility.recent}
-                            onPredefinedVisibleChange={(visible: boolean) => (
+                            onPredefinedVisibleChange={(visible: boolean) =>
                                 setVisibility({ ...defaultVisibility, predefined: visible })
-                            )}
-                            onBuilderVisibleChange={(visible: boolean) => (
+                            }
+                            onBuilderVisibleChange={(visible: boolean) =>
                                 setVisibility({ ...defaultVisibility, builder: visible })
-                            )}
-                            onRecentVisibleChange={(visible: boolean) => (
+                            }
+                            onRecentVisibleChange={(visible: boolean) =>
                                 setVisibility({ ...defaultVisibility, builder: visibility.builder, recent: visible })
-                            )}
+                            }
                             onApplyFilter={(filter: string | null) => {
                                 onApplyFilter(filter);
                             }}

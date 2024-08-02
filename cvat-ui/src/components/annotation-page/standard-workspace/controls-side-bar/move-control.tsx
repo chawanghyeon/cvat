@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 
@@ -20,7 +16,7 @@ function MoveControl(props: Props): JSX.Element {
     const { canvasInstance, activeControl } = props;
 
     return (
-        <CVATTooltip title='Move the image' placement='right'>
+        <CVATTooltip title='Move' placement='bottom'>
             <Icon
                 component={MoveIcon}
                 className={

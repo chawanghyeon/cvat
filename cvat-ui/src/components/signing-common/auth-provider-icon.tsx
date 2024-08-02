@@ -1,7 +1,3 @@
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 
 export default function AuthenticationProviderIcon({ iconData, provider }: {

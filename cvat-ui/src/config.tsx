@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 
 const UNDEFINED_ATTRIBUTE_VALUE = '__undefined__';
@@ -22,7 +17,7 @@ const NUCLIO_GUIDE =
 const DATASET_MANIFEST_GUIDE_URL = 'https://opencv.github.io/cvat/docs/manual/advanced/dataset_manifest/';
 const CANVAS_BACKGROUND_COLORS = ['#ffffff', '#f1f1f1', '#e5e5e5', '#d8d8d8', '#CCCCCC', '#B3B3B3', '#999999'];
 const NEW_LABEL_COLOR = '#b3b3b3';
-const LATEST_COMMENTS_SHOWN_QUICK_ISSUE = 3;
+const LATEST_COMMENTS_SHOWN_QUICK_ISSUE = 10;
 const QUICK_ISSUE_INCORRECT_POSITION_TEXT = 'Wrong position';
 const QUICK_ISSUE_INCORRECT_ATTRIBUTE_TEXT = 'Wrong attribute';
 const DEFAULT_PROJECT_SUBSETS = ['Train', 'Test', 'Validation'];

@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import serverProxy from './server-proxy';
 import { Task } from './session';
 import { ScriptingError } from './exceptions';
@@ -55,6 +50,15 @@ export default class AnnotationsSaver {
     }
 
     async _request(data, action) {
+        // update일 경우에 백엔드에서 validation을 하기 때문에 frameMeta를 추가
+        if (action === 'update') {
+            data.shapes = data.shapes.map((shape) => {
+                const { width, height } = this.collection.frameMeta[shape.frame];
+                shape.width = width;
+                shape.height = height;
+                return shape;
+            });
+        }
         const result = await serverProxy.annotations.updateAnnotations(this.sessionType, this.id, data, action);
 
         return result;

@@ -1,19 +1,20 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useCallback } from 'react';
 import Menu from 'antd/lib/menu';
 import Modal from 'antd/lib/modal';
-import { LoadingOutlined } from '@ant-design/icons';
+import Text from 'antd/lib/typography/Text';
+import Icon, { LoadingOutlined } from '@ant-design/icons';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MenuInfo } from 'rc-menu/lib/interface';
+
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { AdminIcon, DataDownloadIcon, ExitIcon, IllustWarningIcon, ServerIcon, TrashGrayIcon } from 'icons';
 import { DimensionType } from 'cvat-core-wrapper';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     taskID: number;
+    projectID: number | null;
     taskMode: string;
     bugTracker: string;
     loaders: any[];
@@ -35,13 +36,8 @@ export enum Actions {
 }
 
 function ActionsMenuComponent(props: Props): JSX.Element {
-    const {
-        taskID,
-        bugTracker,
-        inferenceIsActive,
-        backupIsActive,
-        onClickMenu,
-    } = props;
+    const { taskID, projectID, inferenceIsActive, backupIsActive, onClickMenu } = props;
+    const { t } = useTranslation();
 
     const onClickMenuWrapper = useCallback(
         (params: MenuInfo) => {
@@ -52,7 +48,13 @@ function ActionsMenuComponent(props: Props): JSX.Element {
             if (params.key === Actions.DELETE_TASK) {
                 Modal.confirm({
                     title: `The task ${taskID} will be deleted`,
-                    content: 'All related data (images, annotations) will be lost. Continue?',
+                    content: (
+                        <div style={{ textAlign: 'center' }}>
+                            <Icon component={IllustWarningIcon} />
+                            <br />
+                            <Text>All related data (images, annotations) will be lost. Continue?</Text>
+                        </div>
+                    ),
                     className: 'cvat-modal-confirm-delete-task',
                     onOk: () => {
                         onClickMenu(params);
@@ -70,26 +72,59 @@ function ActionsMenuComponent(props: Props): JSX.Element {
         [taskID],
     );
 
-    return (
-        <Menu selectable={false} className='cvat-actions-menu' onClick={onClickMenuWrapper}>
-            <Menu.Item key={Actions.LOAD_TASK_ANNO}>Upload annotations</Menu.Item>
-            <Menu.Item key={Actions.EXPORT_TASK_DATASET}>Export task dataset</Menu.Item>
-            {!!bugTracker && <Menu.Item key={Actions.OPEN_BUG_TRACKER}>Open bug tracker</Menu.Item>}
-            <Menu.Item disabled={inferenceIsActive} key={Actions.RUN_AUTO_ANNOTATION}>
-                Automatic annotation
-            </Menu.Item>
-            <Menu.Item
-                key={Actions.BACKUP_TASK}
-                disabled={backupIsActive}
-                icon={backupIsActive && <LoadingOutlined id='cvat-backup-task-loading' />}
-            >
-                Backup Task
-            </Menu.Item>
-            <Menu.Divider />
-            <Menu.Item key={Actions.MOVE_TASK_TO_PROJECT}>Move to project</Menu.Item>
-            <Menu.Item key={Actions.DELETE_TASK}>Delete</Menu.Item>
-        </Menu>
-    );
+    const menuItem: ItemType[] = [
+        {
+            key: Actions.LOAD_TASK_ANNO,
+            title: 'Upload Annotations',
+            label: t('tasks.actions.uploadAnnotation'),
+            itemIcon: <Icon component={DataDownloadIcon} />,
+        },
+        {
+            key: Actions.EXPORT_TASK_DATASET,
+            title: 'Export Dataset',
+            label: t('tasks.actions.exportDataset'),
+            itemIcon: <Icon component={DataDownloadIcon} />,
+        },
+        {
+            key: Actions.RUN_AUTO_ANNOTATION,
+            title: 'Auto Annotation',
+            label: t('tasks.actions.autoAnnotation'),
+            disabled: inferenceIsActive,
+            itemIcon: <Icon component={AdminIcon} />,
+        },
+        {
+            key: Actions.BACKUP_TASK,
+            title: 'Backup Task',
+            label: t('tasks.actions.taskBackup'),
+            disabled: backupIsActive,
+            itemIcon: backupIsActive ? <LoadingOutlined /> : <Icon component={ServerIcon} />,
+        },
+        {
+            key: Actions.MOVE_TASK_TO_PROJECT,
+            title: 'Move Task to Project',
+            label: t('tasks.actions.moveTaskToProject'),
+            itemIcon: <Icon component={ExitIcon} />,
+        },
+        {
+            key: Actions.DELETE_TASK,
+            title: 'Delete Task',
+            label: t('tasks.actions.deleteTask'),
+            itemIcon: <Icon component={TrashGrayIcon} />,
+        },
+    ];
+
+    // if (projectID === null) {
+    //     menuItem.push(
+    //         {
+    //             key: Actions.MOVE_TASK_TO_PROJECT,
+    //             title: 'Move Task to Project',
+    //             label: 'Move Task to Project',
+    //             itemIcon: <Icon component={ExitIcon} />,
+    //         },
+    //     );
+    // }
+
+    return <Menu selectable={false} className='cvat-actions-menu' onClick={onClickMenuWrapper} items={menuItem} />;
 }
 
 export default React.memo(ActionsMenuComponent);

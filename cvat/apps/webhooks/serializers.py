@@ -1,7 +1,3 @@
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from rest_framework import serializers
 
 from cvat.apps.engine.models import Project

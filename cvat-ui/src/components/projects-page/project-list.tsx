@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Row, Col } from 'antd/lib/grid';
@@ -30,21 +25,25 @@ export default function ProjectListComponent(): JSX.Element {
     }, [gettingQuery]);
 
     const dimensions = {
-        md: 22,
-        lg: 18,
-        xl: 16,
-        xxl: 16,
+        md: 20,
+        lg: 20,
+        xl: 18,
+        xxl: 14,
     };
 
     return (
         <>
             <Row justify='center' align='middle' className='cvat-project-list-content'>
                 <Col className='cvat-projects-list' {...dimensions}>
-                    {projects.map(
-                        (project: Project): JSX.Element => (
-                            <ProjectItem key={project.id} projectInstance={project} />
-                        ),
-                    )}
+                    <Row gutter={[32, 32]}>
+                        {projects.map(
+                            (project: Project): JSX.Element => (
+                                <Col key={project.id} span={6}>
+                                    <ProjectItem projectInstance={project} />
+                                </Col>
+                            ),
+                        )}
+                    </Row>
                 </Col>
             </Row>
             <Row justify='center' align='middle'>

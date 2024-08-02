@@ -1,8 +1,3 @@
-# Copyright (C) 2019-2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from collections import OrderedDict
 from enum import Enum
 import os
@@ -492,7 +487,7 @@ class JobAnnotation:
                     "labeledtrackattributeval__value",
                     "labeledtrackattributeval__id",
                 ],
-                "trackedshape_set":[
+                "trackedshape_set": [
                     "trackedshape__type",
                     "trackedshape__occluded",
                     "trackedshape__z_order",
@@ -590,13 +585,16 @@ class JobAnnotation:
         self.create(job_data.data.slice(self.start_frame, self.stop_frame).serialize())
 
 class TaskAnnotation:
-    def __init__(self, pk):
+    def __init__(self, pk, *args, **kwargs):
         self.db_task = models.Task.objects.prefetch_related(
             Prefetch('data__images', queryset=models.Image.objects.order_by('frame'))
         ).get(id=pk)
 
         # Postgres doesn't guarantee an order by default without explicit order_by
-        self.db_jobs = models.Job.objects.select_related("segment").filter(segment__task_id=pk).order_by('id')
+        if kwargs.get('download_only_accepted', False):
+            self.db_jobs = models.Job.objects.select_related("segment").filter(segment__task_id=pk, status=models.StatusChoice.COMPLETED).order_by('id')
+        else:
+            self.db_jobs = models.Job.objects.select_related("segment").filter(segment__task_id=pk).order_by('id')
         self.ir_data = AnnotationIR(self.db_task.dimension)
 
     def reset(self):
@@ -774,14 +772,14 @@ def delete_task_data(pk):
     annotation = TaskAnnotation(pk)
     annotation.delete()
 
-def export_task(task_id, dst_file, format_name, server_url=None, save_images=False):
+def export_task(task_id, dst_file, format_name, server_url=None, save_images=False, *args, **kwargs):
     # For big tasks dump function may run for a long time and
     # we dont need to acquire lock after the task has been initialized from DB.
     # But there is the bug with corrupted dump file in case 2 or
     # more dump request received at the same time:
     # https://github.com/opencv/cvat/issues/217
     with transaction.atomic():
-        task = TaskAnnotation(task_id)
+        task = TaskAnnotation(task_id, *args, **kwargs)
         task.init_from_db()
 
     exporter = make_exporter(format_name)

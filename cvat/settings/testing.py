@@ -1,7 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from .development import *
 import tempfile
 
@@ -11,7 +7,7 @@ BASE_DIR = _temp_dir.name
 DATA_ROOT = os.path.join(BASE_DIR, 'data')
 os.makedirs(DATA_ROOT, exist_ok=True)
 
-EVENTS_LOCAL_DB = os.path.join(DATA_ROOT,'logstash.db')
+EVENTS_LOCAL_DB = os.path.join(DATA_ROOT, 'logstash.db')
 os.makedirs(DATA_ROOT, exist_ok=True)
 if not os.path.exists(EVENTS_LOCAL_DB):
     open(EVENTS_LOCAL_DB, 'w').close()
@@ -71,6 +67,8 @@ PASSWORD_HASHERS = (
 TEST_RUNNER = "cvat.settings.testing.PatchedDiscoverRunner"
 
 from django.test.runner import DiscoverRunner
+
+
 class PatchedDiscoverRunner(DiscoverRunner):
     def __init__(self, *args, **kwargs):
         # Used fakeredis for testing (don't affect production redis)

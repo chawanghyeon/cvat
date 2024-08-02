@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 @import '../../base.scss';
 
 .cvat-create-organization-page {
@@ -13,40 +9,74 @@
 
     > div:first-child {
         > span {
-            font-size: 36px;
+            font-size: 28px;
+            color: white;
         }
     }
 }
 
 .cvat-create-organization-form {
     text-align: initial;
-    margin-top: $grid-unit-size * 2;
     width: 100%;
     height: auto;
-    border: 1px solid $border-color-1;
-    border-radius: 3px;
     padding: $grid-unit-size * 2;
-    background: $background-color-1;
 
-    > div:not(first-child) {
-        margin-top: $grid-unit-size;
+    > div:last-child {
+        margin-top: 50px;
     }
 
     .cvat-create-organization-form-buttons-block {
         display: flex;
-        justify-content: flex-end;
-    }
+        justify-content: center;
 
-    .cvat-create-organization-form-contact-block {
-        display: flex;
-        align-items: flex-end;
+        .ant-btn-primary {
+            width: 200px;
+            height: 46px;
 
-        > .ant-space-item:first-child {
-            width: 100%;
+            &:hover,
+            &:focus {
+                background-color: $button-color;
+            }
         }
     }
 
-    .cvat-create-organization-form-add-contact-block {
-        align-items: baseline;
+    .ant-input-affix-wrapper {
+        height: 46px;
+    }
+
+    .ant-divider {
+        border-top: 1px solid black;
+        box-shadow: 0 1px 0 0 #414142;
+    }
+
+    .ant-divider-horizontal {
+        margin: 16px 0;
+    }
+
+    .ant-form-item {
+        margin-bottom: unset;
+    }
+
+    .ant-form-item-row {
+        align-items: center;
+    }
+
+    .ant-form-item-label {
+        text-align: left;
+
+        label {
+            color: #acacb5;
+
+            &::after { content: unset; }
+
+            &.ant-form-item-required {
+                &::before { content: unset; }
+
+                &::after {
+                    content: '*';
+                    color: #ff4d4f;
+                }
+            }
+        }
     }
 }

@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 /* global
     __dirname:true
 */
@@ -12,19 +7,32 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 
-
 module.exports = (env) => {
-    console.log()
     const defaultAppConfig = path.join(__dirname, 'src/config.tsx');
+    const defaultPlugins = ['plugins/sam_plugin'];
     const appConfigFile = process.env.UI_APP_CONFIG ? process.env.UI_APP_CONFIG : defaultAppConfig;
-    console.log('Application config file is: ', appConfigFile);
+    const pluginsList = process.env.CLIENT_PLUGINS ? [...defaultPlugins, ...process.env.CLIENT_PLUGINS.split(':')]
+        .map((s) => s.trim()).filter((s) => !!s) : defaultPlugins
 
+    const transformedPlugins = pluginsList
+        .filter((plugin) => !!plugin).reduce((acc, _path, index) => ({
+            ...acc,
+            [`plugin_${index}`]: {
+                dependOn: 'cvat-ui',
+                // path can be absolute, in this case it is accepted as is
+                // also the path can be relative to cvat-ui root directory
+                import: path.isAbsolute(_path) ? _path : path.join(__dirname, _path, 'src', 'ts', 'index.tsx'),
+            },
+        }), {});
+
+    console.log('List of plugins: ', Object.values(transformedPlugins).map((plugin) => plugin.import));
     return {
         target: 'web',
         mode: 'production',
         devtool: 'source-map',
         entry: {
             'cvat-ui': './src/index.tsx',
+            ...transformedPlugins,
         },
         output: {
             path: path.resolve(__dirname, 'dist'),
@@ -32,6 +40,9 @@ module.exports = (env) => {
             publicPath: '/',
         },
         devServer: {
+            devMiddleware: {
+                writeToDisk: true,
+            },
             compress: false,
             host: process.env.CVAT_UI_HOST || 'localhost',
             client: {
@@ -41,6 +52,10 @@ module.exports = (env) => {
             historyApiFallback: true,
             static: {
                 directory: path.join(__dirname, 'dist'),
+            },
+            headers: {
+                'Cross-Origin-Opener-Policy': 'same-origin',
+                'Cross-Origin-Embedder-Policy': 'credentialless',
             },
             proxy: [
                 {
@@ -56,36 +71,42 @@ module.exports = (env) => {
         },
         resolve: {
             extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-
             fallback: {
                 fs: false,
             },
             alias: {
                 config$: appConfigFile,
             },
-            modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+            modules: [path.resolve(__dirname, 'src'), 'node_modules']
         },
         module: {
             rules: [
                 {
                     test: /\.(ts|tsx)$/,
-                    use: {
-                        loader: 'babel-loader',
-                        options: {
-                            plugins: [
-                                '@babel/plugin-proposal-class-properties',
-                                '@babel/plugin-proposal-optional-chaining',
-                                [
-                                    'import',
-                                    {
-                                        libraryName: 'antd',
-                                    },
+                    exclude: /(node_modules|bower_components)/,
+                    use: [
+                        {
+                            loader: 'babel-loader',
+                            options: {
+                                plugins: [
+                                    '@babel/plugin-proposal-class-properties',
+                                    '@babel/plugin-proposal-optional-chaining',
+                                    '@babel/plugin-syntax-jsx',
+                                    [
+                                        'import',
+                                        {
+                                            libraryName: 'antd',
+                                        },
+                                    ],
                                 ],
-                            ],
-                            presets: ['@babel/preset-env', '@babel/preset-react', '@babel/typescript'],
-                            sourceType: 'unambiguous',
+                                presets: ['@babel/preset-env', '@babel/preset-react', '@babel/typescript'],
+                                sourceType: 'unambiguous',
+                                cacheDirectory: true,
+                                cacheCompression: true,
+                                compact: true,
+                            },
                         },
-                    },
+                    ],
                 },
                 {
                     test: /\.(css|scss)$/,
@@ -107,6 +128,17 @@ module.exports = (env) => {
                     ],
                 },
                 {
+                    test: /\.(ttf|eot|woff|woff2)$/,
+                    use: [
+                        {
+                            loader: 'file-loader',
+                            options: {
+                                name: 'assets/fonts/[hash].[ext]',
+                            },
+                        },
+                    ],
+                },
+                {
                     test: /\.svg$/,
                     exclude: /node_modules/,
                     use: [
@@ -117,6 +149,9 @@ module.exports = (env) => {
                                 svgo: {
                                     plugins: [{ pretty: true }, { cleanupIDs: false }],
                                 },
+                                cacheDirectory: true,
+                                cacheCompression: true,
+                                compact: true,
                             },
                         },
                     ],
@@ -169,8 +204,32 @@ module.exports = (env) => {
                         from: '../cvat-data/src/ts/3rdparty/avc.wasm',
                         to: 'assets/3rdparty/',
                     },
+                    {
+                        from: '../node_modules/onnxruntime-web/dist/*.wasm',
+                        to: 'assets/[name][ext]',
+                    },
                 ],
             }),
         ],
-    }
+        watchOptions: {
+            ignored: '**/node_modules',
+        },
+        cache: {
+            type: 'filesystem',
+            name: 'cvat-ui_cache',
+            compression: 'gzip',
+            cacheDirectory: path.resolve(__dirname, 'cvat_cache'),
+        },
+        optimization: {
+            splitChunks: {
+                cacheGroups: {
+                    vendor: {
+                        test: /[\\/]node_modules[\\/]/,
+                        name: 'vendors',
+                        chunks: 'all',
+                    },
+                },
+            },
+        },
+    };
 };

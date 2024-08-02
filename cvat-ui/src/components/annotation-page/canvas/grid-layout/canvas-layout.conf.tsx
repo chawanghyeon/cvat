@@ -1,7 +1,3 @@
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import config from 'config';
 
 export interface ItemLayout {

@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { StorageLocation } from './enums';
 
 export interface StorageData {
@@ -20,7 +16,7 @@ export class Storage {
 
     constructor(initialData: StorageData) {
         const data: StorageData = {
-            location: initialData.location,
+            location: initialData ? initialData.location : StorageLocation.LOCAL,
             cloudStorageId: initialData?.cloudStorageId,
         };
 

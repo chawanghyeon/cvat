@@ -1,21 +1,16 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
-import React, { useState } from 'react';
-import Icon from '@ant-design/icons';
+import React from 'react';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import Form, { RuleRender, RuleObject } from 'antd/lib/form';
 import Button from 'antd/lib/button';
+import Input from 'antd/lib/input';
 import Checkbox from 'antd/lib/checkbox';
-import { Link } from 'react-router-dom';
-import { BackArrowIcon } from 'icons';
+// import { Link } from 'react-router-dom';
+// import { BackArrowIcon } from 'icons';
 
 import patterns from 'utils/validation-patterns';
 
 import { UserAgreement } from 'reducers';
-import { Row, Col } from 'antd/lib/grid';
-import CVATSigningInput, { CVATInputType } from 'components/signing-common/cvat-signing-input';
+// import CVATSigningInput, { CVATInputType } from 'components/signing-common/cvat-signing-input';
 
 export interface UserConfirmation {
     name: string;
@@ -37,206 +32,135 @@ interface Props {
     onSubmit(registerData: RegisterData): void;
 }
 
-function validateUsername(_: RuleObject, value: string): Promise<void> {
-    if (!patterns.validateUsernameLength.pattern.test(value)) {
-        return Promise.reject(new Error(patterns.validateUsernameLength.message));
-    }
-
-    if (!patterns.validateUsernameCharacters.pattern.test(value)) {
-        return Promise.reject(new Error(patterns.validateUsernameCharacters.message));
-    }
-
-    return Promise.resolve();
-}
-
 export const validatePassword: RuleRender = (): RuleObject => ({
     validator(_: RuleObject, value: string): Promise<void> {
         if (!patterns.validatePasswordLength.pattern.test(value)) {
             return Promise.reject(new Error(patterns.validatePasswordLength.message));
         }
 
-        if (!patterns.passwordContainsNumericCharacters.pattern.test(value)) {
-            return Promise.reject(new Error(patterns.passwordContainsNumericCharacters.message));
-        }
-
-        if (!patterns.passwordContainsUpperCaseCharacter.pattern.test(value)) {
-            return Promise.reject(new Error(patterns.passwordContainsUpperCaseCharacter.message));
-        }
-
-        if (!patterns.passwordContainsLowerCaseCharacter.pattern.test(value)) {
-            return Promise.reject(new Error(patterns.passwordContainsLowerCaseCharacter.message));
-        }
-
         return Promise.resolve();
     },
 });
 
-export const validateConfirmation: ((firstFieldName: string) => RuleRender) = (
-    firstFieldName: string,
-): RuleRender => ({ getFieldValue }): RuleObject => ({
-    validator(_: RuleObject, value: string): Promise<void> {
-        if (value && value !== getFieldValue(firstFieldName)) {
-            return Promise.reject(new Error('Two passwords that you enter is inconsistent!'));
-        }
+export const validateConfirmation: (firstFieldName: string) => RuleRender =
+    (firstFieldName: string): RuleRender => ({ getFieldValue }): RuleObject => ({
+        validator(_: RuleObject, value: string): Promise<void> {
+            if (value && value !== getFieldValue(firstFieldName)) {
+                return Promise.reject(new Error('Two passwords that you enter is inconsistent!'));
+            }
 
-        return Promise.resolve();
-    },
-});
+            return Promise.resolve();
+        },
+    });
 
-const validateAgreement: ((userAgreements: UserAgreement[]) => RuleRender) = (
-    userAgreements: UserAgreement[],
-): RuleRender => () => ({
-    validator(rule: any, value: boolean): Promise<void> {
-        const [, name] = rule.field.split(':');
-        const [agreement] = userAgreements
-            .filter((userAgreement: UserAgreement): boolean => userAgreement.name === name);
-        if (agreement.required && !value) {
-            return Promise.reject(new Error(`You must accept ${agreement.urlDisplayText} to continue!`));
-        }
-
-        return Promise.resolve();
-    },
-});
+const validateAgreement: (userAgreements: UserAgreement[]) => RuleRender =
+    (userAgreements: UserAgreement[]): RuleRender => () => ({
+        validator(rule: any, value: boolean): Promise<void> {
+            const [, name] = rule.field.split(':');
+            const [agreement] = userAgreements.filter(
+                (userAgreement: UserAgreement): boolean => userAgreement.name === name,
+            );
+            if (agreement.required && !value) {
+                return Promise.reject(new Error(`You must accept ${agreement.urlDisplayText} to continue!`));
+            }
+            return Promise.resolve();
+        },
+    });
 
 function RegisterFormComponent(props: Props): JSX.Element {
     const { fetching, onSubmit, userAgreements } = props;
-    const [form] = Form.useForm();
-    const [usernameEdited, setUsernameEdited] = useState(false);
+    // const [form] = Form.useForm();
     return (
-        <div className={`cvat-register-form-wrapper ${userAgreements.length ? 'cvat-register-form-wrapper-extended' : ''}`}>
-            <Row justify='space-between' className='cvat-credentials-navigation'>
-                <Col>
-                    <Link to='/auth/login'><Icon component={BackArrowIcon} /></Link>
-                </Col>
-            </Row>
-            <Form
-                form={form}
-                onFinish={(values: Record<string, string | boolean>) => {
-                    const agreements = Object.keys(values)
-                        .filter((key: string):boolean => key.startsWith('agreement:'));
-                    const confirmations = agreements
-                        .map((key: string): UserConfirmation => ({ name: key.split(':')[1], value: (values[key] as boolean) }));
-                    const rest = Object.entries(values)
-                        .filter((entry: (string | boolean)[]) => !agreements.includes(entry[0] as string));
+        <Form
+            layout='vertical'
+            onFinish={(values: Record<string, string | boolean>) => {
+                const agreements = Object.keys(values).filter((key: string): boolean => key.startsWith('agreement:'));
+                const confirmations = agreements.map(
+                    (key: string): UserConfirmation => ({ name: key.split(':')[1], value: values[key] as boolean }),
+                );
+                const rest = Object.entries(values).filter(
+                    (entry: (string | boolean)[]) => !agreements.includes(entry[0] as string),
+                );
 
-                    onSubmit({
-                        ...(Object.fromEntries(rest) as any as RegisterData),
-                        confirmations,
-                    });
-                }}
-                className='cvat-register-form'
+                onSubmit({
+                    ...(Object.fromEntries(rest) as any as RegisterData),
+                    confirmations,
+                });
+            }}
+        >
+            <Form.Item
+                label={<span style={{ color: 'white' }}>Username</span>}
+                hasFeedback
+                name='username'
+                rules={[
+                    {
+                        type: 'username',
+                        message: 'The input is not valid E-mail!',
+                    },
+                    {
+                        required: true,
+                        message: 'Please specify an username address',
+                    },
+                ]}
             >
-                <Row gutter={8}>
-                    <Col span={12}>
-                        <Form.Item
-                            className='cvat-credentials-form-item'
-                            name='firstName'
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please specify a first name',
-                                    pattern: patterns.validateName.pattern,
-                                },
-                            ]}
-                        >
-                            <CVATSigningInput
-                                id='firstName'
-                                placeholder='First name'
-                                autoComplete='given-name'
-                                onReset={() => form.setFieldsValue({ firstName: '' })}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item
-                            className='cvat-credentials-form-item'
-                            name='lastName'
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please specify a last name',
-                                    pattern: patterns.validateName.pattern,
-                                },
-                            ]}
-                        >
-                            <CVATSigningInput
-                                id='lastName'
-                                placeholder='Last name'
-                                autoComplete='family-name'
-                                onReset={() => form.setFieldsValue({ lastName: '' })}
-                            />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Form.Item
-                    className='cvat-credentials-form-item'
-                    name='email'
-                    rules={[
-                        {
-                            type: 'email',
-                            message: 'The input is not valid E-mail!',
-                        },
-                        {
-                            required: true,
-                            message: 'Please specify an email address',
-                        },
-                    ]}
-                >
-                    <CVATSigningInput
-                        id='email'
-                        autoComplete='email'
-                        placeholder='Email'
-                        onReset={() => form.setFieldsValue({ email: '', username: '' })}
-                        onChange={(event) => {
-                            const { value } = event.target;
-                            if (!usernameEdited) {
-                                const [username] = value.split('@');
-                                form.setFieldsValue({ username });
-                            }
-                        }}
-                    />
-                </Form.Item>
-                <Form.Item
-                    className='cvat-credentials-form-item'
-                    name='username'
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please specify a username',
-                        },
-                        {
-                            validator: validateUsername,
-                        },
-                    ]}
-                >
-                    <CVATSigningInput
-                        id='username'
-                        placeholder='Username'
-                        autoComplete='username'
-                        onReset={() => form.setFieldsValue({ username: '' })}
-                        onChange={() => setUsernameEdited(true)}
-                    />
-                </Form.Item>
-                <Form.Item
-                    className='cvat-credentials-form-item cvat-register-form-last-field'
+                <Input
+                    type='username'
+                    autoComplete='username'
+                    prefix={<MailOutlined />}
+                    size='large'
+                    style={{ color: 'white' }}
+                />
+            </Form.Item>
+
+            <Form.Item
+                label={<span style={{ color: 'white' }}>Password</span>}
+                hasFeedback
+                name='password'
+                rules={[
+                    {
+                        required: true,
+                        message: 'Please input your password!',
+                    },
+                    validatePassword,
+                ]}
+                labelCol={{ style: { color: 'white' } }}
+            >
+                <Input.Password
+                    type='password'
                     name='password'
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your password!',
-                        }, validatePassword,
-                    ]}
-                >
-                    <CVATSigningInput
-                        type={CVATInputType.PASSWORD}
-                        id='password1'
-                        placeholder='Password'
-                        autoComplete='new-password'
-                    />
-                </Form.Item>
-                {userAgreements.map((userAgreement: UserAgreement): JSX.Element => (
+                    id='new-password'
+                    autoComplete='new-password'
+                    prefix={<LockOutlined />}
+                    size='large'
+                />
+            </Form.Item>
+
+            <Form.Item
+                label={<div style={{ color: 'white' }}>Confirm Password</div>}
+                hasFeedback
+                name='confirm-password'
+                dependencies={['password']}
+                rules={[
+                    {
+                        required: true,
+                        message: 'Please confirm your password!',
+                    },
+                    validateConfirmation('password'),
+                ]}
+            >
+                <Input.Password
+                    type='password'
+                    name='password'
+                    id='new-password'
+                    autoComplete='confirm-password'
+                    prefix={<LockOutlined />}
+                    size='large'
+                />
+            </Form.Item>
+
+            {userAgreements.map(
+                (userAgreement: UserAgreement): JSX.Element => (
                     <Form.Item
-                        className='cvat-agreements-form-item'
                         name={`agreement:${userAgreement.name}`}
                         key={userAgreement.name}
                         initialValue={false}
@@ -245,7 +169,8 @@ function RegisterFormComponent(props: Props): JSX.Element {
                             {
                                 required: true,
                                 message: 'You must accept to continue!',
-                            }, validateAgreement(userAgreements),
+                            },
+                            validateAgreement(userAgreements),
                         ]}
                     >
                         <Checkbox>
@@ -257,21 +182,15 @@ function RegisterFormComponent(props: Props): JSX.Element {
                             )}
                         </Checkbox>
                     </Form.Item>
-                ))}
+                ),
+            )}
 
-                <Form.Item>
-                    <Button
-                        type='primary'
-                        htmlType='submit'
-                        className='cvat-credentials-action-button'
-                        loading={fetching}
-                        disabled={fetching}
-                    >
-                        Create account
-                    </Button>
-                </Form.Item>
-            </Form>
-        </div>
+            <Form.Item>
+                <Button type='primary' size='large' htmlType='submit' loading={fetching} disabled={fetching} block>
+                    Create account
+                </Button>
+            </Form.Item>
+        </Form>
     );
 }
 

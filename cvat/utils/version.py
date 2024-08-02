@@ -1,7 +1,3 @@
-# Copyright (C) 2019-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-#
 # Note: It is slightly re-implemented Django version of code. We cannot use
 # get_version from django.utils.version module because get_git_changeset will
 # always return empty value (cwd=repo_dir isn't correct). Also it gives us a

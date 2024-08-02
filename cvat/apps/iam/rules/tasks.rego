@@ -162,6 +162,17 @@ allow {
     organizations.is_member
 }
 
+allow {
+    input.scope == utils.VIEW
+    utils.is_sandbox
+    is_task_staff
+}
+
+allow {
+    input.scope == utils.VIEW
+    organizations.is_member
+}
+
 filter = [] { # Django Q object to filter list of entries
     utils.is_admin
     utils.is_sandbox

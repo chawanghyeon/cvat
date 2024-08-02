@@ -1,8 +1,6 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
+
+import './styles.scss';
 
 import { Row, Col } from 'antd/lib/grid';
 import Checkbox, { CheckboxChangeEvent } from 'antd/lib/checkbox';
@@ -10,12 +8,15 @@ import InputNumber from 'antd/lib/input-number';
 import Text from 'antd/lib/typography/Text';
 import Slider from 'antd/lib/slider';
 import Select from 'antd/lib/select';
+import { TrashIcon } from 'icons';
 
 import {
     MAX_ACCURACY,
     marks,
 } from 'components/annotation-page/standard-workspace/controls-side-bar/approximation-accuracy';
 import { clamp } from 'utils/math';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     autoSave: boolean;
@@ -57,10 +58,8 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
         intelligentPolygonCrop,
         defaultApproxPolyAccuracy,
         textFontSize,
-        controlPointsSize,
         textPosition,
         textContent,
-        showTagsOnFrame,
         onSwitchAutoSave,
         onChangeAutoSaveInterval,
         onChangeAAMZoomMargin,
@@ -70,37 +69,31 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
         onSwitchIntelligentPolygonCrop,
         onChangeDefaultApproxPolyAccuracy,
         onChangeTextFontSize,
-        onChangeControlPointsSize,
         onChangeTextPosition,
         onChangeTextContent,
-        onSwitchShowingTagsOnFrame,
     } = props;
 
     const minAutoSaveInterval = 1;
     const maxAutoSaveInterval = 60;
     const minAAMMargin = 0;
     const maxAAMMargin = 1000;
-    const minControlPointsSize = 4;
-    const maxControlPointsSize = 8;
+    const { t } = useTranslation();
+    const translationText = 'settings.workspace';
 
     return (
         <div className='cvat-workspace-settings'>
             <Row>
-                <Col>
-                    <Checkbox
-                        className='cvat-text-color cvat-workspace-settings-auto-save'
-                        checked={autoSave}
-                        onChange={(event: CheckboxChangeEvent): void => {
-                            onSwitchAutoSave(event.target.checked);
-                        }}
-                    >
-                        Enable auto save
-                    </Checkbox>
-                </Col>
-            </Row>
-            <Row>
-                <Col className='cvat-workspace-settings-auto-save-interval'>
-                    <Text type='secondary'> Auto save every </Text>
+                <Checkbox
+                    className='cvat-text-color cvat-workspace-settings-auto-save'
+                    checked={autoSave}
+                    onChange={(event: CheckboxChangeEvent): void => {
+                        onSwitchAutoSave(event.target.checked);
+                    }}
+                >
+                    <Text className='cvat-text-color'>{t(`${translationText}.enableAutoSave.title`)}</Text>
+                </Checkbox>
+                <div className='cvat-workspace-settings-auto-save-interval'>
+                    <Text>{t(`${translationText}.enableAutoSave.description`)}</Text>
                     <InputNumber
                         min={minAutoSaveInterval}
                         max={maxAutoSaveInterval}
@@ -113,56 +106,49 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
                                 );
                             }
                         }}
+                        bordered={false}
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
                     />
-                    <Text type='secondary'> minutes </Text>
-                </Col>
+                    <Text>{t('time.minutes')}</Text>
+                </div>
             </Row>
-            <Row>
-                <Col span={12} className='cvat-workspace-settings-show-interpolated'>
-                    <Row>
-                        <Checkbox
-                            className='cvat-text-color'
-                            checked={showAllInterpolationTracks}
-                            onChange={(event: CheckboxChangeEvent): void => {
-                                onSwitchShowingInterpolatedTracks(event.target.checked);
-                            }}
-                        >
-                            Show all interpolation tracks
-                        </Checkbox>
-                    </Row>
-                    <Row>
-                        <Text type='secondary'> Show hidden interpolated objects in the side panel</Text>
-                    </Row>
-                </Col>
+            <Row className='cvat-workspace-settings-show-interpolated'>
+                <Checkbox
+                    className='cvat-text-color'
+                    checked={showAllInterpolationTracks}
+                    onChange={(event: CheckboxChangeEvent): void => {
+                        onSwitchShowingInterpolatedTracks(event.target.checked);
+                    }}
+                >
+                    <Text className='cvat-text-color'>{t(`${translationText}.showAllInterpolationTracks.title`)}</Text>
+                </Checkbox>
+                <Text>{t(`${translationText}.showAllInterpolationTracks.description`)}</Text>
             </Row>
             <Row className='cvat-workspace-settings-show-text-always'>
-                <Col span={24}>
-                    <Checkbox
-                        className='cvat-text-color'
-                        checked={showObjectsTextAlways}
-                        onChange={(event: CheckboxChangeEvent): void => {
-                            onSwitchShowingObjectsTextAlways(event.target.checked);
-                        }}
-                    >
-                        Always show object details
-                    </Checkbox>
-                </Col>
-                <Col span={24}>
-                    <Text type='secondary'>
-                        Show text for an object on the canvas not only when the object is activated
-                    </Text>
-                </Col>
+                <Checkbox
+                    className='cvat-text-color'
+                    checked={showObjectsTextAlways}
+                    onChange={(event: CheckboxChangeEvent): void => {
+                        onSwitchShowingObjectsTextAlways(event.target.checked);
+                    }}
+                >
+                    <Text className='cvat-text-color'>{t(`${translationText}.alwaysShowObjectDetails.title`)}</Text>
+                </Checkbox>
+                <Text> {t(`${translationText}.alwaysShowObjectDetails.description`)}</Text>
             </Row>
             <Row className='cvat-workspace-settings-text-settings'>
-                <Col span={24}>
-                    <Text>Content of a text</Text>
+                <Col span={6}>
+                    <Text className='cvat-text-color'> {t(`${translationText}.contentOfAText.title`)}</Text>
                 </Col>
-                <Col span={16}>
+                <Col span={18}>
                     <Select
                         className='cvat-workspace-settings-text-content'
                         mode='multiple'
                         value={textContent.split(',').filter((entry: string) => !!entry)}
                         onChange={onChangeTextContent}
+                        removeIcon={<TrashIcon />}
+                        dropdownMatchSelectWidth={false}
                     >
                         <Select.Option value='id'>ID</Select.Option>
                         <Select.Option value='label'>Label</Select.Option>
@@ -174,12 +160,7 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
             </Row>
             <Row className='cvat-workspace-settings-text-settings'>
                 <Col span={12}>
-                    <Text>Position of a text</Text>
-                </Col>
-                <Col span={12}>
-                    <Text>Font size of a text</Text>
-                </Col>
-                <Col span={12}>
+                    <Text className='cvat-text-color'>{t(`${translationText}.positionOfAText.title`)}</Text>
                     <Select
                         className='cvat-workspace-settings-text-position'
                         value={textPosition}
@@ -189,69 +170,47 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
                         <Select.Option value='center'>Center</Select.Option>
                     </Select>
                 </Col>
-                <Col span={12}>
+                <Col>
+                    <Text className='cvat-text-color'>{t(`${translationText}.fontSizeOfAText.title`)}</Text>
                     <InputNumber
                         className='cvat-workspace-settings-text-size'
                         onChange={onChangeTextFontSize}
                         min={8}
                         max={20}
                         value={textFontSize}
+                        bordered={false}
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
                     />
                 </Col>
             </Row>
             <Row className='cvat-workspace-settings-autoborders'>
-                <Col span={24}>
-                    <Checkbox
-                        className='cvat-text-color'
-                        checked={automaticBordering}
-                        onChange={(event: CheckboxChangeEvent): void => {
-                            onSwitchAutomaticBordering(event.target.checked);
-                        }}
-                    >
-                        Automatic bordering
-                    </Checkbox>
-                </Col>
-                <Col span={24}>
-                    <Text type='secondary'>
-                        Enable automatic bordering for polygons and polylines during drawing/editing
-                    </Text>
-                </Col>
+                <Checkbox
+                    className='cvat-text-color'
+                    checked={automaticBordering}
+                    onChange={(event: CheckboxChangeEvent): void => {
+                        onSwitchAutomaticBordering(event.target.checked);
+                    }}
+                >
+                    {t(`${translationText}.automaticBordering.title`)}
+                </Checkbox>
+                <Text> {t(`${translationText}.automaticBordering.description`)}</Text>
             </Row>
             <Row className='cvat-workspace-settings-intelligent-polygon-cropping'>
-                <Col span={24}>
-                    <Checkbox
-                        className='cvat-text-color'
-                        checked={intelligentPolygonCrop}
-                        onChange={(event: CheckboxChangeEvent): void => {
-                            onSwitchIntelligentPolygonCrop(event.target.checked);
-                        }}
-                    >
-                        Intelligent polygon cropping
-                    </Checkbox>
-                </Col>
-                <Col span={24}>
-                    <Text type='secondary'>Try to crop polygons automatically when editing</Text>
-                </Col>
-            </Row>
-            <Row className='cvat-workspace-settings-show-frame-tags'>
-                <Col span={24}>
-                    <Checkbox
-                        className='cvat-text-color'
-                        checked={showTagsOnFrame}
-                        onChange={(event: CheckboxChangeEvent): void => {
-                            onSwitchShowingTagsOnFrame(event.target.checked);
-                        }}
-                    >
-                        Show tags on frame
-                    </Checkbox>
-                </Col>
-                <Col span={24}>
-                    <Text type='secondary'>Show frame tags in the corner of the workspace</Text>
-                </Col>
+                <Checkbox
+                    className='cvat-text-color'
+                    checked={intelligentPolygonCrop}
+                    onChange={(event: CheckboxChangeEvent): void => {
+                        onSwitchIntelligentPolygonCrop(event.target.checked);
+                    }}
+                >
+                    {t(`${translationText}.intelligentPolygonCropping.title`)}
+                </Checkbox>
+                <Text> {t(`${translationText}.intelligentPolygonCropping.description`)}</Text>
             </Row>
             <Row className='cvat-workspace-settings-aam-zoom-margin'>
                 <Col>
-                    <Text className='cvat-text-color'> Attribute annotation mode (AAM) zoom margin </Text>
+                    <Text className='cvat-text-color'>{t(`${translationText}.annotationZoomMargin.title`)}</Text>
                     <InputNumber
                         min={minAAMMargin}
                         max={maxAAMMargin}
@@ -261,43 +220,28 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
                                 onChangeAAMZoomMargin(Math.floor(clamp(+value, minAAMMargin, maxAAMMargin)));
                             }
                         }}
-                    />
-                </Col>
-            </Row>
-            <Row className='cvat-workspace-settings-control-points-size'>
-                <Col>
-                    <Text className='cvat-text-color'> Control points size </Text>
-                    <InputNumber
-                        min={minControlPointsSize}
-                        max={maxControlPointsSize}
-                        value={controlPointsSize}
-                        onChange={(value: number | undefined | string): void => {
-                            if (typeof value !== 'undefined') {
-                                onChangeControlPointsSize(
-                                    Math.floor(clamp(+value, minControlPointsSize, maxControlPointsSize)),
-                                );
-                            }
-                        }}
+                        bordered={false}
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
                     />
                 </Col>
             </Row>
             <Row className='cvat-workspace-settings-approx-poly-threshold'>
-                <Col>
-                    <Text className='cvat-text-color'>Default number of points in polygon approximation</Text>
+                <Col span={16}>
+                    <Text className='cvat-text-color'>{t(`${translationText}.polygonApproximation.title`)}</Text>
                 </Col>
-                <Col span={7} offset={1}>
+                <Col span={6} offset={2}>
                     <Slider
                         min={0}
                         max={MAX_ACCURACY}
                         step={1}
                         value={defaultApproxPolyAccuracy}
-                        dots
                         onChange={onChangeDefaultApproxPolyAccuracy}
                         marks={marks}
                     />
                 </Col>
                 <Col span={24}>
-                    <Text type='secondary'>Works for serverless interactors and OpenCV scissors</Text>
+                    <Text>{t(`${translationText}.polygonApproximation.description`)}</Text>
                 </Col>
             </Row>
         </div>

@@ -1,11 +1,8 @@
-# Copyright (C) 2020-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.urls import include, path
 from rest_framework import routers
 
 from . import views
+from cvat.apps.lambda_manager.views import OpenAiViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
 # https://github.com/encode/django-rest-framework/issues/6645
@@ -25,5 +22,7 @@ router.register('requests', views.RequestViewSet, basename='request')
 # GET  /api/lambda/requests/<int:rid> - get status of the request
 # DEL  /api/lambda/requests/<int:rid> - cancel a request (don't delete)
 urlpatterns = [
-    path('api/lambda/', include(router.urls))
+    path('api/lambda/', include(router.urls)),
+    path('api/lambda/sam_detector.onnx', views.ONNXDetector),
+    path("api/lambda/openai/", OpenAiViewSet.as_view(), name="openai"),
 ]

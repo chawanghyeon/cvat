@@ -1,8 +1,3 @@
-# Copyright (C) 2022 Intel Corporation
-# Copyright (C) 2022-2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from __future__ import annotations
 
 import operator
@@ -188,6 +183,8 @@ class OrganizationPermission(OpenPolicyAgentPermission):
             'destroy': Scopes.DELETE,
             'partial_update': Scopes.UPDATE,
             'retrieve': Scopes.VIEW,
+            'statistic': Scopes.VIEW,
+            'get_umap_data': Scopes.VIEW,
         }.get(view.action, None)]
 
     def get_resource(self):
@@ -1074,7 +1071,8 @@ class JobPermission(OpenPolicyAgentPermission):
         LIST = 'list'
         VIEW = 'view'
         UPDATE = 'update'
-        UPDATE_ASSIGNEE = 'update:assignee'
+        UPDATE_WORKER = 'update:worker'
+        UPDATE_CHECKER = 'update:checker'
         UPDATE_OWNER = 'update:owner'
         UPDATE_PROJECT = 'update:project'
         UPDATE_STAGE = 'update:stage'
@@ -1104,10 +1102,11 @@ class JobPermission(OpenPolicyAgentPermission):
                 perm = IssuePermission.create_scope_list(request)
                 permissions.append(perm)
 
-            assignee_id = request.data.get('assignee')
-            if assignee_id:
-                perm = UserPermission.create_scope_view(request, assignee_id)
-                permissions.append(perm)
+            for assignee in ('worker', 'checker'):
+                assignee_id = request.data.get(assignee)
+                if assignee_id:
+                    perm = UserPermission.create_scope_view(request, assignee_id)
+                    permissions.append(perm)
 
         return permissions
 
@@ -1154,10 +1153,14 @@ class JobPermission(OpenPolicyAgentPermission):
                 owner_id = request.data.get('owner_id') or request.data.get('owner')
                 if owner_id != getattr(obj.owner, 'id', None):
                     scopes.append(Scopes.UPDATE_OWNER)
-            if any(k in request.data for k in ('assignee_id', 'assignee')):
-                assignee_id = request.data.get('assignee_id') or request.data.get('assignee')
-                if assignee_id != getattr(obj.assignee, 'id', None):
-                    scopes.append(Scopes.UPDATE_ASSIGNEE)
+            if any(k in request.data for k in ('worker_id', 'worker')):
+                worker_id = request.data.get('worker_id') or request.data.get('worker')
+                if worker_id != getattr(obj.worker, 'id', None):
+                    scopes.append(Scopes.UPDATE_WORKER)
+            if any(k in request.data for k in ('checker_id', 'checker')):
+                checker_id = request.data.get('checker_id') or request.data.get('checker')
+                if checker_id != getattr(obj.checker, 'id', None):
+                    scopes.append(Scopes.UPDATE_CHECKER)
             if any(k in request.data for k in ('project_id', 'project')):
                 project_id = request.data.get('project_id') or request.data.get('project')
                 if project_id != getattr(obj.project, 'id', None):
@@ -1194,7 +1197,9 @@ class JobPermission(OpenPolicyAgentPermission):
 
             data = {
                 "id": self.obj.id,
-                "assignee": { "id": getattr(self.obj.assignee, 'id', None) },
+                "stage": self.obj.stage,
+                "worker": { "id": getattr(self.obj.worker, 'id', None) },
+                "checker": { "id": getattr(self.obj.checker, 'id', None) },
                 'organization': {
                     "id": getattr(organization, 'id', None)
                 },
@@ -1263,7 +1268,8 @@ class CommentPermission(OpenPolicyAgentPermission):
                     "assignee": { "id": getattr(db_issue.job.segment.task.assignee, 'id', None) }
                 },
                 "job": {
-                    "assignee": { "id": getattr(db_issue.job.assignee, 'id', None) }
+                    "worker": { "id": getattr(db_issue.job.worker, 'id', None) },
+                    "checker": { "id": getattr(db_issue.job.checker, 'id', None) }
                 },
                 "issue": {
                     "owner": { "id": getattr(db_issue.owner, 'id', None) },
@@ -1335,6 +1341,7 @@ class IssuePermission(OpenPolicyAgentPermission):
             'partial_update': Scopes.UPDATE,
             'retrieve': Scopes.VIEW,
             'comments': Scopes.VIEW,
+            'content': Scopes.VIEW,
         }.get(view.action, None)]
 
     def get_resource(self):
@@ -1355,7 +1362,8 @@ class IssuePermission(OpenPolicyAgentPermission):
                     "assignee": { "id": getattr(db_job.segment.task.assignee, 'id', None) }
                 },
                 "job": {
-                    "assignee": { "id": getattr(db_job.assignee, 'id', None) }
+                    "worker": { "id": getattr(db_job.worker, 'id', None) },
+                    "checker": { "id": getattr(db_job.checker, 'id', None) }
                 },
                 'organization': {
                     "id": getattr(organization, 'id', None)

@@ -1,0 +1,10 @@
+<!-- templates/admin/user_changelist.html -->
+
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+<li>
+    <a href="{% url 'admin:bulk-create-users' %}" class="addlink">Bulk Create Users</a>
+</li>
+{{ block.super }}
+{% endblock %}

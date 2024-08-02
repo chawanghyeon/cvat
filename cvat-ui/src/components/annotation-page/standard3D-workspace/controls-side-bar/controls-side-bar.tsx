@@ -1,11 +1,6 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from 'antd/lib/layout';
-import { ActiveControl } from 'reducers';
+import { ActiveControl, ObjectType, ShapeType } from 'reducers';
 import { Label, LabelType } from 'cvat-core-wrapper';
 import { Canvas3d as Canvas } from 'cvat-canvas3d-wrapper';
 import MoveControl, {
@@ -29,6 +24,9 @@ import SplitControl, {
 import GlobalHotKeys, { KeyMap } from 'utils/mousetrap-react';
 import ControlVisibilityObserver from 'components/annotation-page/standard-workspace/controls-side-bar/control-visibility-observer';
 import { filterApplicableForType } from 'utils/filter-applicable-labels';
+import { CuboidDrawingMethod, RectDrawingMethod } from 'cvat-canvas-wrapper';
+import DrawSettingsControl from './draw-settings-control';
+import DrawBrushControl from './draw-brush-control';
 
 interface Props {
     keyMap: KeyMap;
@@ -37,6 +35,8 @@ interface Props {
     normalizedKeyMap: Record<string, string>;
     labels: Label[];
     jobInstance: any;
+    activeShapeType: ShapeType;
+    selectedLabelID: number;
     repeatDrawShape(): void;
     redrawShape(): void;
     pasteShape(): void;
@@ -44,6 +44,14 @@ interface Props {
     mergeObjects(enabled: boolean): void;
     splitTrack(enabled: boolean): void;
     resetGroup(): void;
+    onDrawStart(
+        shapeType: ShapeType,
+        labelID: number,
+        objectType: ObjectType,
+        points?: number,
+        rectDrawingMethod?: RectDrawingMethod,
+        cuboidDrawingMethod?: CuboidDrawingMethod,
+    ): void;
 }
 
 const ObservedCursorControl = ControlVisibilityObserver<CursorControlProps>(CursorControl);
@@ -67,9 +75,15 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
         mergeObjects,
         splitTrack,
         resetGroup,
+        activeShapeType,
+        selectedLabelID,
+        onDrawStart,
     } = props;
 
+    const [labelID, setLabelID] = useState(selectedLabelID);
     const applicableLabels = filterApplicableForType(LabelType.CUBOID, labels);
+
+    const isDrawing = activeControl === ActiveControl.DRAW_CUBOID;
     const preventDefault = (event: KeyboardEvent | undefined): void => {
         if (event) {
             event.preventDefault();
@@ -121,8 +135,20 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
     }
 
     const controlsDisabled = !applicableLabels.length;
+
+    /** 라벨 변경 이벤트 */
+    const onChangeLabel = (value: Label | null) : void => {
+        canvasInstance.cancel();
+        if (value == null) {
+            return;
+        }
+
+        setLabelID(value.id as number);
+        onDrawStart(ShapeType.CUBOID, value.id as number, ObjectType.SHAPE);
+        repeatDrawShape();
+    };
     return (
-        <Layout.Sider className='cvat-canvas-controls-sidebar' theme='light' width={44}>
+        <div className='cvat-canvas-controls-sidebar'>
             <GlobalHotKeys keyMap={subKeyMap} handlers={handlers} />
             <ObservedCursorControl
                 cursorShortkey={normalizedKeyMap.CANCEL}
@@ -134,10 +160,12 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
                 canvasInstance={canvasInstance}
                 isDrawing={activeControl === ActiveControl.DRAW_CUBOID}
                 disabled={controlsDisabled}
+                onDraw={repeatDrawShape}
             />
-
-            <hr />
-
+            <DrawBrushControl
+                canvasInstance={canvasInstance}
+                disabled={!applicableLabels.length}
+            />
             <ObservedMergeControl
                 mergeObjects={mergeObjects}
                 canvasInstance={canvasInstance}
@@ -179,6 +207,14 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
                     },
                 }}
             />
-        </Layout.Sider>
+            {isDrawing && (
+                <DrawSettingsControl
+                    activeShapeType={activeShapeType}
+                    labels={applicableLabels}
+                    selectedLabelID={labelID}
+                    onChangeLabel={onChangeLabel}
+                />
+            )}
+        </div>
     );
 }

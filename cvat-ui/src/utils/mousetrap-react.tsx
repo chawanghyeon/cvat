@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect } from 'react';
 import Mousetrap from 'mousetrap';
 
@@ -11,6 +7,7 @@ export interface KeyMapItem {
     sequences: string[];
     displayedSequences?: string[];
     action: 'keydown' | 'keyup' | 'keypress';
+    tKey?: string;
     applicable: any[];
 }
 

@@ -1,7 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import logging
 import sys
 import os.path as osp

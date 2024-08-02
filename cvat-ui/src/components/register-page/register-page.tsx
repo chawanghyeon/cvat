@@ -1,15 +1,13 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corp
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
-import { withRouter } from 'react-router-dom';
+import { RouteComponentProps, useHistory } from 'react-router';
+import { Link, withRouter } from 'react-router-dom';
 import { Row, Col } from 'antd/lib/grid';
+import Layout from 'antd/lib/layout';
+import Button from 'antd/lib/button';
+import Icon from '@ant-design/icons';
+import { SignUpIcon, SALMONLogo } from 'icons';
 
 import { UserAgreement } from 'reducers';
-import SigningLayout, { formSizes } from 'components/signing-common/signing-layout';
 import RegisterForm, { RegisterData, UserConfirmation } from './register-form';
 
 interface RegisterPageComponentProps {
@@ -26,13 +24,25 @@ interface RegisterPageComponentProps {
 }
 
 function RegisterPageComponent(props: RegisterPageComponentProps & RouteComponentProps): JSX.Element {
+    const sizes = {
+        style: {
+            width: 640,
+            padding: '140px 110px',
+        },
+    };
+
     const { fetching, userAgreements, onRegister } = props;
+    const { Content } = Layout;
+    const history = useHistory();
 
     return (
-        <SigningLayout>
-            <Col {...formSizes.wrapper}>
-                <Row justify='center'>
-                    <Col {...formSizes.form}>
+        <Layout>
+            <Content>
+                <Row justify='center' align='middle' style={{ height: '100%' }}>
+                    <Col {...sizes} className='shadow-box'>
+                        <Row justify='center' align='top'>
+                            <Icon component={SignUpIcon} className='top-icon' />
+                        </Row>
                         <RegisterForm
                             fetching={fetching}
                             userAgreements={userAgreements}
@@ -41,16 +51,29 @@ function RegisterPageComponent(props: RegisterPageComponentProps & RouteComponen
                                     registerData.username,
                                     registerData.firstName,
                                     registerData.lastName,
-                                    registerData.email,
+                                    registerData.username + '@salmon.com',
                                     registerData.password,
                                     registerData.confirmations,
                                 );
                             }}
                         />
+                        <Col>
+                            <Button
+                                size='large'
+                                type='default'
+                                onClick={() => history.push('/auth/login')}
+                                block
+                            >
+                                Go to login page
+                            </Button>
+                        </Col>
+                        <Row justify='center' align='bottom'>
+                            <Icon component={SALMONLogo} className='logo-icon' />
+                        </Row>
                     </Col>
                 </Row>
-            </Col>
-        </SigningLayout>
+            </Content>
+        </Layout>
     );
 }
 

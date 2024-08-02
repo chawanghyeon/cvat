@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Label, ObjectState, LabelType } from 'cvat-core-wrapper';
 
 export function filterApplicableForType(type: LabelType, labels: Label[]): Label[] {

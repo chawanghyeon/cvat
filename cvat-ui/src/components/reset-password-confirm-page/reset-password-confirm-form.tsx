@@ -1,14 +1,9 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import Form from 'antd/lib/form';
 import Button from 'antd/lib/button';
 import { LockOutlined } from '@ant-design/icons';
 import Input from 'antd/lib/input';
-
 import { validateConfirmation, validatePassword } from 'components/register-page/register-form';
 
 export interface ResetPasswordConfirmData {
@@ -17,7 +12,6 @@ export interface ResetPasswordConfirmData {
     uid: string;
     token: string;
 }
-
 interface Props {
     fetching: boolean;
     onSubmit(resetPasswordConfirmData: ResetPasswordConfirmData): void;
@@ -79,6 +73,7 @@ function ResetPasswordConfirmFormComponent({ fetching, onSubmit }: Props): JSX.E
                     className='cvat-reset-password-confirm-form-button'
                     loading={fetching}
                     disabled={fetching}
+                    style={{ width: '100%' }}
                 >
                     Change password
                 </Button>

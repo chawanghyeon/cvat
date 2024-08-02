@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect } from 'react';
 import { Redirect, useLocation, useHistory } from 'react-router';
 import notification from 'antd/lib/notification';

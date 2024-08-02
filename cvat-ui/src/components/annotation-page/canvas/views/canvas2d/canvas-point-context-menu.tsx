@@ -1,16 +1,13 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import Button from 'antd/lib/button';
-import { DeleteOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import Icon from '@ant-design/icons';
 import { connect } from 'react-redux';
 
 import { CombinedState, ContextMenuType } from 'reducers';
 import { updateAnnotationsAsync, updateCanvasContextMenu } from 'actions/annotation-actions';
 import CVATTooltip from 'components/common/cvat-tooltip';
+import { LocationIcon, TrashGrayIcon } from 'icons';
 
 interface StateToProps {
     activatedState: any | null;
@@ -106,7 +103,7 @@ function CanvasPointContextMenu(props: Props): React.ReactPortal | null {
                 <CVATTooltip title='Delete point [Alt + dblclick]'>
                     <Button
                         type='link'
-                        icon={<DeleteOutlined />}
+                        icon={<Icon component={TrashGrayIcon} />}
                         onClick={onPointDelete}
                         className='cvat-canvas-point-context-menu-delete'
                     >
@@ -116,7 +113,7 @@ function CanvasPointContextMenu(props: Props): React.ReactPortal | null {
                 {contextMenuFor && contextMenuFor.shapeType === 'polygon' && (
                     <Button
                         type='link'
-                        icon={<EnvironmentOutlined />}
+                        icon={<Icon component={LocationIcon} />}
                         onClick={onSetStartPoint}
                         className='cvat-canvas-point-context-menu-set-start'
                     >

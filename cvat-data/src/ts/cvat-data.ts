@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Mutex } from 'async-mutex';
 import { MP4Reader, Bytestream } from './3rdparty/mp4';
 import ZipDecoder from './unzip_imgs.worker';

@@ -1,10 +1,7 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Store } from 'antd/lib/form/interface';
 import { User } from 'components/task-page/user-selector';
 import { getCore } from 'cvat-core-wrapper';
+import { Cookies } from 'react-cookie';
 import { ActionUnion, createAction, ThunkAction } from 'utils/redux';
 
 const core = getCore();
@@ -38,67 +35,69 @@ export enum OrganizationActionsTypes {
     UPDATE_ORGANIZATION_MEMBER = 'UPDATE_ORGANIZATION_MEMBER',
     UPDATE_ORGANIZATION_MEMBER_SUCCESS = 'UPDATE_ORGANIZATION_MEMBER_SUCCESS',
     UPDATE_ORGANIZATION_MEMBER_FAILED = 'UPDATE_ORGANIZATION_MEMBER_FAILED',
+    GET_STATISTIC = 'GET_STATISTIC',
+    GET_STATISTIC_SUCCESS = 'GET_STATISTIC_SUCCESS',
+    GET_STATISTIC_FAILED = 'GET_STATISTIC_FAILED',
+    GET_UMAP = 'GET_UMAP',
+    GET_UMAP_SUCCESS = 'GET_UMAP_SUCCESS',
+    GET_UMAP_FAILED = 'GET_UMAP_FAILED',
+    GET_LABELS_SUCCESS = 'GET_LABELS_SUCCESS',
 }
 
 const organizationActions = {
     getOrganizations: () => createAction(OrganizationActionsTypes.GET_ORGANIZATIONS),
-    getOrganizationsSuccess: (list: any[]) => createAction(
-        OrganizationActionsTypes.GET_ORGANIZATIONS_SUCCESS, { list },
-    ),
+    getOrganizationsSuccess: (list: any[]) =>
+        createAction(OrganizationActionsTypes.GET_ORGANIZATIONS_SUCCESS, { list }),
     getOrganizationsFailed: (error: any) => createAction(OrganizationActionsTypes.GET_ORGANIZATIONS_FAILED, { error }),
     createOrganization: () => createAction(OrganizationActionsTypes.CREATE_ORGANIZATION),
-    createOrganizationSuccess: (organization: any) => createAction(
-        OrganizationActionsTypes.CREATE_ORGANIZATION_SUCCESS, { organization },
-    ),
-    createOrganizationFailed: (slug: string, error: any) => createAction(
-        OrganizationActionsTypes.CREATE_ORGANIZATION_FAILED, { slug, error },
-    ),
+    createOrganizationSuccess: (organization: any) =>
+        createAction(OrganizationActionsTypes.CREATE_ORGANIZATION_SUCCESS, { organization }),
+    createOrganizationFailed: (slug: string, error: any) =>
+        createAction(OrganizationActionsTypes.CREATE_ORGANIZATION_FAILED, { slug, error }),
     updateOrganization: () => createAction(OrganizationActionsTypes.UPDATE_ORGANIZATION),
-    updateOrganizationSuccess: (organization: any) => createAction(
-        OrganizationActionsTypes.UPDATE_ORGANIZATION_SUCCESS, { organization },
-    ),
-    updateOrganizationFailed: (slug: string, error: any) => createAction(
-        OrganizationActionsTypes.UPDATE_ORGANIZATION_FAILED, { slug, error },
-    ),
-    activateOrganizationSuccess: (organization: any | null) => createAction(
-        OrganizationActionsTypes.ACTIVATE_ORGANIZATION_SUCCESS, { organization },
-    ),
-    activateOrganizationFailed: (error: any, slug: string | null) => createAction(
-        OrganizationActionsTypes.ACTIVATE_ORGANIZATION_FAILED, { slug, error },
-    ),
+    updateOrganizationSuccess: (organization: any) =>
+        createAction(OrganizationActionsTypes.UPDATE_ORGANIZATION_SUCCESS, { organization }),
+    updateOrganizationFailed: (slug: string, error: any) =>
+        createAction(OrganizationActionsTypes.UPDATE_ORGANIZATION_FAILED, { slug, error }),
+    activateOrganizationSuccess: (organization: any | null) =>
+        createAction(OrganizationActionsTypes.ACTIVATE_ORGANIZATION_SUCCESS, { organization }),
+    activateOrganizationFailed: (error: any, slug: string | null) =>
+        createAction(OrganizationActionsTypes.ACTIVATE_ORGANIZATION_FAILED, { slug, error }),
     removeOrganization: () => createAction(OrganizationActionsTypes.REMOVE_ORGANIZATION),
-    removeOrganizationSuccess: (slug: string) => createAction(
-        OrganizationActionsTypes.REMOVE_ORGANIZATION_SUCCESS, { slug },
-    ),
-    removeOrganizationFailed: (error: any, slug: string) => createAction(
-        OrganizationActionsTypes.REMOVE_ORGANIZATION_FAILED, { error, slug },
-    ),
+    removeOrganizationSuccess: (slug: string) =>
+        createAction(OrganizationActionsTypes.REMOVE_ORGANIZATION_SUCCESS, { slug }),
+    removeOrganizationFailed: (error: any, slug: string) =>
+        createAction(OrganizationActionsTypes.REMOVE_ORGANIZATION_FAILED, { error, slug }),
     inviteOrganizationMembers: () => createAction(OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBERS),
-    inviteOrganizationMembersFailed: (error: any) => createAction(
-        OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBERS_FAILED, { error },
-    ),
+    inviteOrganizationMembersFailed: (error: any) =>
+        createAction(OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBERS_FAILED, { error }),
     inviteOrganizationMembersDone: () => createAction(OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBERS_DONE),
-    inviteOrganizationMemberSuccess: (email: string) => createAction(
-        OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBER_SUCCESS, { email },
-    ),
-    inviteOrganizationMemberFailed: (email: string, error: any) => createAction(
-        OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBER_FAILED, { email, error },
-    ),
+    inviteOrganizationMemberSuccess: (email: string) =>
+        createAction(OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBER_SUCCESS, { email }),
+    inviteOrganizationMemberFailed: (email: string, error: any) =>
+        createAction(OrganizationActionsTypes.INVITE_ORGANIZATION_MEMBER_FAILED, { email, error }),
     leaveOrganization: () => createAction(OrganizationActionsTypes.LEAVE_ORGANIZATION),
     leaveOrganizationSuccess: () => createAction(OrganizationActionsTypes.LEAVE_ORGANIZATION_SUCCESS),
-    leaveOrganizationFailed: (error: any) => createAction(
-        OrganizationActionsTypes.LEAVE_ORGANIZATION_FAILED, { error },
-    ),
+    leaveOrganizationFailed: (error: any) =>
+        createAction(OrganizationActionsTypes.LEAVE_ORGANIZATION_FAILED, { error }),
     removeOrganizationMember: () => createAction(OrganizationActionsTypes.REMOVE_ORGANIZATION_MEMBER),
     removeOrganizationMemberSuccess: () => createAction(OrganizationActionsTypes.REMOVE_ORGANIZATION_MEMBER_SUCCESS),
-    removeOrganizationMemberFailed: (username: string, error: any) => createAction(
-        OrganizationActionsTypes.REMOVE_ORGANIZATION_MEMBER_FAILED, { username, error },
-    ),
+    removeOrganizationMemberFailed: (username: string, error: any) =>
+        createAction(OrganizationActionsTypes.REMOVE_ORGANIZATION_MEMBER_FAILED, { username, error }),
     updateOrganizationMember: () => createAction(OrganizationActionsTypes.UPDATE_ORGANIZATION_MEMBER),
     updateOrganizationMemberSuccess: () => createAction(OrganizationActionsTypes.UPDATE_ORGANIZATION_MEMBER_SUCCESS),
-    updateOrganizationMemberFailed: (username: string, role: string, error: any) => createAction(
-        OrganizationActionsTypes.UPDATE_ORGANIZATION_MEMBER_FAILED, { username, role, error },
-    ),
+    updateOrganizationMemberFailed: (username: string, role: string, error: any) =>
+        createAction(OrganizationActionsTypes.UPDATE_ORGANIZATION_MEMBER_FAILED, { username, role, error }),
+    getStatistic: () => createAction(OrganizationActionsTypes.GET_STATISTIC),
+    getStatisticSuccess: (statistic: any) =>
+        createAction(OrganizationActionsTypes.GET_STATISTIC_SUCCESS, { statistic }),
+    getStatisticFailed: (error: any) => createAction(OrganizationActionsTypes.GET_STATISTIC_FAILED, { error }),
+    getUmap: () => createAction(OrganizationActionsTypes.GET_UMAP),
+    getUmapSuccess: (umap: any) =>
+        createAction(OrganizationActionsTypes.GET_UMAP_SUCCESS, { umap }),
+    getUmapFailed: (error: any) => createAction(OrganizationActionsTypes.GET_UMAP_FAILED, { error }),
+    getLabelsSuccess: (labels: any) =>
+        createAction(OrganizationActionsTypes.GET_LABELS_SUCCESS, { labels }),
 };
 
 export function getOrganizationsAsync(): ThunkAction {
@@ -112,6 +111,17 @@ export function getOrganizationsAsync(): ThunkAction {
             try {
                 // this action is dispatched after user is authentificated
                 // need to configure organization at cvat-core immediately to get relevant data
+
+                const cookie = new Cookies();
+                if (cookie.get('organization')) {
+                    console.log(`${cookie.get('organization')} exist`);
+                    localStorage.setItem('currentOrganization', cookie.get('organization'));
+                } else if (cookie.get('organization') === '') {
+                    console.log('organization reset');
+                    cookie.remove('organization');
+                    localStorage.removeItem('currentOrganization');
+                }
+
                 const curSlug = localStorage.getItem('currentOrganization');
                 if (curSlug) {
                     currentOrganization =
@@ -262,5 +272,37 @@ export function updateOrganizationMemberAsync(
         }
     };
 }
+
+export function getStatistic(userId: any): ThunkAction {
+    return async function (dispatch) {
+        dispatch(organizationActions.getStatistic());
+        try {
+            const statistic = await core.organizations.getStatistic(userId);
+            dispatch(organizationActions.getStatisticSuccess(statistic));
+        } catch (error) {
+            dispatch(organizationActions.getStatisticFailed(error));
+        }
+    };
+}
+
+export function getUmap(labelId: any): ThunkAction {
+    return async function (dispatch) {
+        dispatch(organizationActions.getUmap());
+        try {
+            const umap = await core.organizations.getUmap(labelId);
+            dispatch(organizationActions.getUmapSuccess(umap));
+        } catch (error) {
+            dispatch(organizationActions.getUmapFailed(error));
+        }
+    };
+}
+
+export function getLabels(org: string): ThunkAction {
+    return async function (dispatch) {
+        const labels = await core.labels.get({org: org});
+        dispatch(organizationActions.getLabelsSuccess(labels));
+    }
+}
+
 
 export type OrganizationActions = ActionUnion<typeof organizationActions>;

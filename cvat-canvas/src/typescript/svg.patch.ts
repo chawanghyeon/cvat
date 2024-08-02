@@ -1,7 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 /* eslint-disable */
 import * as SVG from 'svg.js';
 import 'svg.draggable.js';
@@ -969,7 +965,7 @@ function getTopDown(edgeIndex: EdgeIndex): number[] {
             const computedStyles = getComputedStyle(this.node);
             const fillColor = computedStyles['fill'] || this.attr('fill');
             const strokeColor = computedStyles['stroke'] || this.attr('stroke');
-            const selectedColor = this.attr('face-stroke') || '#b0bec5';
+            const selectedColor = this.attr('face-stroke') || '#88ff8e';
             this.frontTopEdge.stroke({ color: selectedColor });
             this.frontLeftEdge.stroke({ color: selectedColor });
             this.frontBotEdge.stroke({ color: selectedColor });
@@ -982,7 +978,7 @@ function getTopDown(edgeIndex: EdgeIndex): number[] {
 
             this.bot.stroke({ color: strokeColor }).fill({ color: fillColor });
             this.top.stroke({ color: strokeColor }).fill({ color: fillColor });
-            this.face.stroke({ color: strokeColor, width: 0 }).fill({ color: fillColor });
+            this.face.stroke({ color: strokeColor, width: 0 }).fill({ color: selectedColor });
             this.right.stroke({ color: strokeColor }).fill({ color: fillColor });
             this.dorsal.stroke({ color: strokeColor }).fill({ color: fillColor });
             this.left.stroke({ color: strokeColor }).fill({ color: fillColor });

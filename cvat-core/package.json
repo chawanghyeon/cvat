@@ -10,8 +10,6 @@
     "type-check": "tsc --noEmit",
     "type-check:watch": "yarn run type-check --watch"
   },
-  "author": "CVAT.ai",
-  "license": "MIT",
   "browserslist": [
     "Chrome >= 63",
     "Firefox > 58",

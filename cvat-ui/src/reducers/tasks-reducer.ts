@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { AnyAction } from 'redux';
 import { BoundariesActionTypes } from 'actions/boundaries-actions';
 import { TasksActionTypes } from 'actions/tasks-actions';
@@ -21,6 +16,7 @@ const defaultState: TasksState = {
     },
     count: 0,
     current: [],
+    issues: [],
     previews: {},
     gettingQuery: {
         page: 1,
@@ -37,6 +33,17 @@ const defaultState: TasksState = {
 
 export default (state: TasksState = defaultState, action: AnyAction): TasksState => {
     switch (action.type) {
+        case TasksActionTypes.GET_TASKSISSUES_SUCCESS: {
+            return {
+                ...state,
+                issues: action.payload.array,
+            };
+        }
+        case TasksActionTypes.GET_TASKSISSUES_FAILED:
+            return {
+                ...state,
+                issues: action.payload.error,
+            };
         case TasksActionTypes.GET_TASKS:
             return {
                 ...state,

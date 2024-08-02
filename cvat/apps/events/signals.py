@@ -1,7 +1,3 @@
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.core.exceptions import ObjectDoesNotExist

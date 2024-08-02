@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState, useEffect, useRef } from 'react';
 import { SelectValue, RefSelectProps } from 'antd/lib/select';
 import Autocomplete from 'antd/lib/auto-complete';
@@ -10,6 +5,9 @@ import Input from 'antd/lib/input';
 import debounce from 'lodash/debounce';
 
 import { getCore } from 'cvat-core-wrapper';
+import { UserIcon, DownIcon } from 'icons';
+import { useTranslation } from 'react-i18next';
+import { Tooltip } from 'antd';
 
 const core = getCore();
 
@@ -23,7 +21,25 @@ interface Props {
     username?: string;
     className?: string;
     onSelect: (user: User | null) => void;
+    prefix?: boolean;
+    suffix?: boolean;
 }
+
+const compareSortArray = (arr: any) => {
+    const sortedResult = arr.sort((a, b) => {
+        // 숫자가 포함된 부분까지만 비교
+        const aNumber = parseInt(a.username.match(/\d+/)?.[0] || '0');
+        const bNumber = parseInt(b.username.match(/\d+/)?.[0] || '0');
+        // 숫자가 같으면 문자열을 비교, 아니면 숫자를 비교
+        if (aNumber !== bNumber) {
+            return aNumber - bNumber;
+        } else {
+            // 숫자가 같으면 문자열을 비교
+            return a.username.localeCompare(b.username);
+        }
+    });
+    return sortedResult;
+};
 
 const searchUsers = debounce(
     (searchValue: string, setUsers: (users: User[]) => void): void => {
@@ -35,7 +51,21 @@ const searchUsers = debounce(
             })
             .then((result: User[]) => {
                 if (result) {
-                    setUsers(result);
+                    // 사용자 객체의 username으로 정렬
+                    const sortedResult = result.sort((a, b) => {
+                        // 숫자가 포함된 부분까지만 비교
+                        const aNumber = parseInt(a.username.match(/\d+/)?.[0] || '0');
+                        const bNumber = parseInt(b.username.match(/\d+/)?.[0] || '0');
+                        // 숫자가 같으면 문자열을 비교, 아니면 숫자를 비교
+                        if (aNumber !== bNumber) {
+                            return aNumber - bNumber;
+                        } else {
+                            // 숫자가 같으면 문자열을 비교
+                            return a.username.localeCompare(b.username);
+                        }
+                    });
+                    console.log('sortedResult ; ', sortedResult);
+                    setUsers(compareSortArray(result));
                 }
             });
     },
@@ -46,9 +76,8 @@ const searchUsers = debounce(
 );
 
 export default function UserSelector(props: Props): JSX.Element {
-    const {
-        value, className, username, onSelect,
-    } = props;
+    const { t } = useTranslation();
+    const { value, className, username, onSelect, prefix, suffix } = props;
     const [searchPhrase, setSearchPhrase] = useState(username || '');
     const [initialUsers, setInitialUsers] = useState<User[]>([]);
     const [users, setUsers] = useState<User[]>([]);
@@ -63,14 +92,14 @@ export default function UserSelector(props: Props): JSX.Element {
     }, []);
 
     useEffect(() => {
-        setUsers(initialUsers);
+        setUsers(compareSortArray(initialUsers));
     }, [initialUsers]);
 
     useEffect(() => {
         if (searchPhrase) {
             searchUsers(searchPhrase, setUsers);
         } else {
-            setUsers(initialUsers);
+            setUsers(compareSortArray(initialUsers));
         }
     }, [searchPhrase]);
 
@@ -94,10 +123,20 @@ export default function UserSelector(props: Props): JSX.Element {
         }
     };
 
+    const renderOption = (username: string | null | undefined) => (
+        <Tooltip title={`${username}`} placement='right'>
+            <span>{username}</span>
+        </Tooltip>
+    );
     const handleSelect = (_value: SelectValue): void => {
         const user = _value ? users.filter((_user) => _user.id === +_value)[0] : null;
+        console.log('user : ', user);
         if ((user?.id || null) !== (value?.id || null)) {
             onSelect(user);
+            if (user) {
+                setSearchPhrase(user.username);
+                onSelect(user);
+            }
         }
     };
 
@@ -107,7 +146,7 @@ export default function UserSelector(props: Props): JSX.Element {
                 core.users.get({ id: value.id }).then((result: User[]) => {
                     const [user] = result;
                     if (user) {
-                        setUsers([...users, user]);
+                        setUsers(compareSortArray([...users, user]));
                     }
                 });
             }
@@ -118,20 +157,27 @@ export default function UserSelector(props: Props): JSX.Element {
 
     const combinedClassName = className ? `${className} cvat-user-search-field` : 'cvat-user-search-field';
     return (
-        <Autocomplete
-            ref={autocompleteRef}
-            value={searchPhrase}
-            placeholder='Select a user'
-            onSearch={handleSearch}
-            onSelect={handleSelect}
-            onBlur={onBlur}
-            className={combinedClassName}
-            options={users.map((user) => ({
-                value: user.id.toString(),
-                label: user.username,
-            }))}
-        >
-            <Input onPressEnter={() => autocompleteRef.current?.blur()} />
-        </Autocomplete>
+        <div className='cvat-user-search-assign' style={{ minWidth: 150 }}>
+            <Autocomplete
+                ref={autocompleteRef}
+                value={searchPhrase}
+                placeholder={t('search.selectAUser')}
+                onSearch={handleSearch}
+                onSelect={handleSelect}
+                onBlur={onBlur}
+                className={combinedClassName}
+                options={users.map((user) => ({
+                    value: user.id.toString(),
+                    label: renderOption(user.username),
+                }))}
+            >
+                <Input
+                    style={{ minWidth: 150 }}
+                    onPressEnter={() => autocompleteRef.current?.blur()}
+                    prefix={prefix ? <UserIcon /> : null}
+                    suffix={suffix ? <DownIcon /> : null}
+                />
+            </Autocomplete>
+        </div>
     );
 }

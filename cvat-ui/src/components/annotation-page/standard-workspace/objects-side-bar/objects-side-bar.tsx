@@ -1,22 +1,14 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { Dispatch, TransitionEvent } from 'react';
 import { AnyAction } from 'redux';
 import { connect } from 'react-redux';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import Text from 'antd/lib/typography/Text';
-import Tabs from 'antd/lib/tabs';
 import Layout from 'antd/lib/layout';
 
 import { CombinedState } from 'reducers';
 import { DimensionType } from 'cvat-core-wrapper';
 import LabelsList from 'components/annotation-page/standard-workspace/objects-side-bar/labels-list';
 import { collapseSidebar as collapseSidebarAction } from 'actions/annotation-actions';
-import AppearanceBlock from 'components/annotation-page/appearance-block';
 import IssuesListComponent from 'components/annotation-page/standard-workspace/objects-side-bar/issues-list';
 
 interface OwnProps {
@@ -56,12 +48,15 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>): DispatchToProps {
 
 function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.Element {
     const {
-        sidebarCollapsed, collapseSidebar, objectsList, jobInstance,
+        sidebarCollapsed, canvasInstance, collapseSidebar, jobInstance,
     } = props;
 
     const collapse = (): void => {
         const [collapser] = window.document.getElementsByClassName('cvat-objects-sidebar');
         const listener = (event: TransitionEvent): void => {
+            if (canvasInstance == null) {
+                return;
+            }
             if (event.target && event.propertyName === 'width' && event.target === collapser) {
                 window.dispatchEvent(new Event('resize'));
                 (collapser as HTMLElement).removeEventListener('transitionend', listener as any);
@@ -81,7 +76,7 @@ function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.E
             className='cvat-objects-sidebar'
             theme='light'
             width={300}
-            collapsedWidth={0}
+            collapsedWidth={40}
             reverseArrow
             collapsible
             trigger={null}
@@ -94,25 +89,13 @@ function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.E
                     ant-layout-sider-zero-width-trigger-left`}
                 onClick={collapse}
             >
-                {sidebarCollapsed ? <MenuFoldOutlined title='Show' /> : <MenuUnfoldOutlined title='Hide' />}
+                {sidebarCollapsed ? <div className='color-icon'><MenuFoldOutlined title='Show' /></div> : <MenuUnfoldOutlined title='Hide' />}
             </span>
 
-            <Tabs type='card' defaultActiveKey='objects' className='cvat-objects-sidebar-tabs'>
-                <Tabs.TabPane tab={<Text strong>Objects</Text>} key='objects'>
-                    {objectsList}
-                </Tabs.TabPane>
-                <Tabs.TabPane forceRender tab={<Text strong>Labels</Text>} key='labels'>
-                    <LabelsList />
-                </Tabs.TabPane>
-
-                {is2D ? (
-                    <Tabs.TabPane tab={<Text strong>Issues</Text>} key='issues'>
-                        <IssuesListComponent />
-                    </Tabs.TabPane>
-                ) : null}
-            </Tabs>
-
-            {!sidebarCollapsed && <AppearanceBlock />}
+            {is2D ? (
+                <IssuesListComponent />
+            ) : null}
+            {!sidebarCollapsed && <LabelsList />}
         </Layout.Sider>
     );
 }

@@ -1,8 +1,4 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
+/* eslint-disable @typescript-eslint/dot-notation */
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -20,7 +16,6 @@ import 'antd/dist/antd.css';
 import LogoutComponent from 'components/logout-component';
 import LoginPageContainer from 'containers/login-page/login-page';
 import LoginWithTokenComponent from 'components/login-with-token/login-with-token';
-import LoginWithSSOComponent from 'components/login-with-social-app/login-with-sso';
 import LoginWithSocialAppComponent from 'components/login-with-social-app/login-with-social-app';
 import RegisterPageContainer from 'containers/register-page/register-page';
 import ResetPasswordPageConfirmComponent from 'components/reset-password-confirm-page/reset-password-confirm-page';
@@ -34,9 +29,9 @@ import ExportDatasetModal from 'components/export-dataset/export-dataset-modal';
 import ExportBackupModal from 'components/export-backup/export-backup-modal';
 import ImportDatasetModal from 'components/import-dataset/import-dataset-modal';
 import ImportBackupModal from 'components/import-backup/import-backup-modal';
+import ModelsPageContainer from 'containers/models-page/models-page';
 
 import JobsPageComponent from 'components/jobs-page/jobs-page';
-import ModelsPageComponent from 'components/models-page/models-page';
 
 import TasksPageContainer from 'containers/tasks-page/tasks-page';
 import CreateTaskPageContainer from 'containers/create-task-page/create-task-page';
@@ -51,6 +46,7 @@ import CreateCloudStoragePageComponent from 'components/create-cloud-storage-pag
 import UpdateCloudStoragePageComponent from 'components/update-cloud-storage-page/update-cloud-storage-page';
 
 import OrganizationPage from 'components/organization-page/organization-page';
+import OrganizationList from 'components/organization-page/organization-list';
 import CreateOrganizationComponent from 'components/create-organization-page/create-organization-page';
 import { ShortcutsContextProvider } from 'components/shortcuts.context';
 
@@ -61,7 +57,7 @@ import UpdateWebhookPage from 'components/setup-webhook-pages/update-webhook-pag
 import AnnotationPageContainer from 'containers/annotation-page/annotation-page';
 import { getCore } from 'cvat-core-wrapper';
 import GlobalHotKeys, { KeyMap } from 'utils/mousetrap-react';
-import { NotificationsState } from 'reducers';
+import { NotificationsState, PluginsState } from 'reducers';
 import { customWaViewHit } from 'utils/environment';
 import showPlatformNotification, {
     platformInfo,
@@ -74,7 +70,11 @@ import EventRecorder from 'utils/controls-logger';
 import EmailConfirmationPage from './email-confirmation-pages/email-confirmed';
 import EmailVerificationSentPage from './email-confirmation-pages/email-verification-sent';
 import IncorrectEmailConfirmationPage from './email-confirmation-pages/incorrect-email-confirmation';
-import CreateModelPage from './create-model-page/create-model-page';
+import statisticsPage from './statistics-page/statistics-page';
+// import UmapPage from './umap-page/umap-page';
+import ModalContainer from './modal/modal-container';
+// billing page 비활성화
+// import BillingPage from './billing-page/billing-page';
 
 interface CVATAppProps {
     loadFormats: () => void;
@@ -109,6 +109,7 @@ interface CVATAppProps {
     notifications: NotificationsState;
     user: any;
     isModelPluginActive: boolean;
+    pluginComponents: PluginsState['components'];
 }
 
 interface CVATAppState {
@@ -129,7 +130,10 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
         const core = getCore();
         const { history, location } = this.props;
         const {
-            HEALTH_CHECK_RETRIES, HEALTH_CHECK_PERIOD, HEALTH_CHECK_REQUEST_TIMEOUT, SERVER_UNAVAILABLE_COMPONENT,
+            HEALTH_CHECK_RETRIES,
+            HEALTH_CHECK_PERIOD,
+            HEALTH_CHECK_REQUEST_TIMEOUT,
+            SERVER_UNAVAILABLE_COMPONENT,
             RESET_NOTIFICATIONS_PATHS,
         } = appConfig;
         // configure({ ignoreRepeatedEventsWhenKeyHeldDown: false });
@@ -150,24 +154,22 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
             const shouldResetNotifications = RESET_NOTIFICATIONS_PATHS.from.some(
                 (pathname) => prevLocation.pathname === pathname,
             );
-            const pathExcluded = shouldResetNotifications && RESET_NOTIFICATIONS_PATHS.exclude.some(
-                (pathname) => newLocation.pathname.includes(pathname),
-            );
+            const pathExcluded =
+                shouldResetNotifications &&
+                RESET_NOTIFICATIONS_PATHS.exclude.some((pathname) => newLocation.pathname.includes(pathname));
             if (shouldResetNotifications && !pathExcluded) {
                 this.resetNotifications();
             }
         });
 
-        core.server.healthCheck(
-            HEALTH_CHECK_RETRIES,
-            HEALTH_CHECK_PERIOD,
-            HEALTH_CHECK_REQUEST_TIMEOUT,
-        ).then(() => {
-            this.setState({
-                healthIinitialized: true,
-                backendIsHealthy: true,
-            });
-        })
+        core.server
+            .healthCheck(HEALTH_CHECK_RETRIES, HEALTH_CHECK_PERIOD, HEALTH_CHECK_REQUEST_TIMEOUT)
+            .then(() => {
+                this.setState({
+                    healthIinitialized: true,
+                    backendIsHealthy: true,
+                });
+            })
             .catch(() => {
                 this.setState({
                     healthIinitialized: true,
@@ -178,16 +180,11 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                     title: 'Cannot connect to the server',
                     className: 'cvat-modal-cannot-connect-server',
                     closable: false,
-                    content:
-    <Text>
-        {SERVER_UNAVAILABLE_COMPONENT}
-    </Text>,
+                    content: <Text>{SERVER_UNAVAILABLE_COMPONENT}</Text>,
                 });
             });
 
-        const {
-            name, version, engine, os,
-        } = platformInfo();
+        const { name, version, engine, os } = platformInfo();
 
         if (showPlatformNotification()) {
             stopNotifications(false);
@@ -311,9 +308,7 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
     private showMessages(): void {
         function showMessage(title: string): void {
             notification.info({
-                message: (
-                    <ReactMarkdown>{title}</ReactMarkdown>
-                ),
+                message: <ReactMarkdown>{title}</ReactMarkdown>,
                 duration: null,
             });
         }
@@ -342,11 +337,14 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
             const dynamicProps = typeof className === 'undefined' ? {} : { className };
             notification.error({
                 ...dynamicProps,
-                message: (
-                    <ReactMarkdown>{title}</ReactMarkdown>
-                ),
+                message: <ReactMarkdown>{title}</ReactMarkdown>,
                 duration: null,
-                description: error.length > 300 ? 'Open the Browser Console to get details' : <ReactMarkdown>{error}</ReactMarkdown>,
+                description:
+                    error.length > 300 ? (
+                        'Open the Browser Console to get details'
+                    ) : (
+                        <ReactMarkdown>{error}</ReactMarkdown>
+                    ),
             });
 
             // eslint-disable-next-line no-console
@@ -400,18 +398,17 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
 
         const { healthIinitialized, backendIsHealthy } = this.state;
 
-        const notRegisteredUserInitialized = (userInitialized && (user == null || !user.isVerified));
+        const notRegisteredUserInitialized = userInitialized && (user == null || !user.isVerified);
         let readyForRender = userAgreementsInitialized && authActionsInitialized;
-        readyForRender = readyForRender && (notRegisteredUserInitialized ||
-            (
-                userInitialized &&
-                formatsInitialized &&
-                pluginsInitialized &&
-                aboutInitialized &&
-                organizationsInitialized &&
-                (!isModelPluginActive || modelsInitialized)
-            )
-        );
+        readyForRender =
+            readyForRender &&
+            (notRegisteredUserInitialized ||
+                (userInitialized &&
+                    formatsInitialized &&
+                    pluginsInitialized &&
+                    aboutInitialized &&
+                    organizationsInitialized &&
+                    (!isModelPluginActive || modelsInitialized)));
 
         const subKeyMap = {
             SWITCH_SHORTCUTS: keyMap.SWITCH_SHORTCUTS,
@@ -444,14 +441,29 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                         <Switch>
                                             <Route exact path='/auth/logout' component={LogoutComponent} />
                                             <Route exact path='/projects' component={ProjectsPageComponent} />
-                                            <Route exact path='/projects/create' component={CreateProjectPageComponent} />
+                                            <Route
+                                                exact
+                                                path='/projects/create'
+                                                component={CreateProjectPageComponent}
+                                            />
                                             <Route exact path='/projects/:id' component={ProjectPageComponent} />
                                             <Route exact path='/projects/:id/webhooks' component={WebhooksPage} />
                                             <Route exact path='/tasks' component={TasksPageContainer} />
                                             <Route exact path='/tasks/create' component={CreateTaskPageContainer} />
                                             <Route exact path='/tasks/:id' component={TaskPageComponent} />
-                                            <Route exact path='/tasks/:tid/jobs/:jid' component={AnnotationPageContainer} />
+                                            <Route
+                                                exact
+                                                path='/tasks/:tid/jobs/:jid'
+                                                component={AnnotationPageContainer}
+                                            />
+                                            <Route
+                                                exact
+                                                path='/tasks/:tid/jobs/:jid/frame/:fid'
+                                                component={AnnotationPageContainer}
+                                            />
                                             <Route exact path='/jobs' component={JobsPageComponent} />
+                                            <Route exact path='/statistics' component={statisticsPage} />
+                                            {/* <Route exact path='/umap' component={UmapPage} /> */}
                                             <Route exact path='/cloudstorages' component={CloudStoragesPageComponent} />
                                             <Route
                                                 exact
@@ -472,16 +484,12 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                             <Route exact path='/webhooks/create' component={CreateWebhookPage} />
                                             <Route exact path='/webhooks/update/:id' component={UpdateWebhookPage} />
                                             <Route exact path='/organization' component={OrganizationPage} />
-                                            {isModelPluginActive && (
-                                                <Route
-                                                    path='/models'
-                                                >
-                                                    <Switch>
-                                                        <Route exact path='/models' component={ModelsPageComponent} />
-                                                        <Route exact path='/models/create' component={CreateModelPage} />
-                                                    </Switch>
-                                                </Route>
-                                            )}
+                                            <Route exact path='/organizations' component={OrganizationList} />
+                                            {/* <Route exact path='/billing' component={BillingPage} /> */}
+                                            {/* models 페이지 잠시 비활성화 */}
+                                            {/* {isModelPluginActive && (
+                                                <Route exact path='/models' component={ModelsPageContainer} />
+                                            )} */}
                                             <Redirect
                                                 push
                                                 to={new URLSearchParams(location.search).get('next') || '/tasks'}
@@ -493,6 +501,7 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                     <ExportBackupModal />
                                     <ImportDatasetModal />
                                     <ImportBackupModal />
+                                    <ModalContainer />
                                     {/* eslint-disable-next-line */}
                                     <a id='downloadAnchor' target='_blank' style={{ display: 'none' }} download />
                                 </Layout.Content>
@@ -507,22 +516,17 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                     <Switch>
                         <Route exact path='/auth/register' component={RegisterPageContainer} />
                         <Route exact path='/auth/email-verification-sent' component={EmailVerificationSentPage} />
-                        <Route exact path='/auth/incorrect-email-confirmation' component={IncorrectEmailConfirmationPage} />
-                        <Route exact path='/auth/login' component={LoginPageContainer} />
                         <Route
                             exact
-                            path='/auth/login-with-token/:token'
-                            component={LoginWithTokenComponent}
+                            path='/auth/incorrect-email-confirmation'
+                            component={IncorrectEmailConfirmationPage}
                         />
+                        <Route exact path='/auth/login' component={LoginPageContainer} />
+                        <Route exact path='/auth/login-with-token/:token' component={LoginWithTokenComponent} />
                         <Route
                             exact
                             path={['/auth/login-with-social-app/', '/auth/login-with-oidc/']}
                             component={LoginWithSocialAppComponent}
-                        />
-                        <Route
-                            exact
-                            path='/auth/oidc/select-identity-provider/'
-                            component={LoginWithSSOComponent}
                         />
                         <Route exact path='/auth/password/reset' component={ResetPasswordPageComponent} />
                         <Route

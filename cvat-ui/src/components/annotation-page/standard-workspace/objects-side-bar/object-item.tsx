@@ -1,16 +1,11 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
-import React, { useCallback } from 'react';
-import Text from 'antd/lib/typography/Text';
-import Collapse from 'antd/lib/collapse';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import ObjectButtonsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-buttons';
 import ItemDetailsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-item-details';
 import { ObjectType, ShapeType, ColorBy } from 'reducers';
 import { ObjectState } from 'cvat-core-wrapper';
+import { Button } from 'antd';
+import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import ObjectItemElementComponent from './object-item-element';
 import ItemBasics from './object-item-basics';
 
@@ -81,89 +76,121 @@ function ObjectItemComponent(props: Props): JSX.Element {
             `${shapeType.toUpperCase()} ${objectType.toUpperCase()}`;
 
     const className = !activated ?
-        'cvat-objects-sidebar-state-item' :
-        'cvat-objects-sidebar-state-item cvat-objects-sidebar-state-active-item';
+        '' :
+        'cvat-objects-sidebar-state-active-item';
 
     const activateState = useCallback(() => {
         activate();
     }, []);
 
+    const [hasMounted, setHasMounted] = useState(false);
+    const [partCollapsed, setPartCollapsed] = useState(true);
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+
     return (
-        <div style={{ display: 'flex', marginBottom: '1px' }}>
-            <div className='cvat-objects-sidebar-state-item-color' style={{ background: `${color}` }} />
+        <>
             <div
-                onMouseEnter={activateState}
-                id={`cvat-objects-sidebar-state-item-${clientID}`}
+                style={{ display: 'flex' }}
                 className={className}
-                style={{ backgroundColor: `${color}88` }}
             >
-                <ItemBasics
-                    jobInstance={jobInstance}
-                    readonly={readonly}
-                    serverID={serverID}
-                    clientID={clientID}
-                    labelID={labelID}
-                    labels={labels}
-                    shapeType={shapeType}
-                    objectType={objectType}
-                    color={color}
-                    colorBy={colorBy}
-                    type={type}
-                    locked={locked}
-                    copyShortcut={normalizedKeyMap.COPY_SHAPE}
-                    pasteShortcut={normalizedKeyMap.PASTE_SHAPE}
-                    propagateShortcut={normalizedKeyMap.PROPAGATE_OBJECT}
-                    toBackgroundShortcut={normalizedKeyMap.TO_BACKGROUND}
-                    toForegroundShortcut={normalizedKeyMap.TO_FOREGROUND}
-                    removeShortcut={normalizedKeyMap.DELETE_OBJECT}
-                    changeColorShortcut={normalizedKeyMap.CHANGE_OBJECT_COLOR}
-                    changeLabel={changeLabel}
-                    changeColor={changeColor}
-                    copy={copy}
-                    remove={remove}
-                    propagate={propagate}
-                    createURL={createURL}
-                    switchOrientation={switchOrientation}
-                    toBackground={toBackground}
-                    toForeground={toForeground}
-                    resetCuboidPerspective={resetCuboidPerspective}
-                    edit={edit}
-                />
-                <ObjectButtonsContainer readonly={readonly} clientID={clientID} />
-                {!!attributes.length && (
-                    <ItemDetailsContainer
+                <div className='cvat-objects-sidebar-state-item-color'>
+                    <div style={{ background: color }}>
+                        <div style={{ borderColor: color }}>
+                            {' '}
+                        </div>
+                    </div>
+                </div>
+                <div
+                    onMouseEnter={activateState}
+                    id={`cvat-objects-sidebar-state-item-${clientID}`}
+                    className='cvat-objects-sidebar-state-item'
+                >
+                    <ItemBasics
+                        jobInstance={jobInstance}
                         readonly={readonly}
+                        serverID={serverID}
                         clientID={clientID}
-                        parentID={null}
+                        labelID={labelID}
+                        labels={labels}
+                        shapeType={shapeType}
+                        objectType={objectType}
+                        color={color}
+                        colorBy={colorBy}
+                        type={type}
+                        locked={locked}
+                        copyShortcut={normalizedKeyMap.COPY_SHAPE}
+                        pasteShortcut={normalizedKeyMap.PASTE_SHAPE}
+                        propagateShortcut={normalizedKeyMap.PROPAGATE_OBJECT}
+                        toBackgroundShortcut={normalizedKeyMap.TO_BACKGROUND}
+                        toForegroundShortcut={normalizedKeyMap.TO_FOREGROUND}
+                        removeShortcut={normalizedKeyMap.DELETE_OBJECT}
+                        changeColorShortcut={normalizedKeyMap.CHANGE_OBJECT_COLOR}
+                        changeLabel={changeLabel}
+                        changeColor={changeColor}
+                        copy={copy}
+                        remove={remove}
+                        propagate={propagate}
+                        createURL={createURL}
+                        switchOrientation={switchOrientation}
+                        toBackground={toBackground}
+                        toForeground={toForeground}
+                        resetCuboidPerspective={resetCuboidPerspective}
+                        edit={edit}
                     />
-                )}
-                {!!elements.length && (
-                    <>
-                        <Collapse className='cvat-objects-sidebar-state-item-elements-collapse'>
-                            <Collapse.Panel
-                                header={(
-                                    <>
-                                        <Text style={{ fontSize: 10 }} type='secondary'>PARTS</Text>
-                                        <br />
-                                    </>
-                                )}
-                                key='elements'
-                            >
-                                {elements.map((element: ObjectState) => (
-                                    <ObjectItemElementComponent
-                                        key={element.clientID as number}
-                                        readonly={readonly}
-                                        parentID={clientID}
-                                        clientID={element.clientID as number}
-                                        onMouseLeave={activateState}
-                                    />
-                                ))}
-                            </Collapse.Panel>
-                        </Collapse>
-                    </>
-                )}
+                </div>
             </div>
-        </div>
+            <div className={className}>
+                {(objectType === ObjectType.TRACK || !!attributes.length || !!elements.length) && (
+                    <div className='cvat-objects-sidebar-state-item-bottom'>
+                        {objectType === ObjectType.TRACK && (
+                            <ObjectButtonsContainer
+                                readonly={readonly}
+                                clientID={clientID}
+                                isTrack
+                                isContextMenu={false}
+                            />
+                        )}
+                        {!!attributes.length && (
+                            <ItemDetailsContainer
+                                readonly={readonly}
+                                clientID={clientID}
+                                parentID={null}
+                                hasMounted={hasMounted}
+                            />
+                        )}
+                        {!!elements.length && (
+                            <Button
+                                type='text'
+                                onClick={() => setPartCollapsed(!partCollapsed)}
+                                icon={partCollapsed ? <DownOutlined /> : <UpOutlined />}
+                                className='cvat-item-attributes-button'
+                            >
+                                PARTS
+                            </Button>
+                        )}
+                    </div>
+                )}
+                <div className={
+                    `cvat-objects-sidebar-state-item-details
+                    cvat-objects-sidebar-state-item-details-${clientID}
+                    ${className}`
+                }
+                >
+                    {!partCollapsed && elements.map((element: ObjectState) => (
+                        <ObjectItemElementComponent
+                            key={element.clientID as number}
+                            readonly={readonly}
+                            parentID={clientID}
+                            clientID={element.clientID as number}
+                            onMouseLeave={activateState}
+                        />
+                    ))}
+                </div>
+            </div>
+        </>
+
     );
 }
 

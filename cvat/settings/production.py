@@ -1,14 +1,6 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from .base import *
 
 DEBUG = False
-
-INSTALLED_APPS += [
-    'mod_wsgi.server',
-]
 
 NUCLIO['HOST'] = os.getenv('CVAT_NUCLIO_HOST', 'nuclio')
 for key in RQ_QUEUES:
@@ -17,7 +9,8 @@ for key in RQ_QUEUES:
 
 # Django-sendfile:
 # https://github.com/moggers87/django-sendfile2
-SENDFILE_BACKEND = 'django_sendfile.backends.xsendfile'
+SENDFILE_BACKEND = 'django_sendfile.backends.nginx'
+SENDFILE_URL = '/'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -32,3 +25,22 @@ DATABASES = {
         'PORT': os.getenv('CVAT_POSTGRES_PORT', 5432),
     }
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_REPLACE_HTTPS_REFERER = True
+
+# https://github.com/pennersr/django-allauth
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+# Email backend settings for Django
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@agilegrowth.co.kr')

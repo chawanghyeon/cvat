@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { ArgumentError } from './exceptions';
 import { HistoryActions } from './enums';
 import { Storage } from './storage';
@@ -64,9 +59,8 @@ export function implementJob(Job) {
     Job.prototype.save.implementation = async function () {
         if (this.id) {
             const jobData = this._updateTrigger.getUpdated(this);
-            if (jobData.assignee) {
-                jobData.assignee = jobData.assignee.id;
-            }
+            if (jobData.worker) jobData.worker = jobData.worker.id;
+            if (jobData.checker) jobData.checker = jobData.checker.id;
 
             const data = await serverProxy.jobs.save(this.id, jobData);
             this._updateTrigger.reset();
@@ -74,6 +68,11 @@ export function implementJob(Job) {
         }
 
         throw new ArgumentError('Could not save job without id');
+    };
+
+    Job.prototype.updateTime.implementation = async function () {
+        const result = await serverProxy.jobs.updateTime(this.id);
+        return result;
     };
 
     Job.prototype.issues.implementation = async function () {
@@ -398,21 +397,22 @@ export function implementTask(Task) {
                 taskData.assignee_id = taskData.assignee_id.id;
             }
 
-            await Promise.all((taskData.labels || []).map((label: Label): Promise<unknown> => {
-                if (label.deleted) {
-                    return serverProxy.labels.delete(label.id);
-                }
+            // 주석해제하면 라벨이 이상하게 바뀌는 오류가 생김
+            // await Promise.all((taskData.labels || []).map((label: Label): Promise<unknown> => {
+            //     if (label.deleted) {
+            //         return serverProxy.labels.delete(label.id);
+            //     }
 
-                if (label.patched) {
-                    return serverProxy.labels.update(label.id, label.toJSON());
-                }
+            //     if (label.patched) {
+            //         return serverProxy.labels.update(label.id, label.toJSON());
+            //     }
 
-                return Promise.resolve();
-            }));
+            //     return Promise.resolve();
+            // }));
 
-            // leave only new labels to create them via project PATCH request
-            taskData.labels = (taskData.labels || [])
-                .filter((label: SerializedLabel) => !Number.isInteger(label.id)).map((el) => el.toJSON());
+            // // leave only new labels to create them via project PATCH request
+            // taskData.labels = (taskData.labels || [])
+            //     .filter((label: SerializedLabel) => !Number.isInteger(label.id)).map((el) => el.toJSON());
             if (!taskData.labels.length) {
                 delete taskData.labels;
             }

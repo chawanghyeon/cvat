@@ -1,0 +1,13 @@
+<!-- templates/admin/bulk_create_users.html -->
+
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>Bulk Create Users</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Create Users">
+</form>
+{% endblock %}

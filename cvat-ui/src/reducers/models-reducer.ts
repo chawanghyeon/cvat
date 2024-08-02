@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { BoundariesActions, BoundariesActionTypes } from 'actions/boundaries-actions';
 import { ModelsActionTypes, ModelsActions } from 'actions/models-actions';
 import { AuthActionTypes, AuthActions } from 'actions/auth-actions';
@@ -103,7 +98,7 @@ export default function (state = defaultState, action: ModelsActions | AuthActio
             }
             return {
                 ...mutual,
-                [`${action.payload.model.kind}s`]: [...`${action.payload.model.kind}s`, action.payload.model],
+                [`${action.payload.model.kind}s`]: [...state[`${action.payload.model.kind}s`], action.payload.model],
             };
         }
         case ModelsActionTypes.SHOW_RUN_MODEL_DIALOG: {

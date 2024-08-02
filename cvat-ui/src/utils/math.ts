@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 export function clamp(value: number, min: number, max: number): number {
     return Math.max(Math.min(value, max), min);
 }

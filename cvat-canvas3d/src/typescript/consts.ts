@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 const BASE_GRID_WIDTH = 2;
 const MOVEMENT_FACTOR = 200;
 const DOLLY_FACTOR = 5;

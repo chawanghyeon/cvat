@@ -1,13 +1,9 @@
-// Copyright (C) 2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 
 import Text from 'antd/lib/typography/Text';
 import Upload, { RcFile } from 'antd/lib/upload';
-import { InboxOutlined } from '@ant-design/icons';
+import Icon from '@ant-design/icons';
+import { IllustFileIcon } from 'icons';
 
 interface Props {
     files: File[];
@@ -34,7 +30,7 @@ export default function LocalFiles(props: Props): JSX.Element {
                 beforeUpload={onUpload}
             >
                 <p className='ant-upload-drag-icon'>
-                    <InboxOutlined />
+                    <Icon component={IllustFileIcon} />
                 </p>
                 <p className='ant-upload-text'>Click or drag files to this area</p>
                 <p className='ant-upload-hint'>{ hintText }</p>

@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 
@@ -69,7 +64,7 @@ function SplitControl(props: Props): JSX.Element {
                 keyMap={{ SWITCH_SPLIT_MODE: shortcuts.SWITCH_SPLIT_MODE.details }}
                 handlers={shortcutHandlers}
             />
-            <CVATTooltip title={`Split a track ${shortcuts.SWITCH_SPLIT_MODE.displayValue}`} placement='right'>
+            <CVATTooltip title={`Split a track ${shortcuts.SWITCH_SPLIT_MODE.displayValue}`} placement='bottom'>
                 <Icon {...dynamicIconProps} component={SplitIcon} />
             </CVATTooltip>
         </>

@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import FormData from 'form-data';
 import store from 'store';
 import Axios, { AxiosError, AxiosResponse } from 'axios';
@@ -29,6 +24,7 @@ type Params = {
     format?: string,
     filename?: string,
     action?: string,
+    download_only_accepted?: boolean,
 };
 
 function enableOrganization(): { org: string } {
@@ -519,9 +515,6 @@ async function hasLimits(userId: number, orgId: number): Promise<boolean> {
 
 async function authorized(): Promise<boolean> {
     try {
-        // In CVAT app we use two types of authentication
-        // At first we check if authentication token is present
-        // Request in getSelf will provide correct authentication cookies
         if (!store.get('token')) {
             removeAuthData();
             return false;
@@ -717,6 +710,44 @@ async function getTasks(filter: TasksFilter = {}): Promise<SerializedTask[] & { 
     return response.data.results;
 }
 
+// job의 프레임 프리뷰를 가져오는 함수, jobs-cards에서 사용
+async function getJobPreviewWithFrame(id, frame) {
+    const { backendAPI } = config;
+
+    let response = null;
+    try {
+        const url = `${backendAPI}/jobs/${id}/preview${frame !== null ? `?frame_id=${frame}` : ''}`;
+        response = await Axios.get(url, {
+            responseType: 'blob',
+        });
+    } catch (errorData) {
+        const code = errorData.response ? errorData.response.status : errorData.code;
+        throw new ServerError(`Could not get preview for "jobs/${id}?frame_id=${frame}"`, code);
+    }
+
+    return response.data;
+}
+
+async function getTasksIssues(id: number) {
+    const { backendAPI } = config;
+    let response = null;
+    try {
+        response = await Axios.get(`${backendAPI}/issues/content/${id}`);
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    const previews = response.data.map((d) => getJobPreviewWithFrame(d?.job_id, d?.frame));
+    const data = await Promise.all(previews);
+    for (let i = 0; i < data.length; i++) {
+        response.data[i] = {
+            ...response.data[i],
+            imgUrl: data[i],
+        };
+    }
+    return response.data;
+}
+
 async function saveTask(id: number, taskData: Partial<SerializedTask>): Promise<SerializedTask> {
     const { backendAPI } = config;
 
@@ -753,6 +784,7 @@ async function getLabels(filter: {
     job_id?: number,
     task_id?: number,
     project_id?: number,
+    org?: string,
 }): Promise<{ results: SerializedLabel[] }> {
     const { backendAPI } = config;
     return fetchAll(`${backendAPI}/labels`, {
@@ -789,6 +821,7 @@ function exportDataset(instanceType: 'projects' | 'jobs' | 'tasks') {
         saveImages: boolean,
         useDefaultSettings: boolean,
         targetStorage: Storage,
+        downloadOnlyAccepted: boolean,
         name?: string,
     ) {
         const { backendAPI } = config;
@@ -798,6 +831,7 @@ function exportDataset(instanceType: 'projects' | 'jobs' | 'tasks') {
             ...configureStorage(targetStorage, useDefaultSettings),
             ...(name ? { filename: name.replace(/\//g, '_') } : {}),
             format,
+            download_only_accepted: downloadOnlyAccepted,
         };
 
         return new Promise<string | void>((resolve, reject) => {
@@ -810,6 +844,13 @@ function exportDataset(instanceType: 'projects' | 'jobs' | 'tasks') {
                         const { status } = response;
                         if (status === 201) params.action = 'download';
                         if (status === 202 || (isCloudStorage && status === 201)) {
+                            const notification = document.getElementsByClassName(`cvat-notification-notice-export-${instanceType.slice(0, -1)}-start`);
+                            for (const item of notification) {
+                                const description = item.getElementsByClassName('ant-notification-notice-description')[0];
+                                if (description.innerHTML.includes(`${id}`)){
+                                    description.innerHTML = `${instanceType} Id: ${id}` + response.data.status;
+                                }
+                            }
                             setTimeout(request, 3000);
                         } else if (status === 201) {
                             resolve(`${baseURL}?${new URLSearchParams(params).toString()}`);
@@ -1295,6 +1336,7 @@ async function getJobs(
     const id = filter.id || null;
 
     let response = null;
+
     try {
         if (id !== null) {
             response = await Axios.get(`${backendAPI}/jobs/${id}`);
@@ -1317,6 +1359,18 @@ async function getJobs(
                 page_size: 12,
             },
         });
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+
+    return response.data;
+}
+
+async function getGuide(projectId: number) {
+    const { backendAPI } = config;
+    let response = null;
+    try {
+        response = await Axios.get(`${backendAPI}/guide/${projectId}`);
     } catch (errorData) {
         throw generateError(errorData);
     }
@@ -1442,6 +1496,32 @@ async function saveJob(id: number, jobData: Partial<SerializedJob>): Promise<Ser
                 'Content-Type': 'application/json',
             },
         });
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+
+    return response.data;
+}
+
+/**
+ * 작업자가 작업화면(editor) 영역에 접근할 경우 updated_time을 업데이트하는 메서드
+ * @param id job id
+ * @returns any
+ */
+async function updateAccessTime(id): Promise<any> {
+    const { backendAPI } = config;
+
+    let response = null;
+    try {
+        response = await Axios.patch(
+            `${backendAPI}/jobs/${id}`,
+            {},
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        );
     } catch (errorData) {
         throw generateError(errorData);
     }
@@ -1590,69 +1670,6 @@ async function getAnnotations(session, id) {
     return response.data;
 }
 
-async function getFunctions(): Promise<FunctionsResponseBody> {
-    const { backendAPI } = config;
-
-    try {
-        const response = await fetchAll(`${backendAPI}/functions`);
-        return response;
-    } catch (errorData) {
-        if (errorData.response.status === 404) {
-            return {
-                results: [],
-                count: 0,
-            };
-        }
-        throw generateError(errorData);
-    }
-}
-
-async function getFunctionPreview(modelID) {
-    const { backendAPI } = config;
-
-    let response = null;
-    try {
-        const url = `${backendAPI}/functions/${modelID}/preview`;
-        response = await Axios.get(url, {
-            responseType: 'blob',
-        });
-    } catch (errorData) {
-        const code = errorData.response ? errorData.response.status : errorData.code;
-        throw new ServerError(`Could not get preview for the model ${modelID} from the server`, code);
-    }
-
-    return response.data;
-}
-
-async function getFunctionProviders() {
-    const { backendAPI } = config;
-
-    try {
-        const response = await Axios.get(`${backendAPI}/functions/info`, {
-        });
-        return response.data;
-    } catch (errorData) {
-        if (errorData.response.status === 404) {
-            return [];
-        }
-        throw generateError(errorData);
-    }
-}
-
-async function deleteFunction(functionId: number) {
-    const { backendAPI } = config;
-
-    try {
-        await Axios.delete(`${backendAPI}/functions/${functionId}`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-    } catch (errorData) {
-        throw generateError(errorData);
-    }
-}
-
 // Session is 'task' or 'job'
 async function updateAnnotations(session, id, data, action) {
     const { backendAPI } = config;
@@ -1679,22 +1696,6 @@ async function updateAnnotations(session, id, data, action) {
         throw generateError(errorData);
     }
     return response.data;
-}
-
-async function runFunctionRequest(body) {
-    const { backendAPI } = config;
-
-    try {
-        const response = await Axios.post(`${backendAPI}/functions/requests/`, JSON.stringify(body), {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        return response.data;
-    } catch (errorData) {
-        throw generateError(errorData);
-    }
 }
 
 // Session is 'task' or 'job'
@@ -1781,17 +1782,6 @@ async function uploadAnnotations(
     }
 }
 
-async function getFunctionRequestStatus(requestID) {
-    const { backendAPI } = config;
-
-    try {
-        const response = await Axios.get(`${backendAPI}/functions/requests/${requestID}`);
-        return response.data;
-    } catch (errorData) {
-        throw generateError(errorData);
-    }
-}
-
 // Session is 'task' or 'job'
 async function dumpAnnotations(id, name, format) {
     const { backendAPI } = config;
@@ -1824,76 +1814,16 @@ async function dumpAnnotations(id, name, format) {
     });
 }
 
-async function cancelFunctionRequest(requestId: string): Promise<void> {
-    const { backendAPI } = config;
-
-    try {
-        await Axios.delete(`${backendAPI}/functions/requests/${requestId}`, {
-            method: 'DELETE',
-        });
-    } catch (errorData) {
-        throw generateError(errorData);
-    }
-}
-
-async function createFunction(functionData: any) {
-    const params = enableOrganization();
-    const { backendAPI } = config;
-
-    try {
-        const response = await Axios.post(`${backendAPI}/functions`, JSON.stringify(functionData), {
-            params,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        return response.data;
-    } catch (errorData) {
-        throw generateError(errorData);
-    }
-}
-
 async function saveEvents(events) {
     const { backendAPI } = config;
 
     try {
         await Axios.post(`${backendAPI}/events`, JSON.stringify(events), {
-            proxy: config.proxy,
             headers: {
                 'Content-Type': 'application/json',
             },
         });
     } catch (errorData) {
-        throw generateError(errorData);
-    }
-}
-
-async function callFunction(funId, body) {
-    const { backendAPI } = config;
-
-    try {
-        const response = await Axios.post(`${backendAPI}/functions/${funId}/run`, JSON.stringify(body), {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        return response.data;
-    } catch (errorData) {
-        throw generateError(errorData);
-    }
-}
-
-async function getFunctionsRequests() {
-    const { backendAPI } = config;
-
-    try {
-        const response = await Axios.get(`${backendAPI}/functions/requests/`);
-        return response.data;
-    } catch (errorData) {
-        if (errorData.response.status === 404) {
-            return [];
-        }
         throw generateError(errorData);
     }
 }
@@ -2375,6 +2305,45 @@ async function selectSSOIdentityProvider(email?: string, iss?: string): Promise<
     }
 }
 
+async function getStatistic(userId: any): Promise<any> {
+    const { backendAPI } = config;
+    try {
+        let response = null;
+        if (userId !== null) {
+            response = await Axios.get(`${backendAPI}/organizations/statistic/${userId}`);
+        } else {
+            response = await Axios.get(`${backendAPI}/organizations/statistic/`);
+        }
+        return response.data;
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+};
+
+async function getUmap(labelId: any): Promise<any> {
+    const { backendAPI } = config;
+
+    async function waitUmap(labelId: number | string): Promise<any> {
+        return new Promise((resolve) => {
+            async function checkStatus(): Promise<any> {
+                const response = await Axios.get(`${backendAPI}/organizations/umap/${labelId}`);
+                if (response && response.status === 200) {
+                    resolve(response.data);
+                } else {
+                    setTimeout(checkStatus, 1000);
+                }
+            }
+            setTimeout(checkStatus, 1000);
+        });
+    }
+
+    try {
+        return await waitUmap(labelId);
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+};
+
 export default Object.freeze({
     server: Object.freeze({
         about,
@@ -2427,11 +2396,17 @@ export default Object.freeze({
         update: updateLabel,
     }),
 
+    tasksIssues: Object.freeze({
+        get: getTasksIssues,
+    }),
+
     jobs: Object.freeze({
         get: getJobs,
+        getGuides: getGuide,
         getPreview: getPreview('jobs'),
         save: saveJob,
         exportDataset: exportDataset('jobs'),
+        updateTime: updateAccessTime,
     }),
 
     users: Object.freeze({
@@ -2467,19 +2442,6 @@ export default Object.freeze({
         cancel: cancelLambdaRequest,
     }),
 
-    functions: Object.freeze({
-        list: getFunctions,
-        status: getFunctionRequestStatus,
-        requests: getFunctionsRequests,
-        run: runFunctionRequest,
-        call: callFunction,
-        create: createFunction,
-        providers: getFunctionProviders,
-        delete: deleteFunction,
-        cancel: cancelFunctionRequest,
-        getPreview: getFunctionPreview,
-    }),
-
     issues: Object.freeze({
         create: createIssue,
         update: updateIssue,
@@ -2511,6 +2473,8 @@ export default Object.freeze({
         invite: inviteOrganizationMembers,
         updateMembership: updateOrganizationMembership,
         deleteMembership: deleteOrganizationMembership,
+        getStatistic: getStatistic,
+        getUmap: getUmap,
     }),
 
     webhooks: Object.freeze({

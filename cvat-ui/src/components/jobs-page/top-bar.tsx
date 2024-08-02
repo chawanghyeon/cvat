@@ -1,75 +1,213 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState } from 'react';
-import { Col, Row } from 'antd/lib/grid';
-import Input from 'antd/lib/input';
-
-import { JobsQuery } from 'reducers';
-import { SortingComponent, ResourceFilterHOC, defaultVisibility } from 'components/resource-sorting-filtering';
-import {
-    localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues, config,
-} from './jobs-filter-configuration';
-
-const FilteringComponent = ResourceFilterHOC(
-    config, localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues,
-);
+import { CombinedState, JobsQuery, JobStage } from 'reducers';
+import { Button, Checkbox, Dropdown, Space, Col, Row } from 'antd';
+import Text from 'antd/lib/typography/Text';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { useSelector } from 'react-redux';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { JobState } from 'cvat-core/src/enums';
+import Icon from '@ant-design/icons';
+import { FilterIcon, FilterSolidIcon } from 'icons';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     query: JobsQuery;
     onApplyFilter(filter: string | null): void;
     onApplySorting(sorting: string | null): void;
     onApplySearch(search: string | null): void;
+    // onFilterDataSource: React.Dispatch<React.SetStateAction<any[]>>;
+    onFilterDataSource(dataSource: any[]): void;
 }
 
+const changeToDataSource = (arr: any[]): any[] => arr.reduce((acc: any[], job: any) => {
+    acc.push({
+        key: job.id,
+        job: job.id,
+        projectName: job.projectName,
+        taskName: job.taskName,
+        worker: job.worker,
+        checker: job.checker,
+        size: job,
+        state: job,
+        stage: job,
+        actions: job,
+        etc: job,
+    });
+    return acc;
+}, []);
+
 function TopBarComponent(props: Props): JSX.Element {
-    const {
-        query, onApplyFilter, onApplySorting, onApplySearch,
-    } = props;
-    const [visibility, setVisibility] = useState(defaultVisibility);
+    const { onFilterDataSource } = props;
+
+    const { t } = useTranslation();
+
+    // dropdown checked 여부
+    const [stageChecked, setStageChecked] = useState<string[]>([]);
+    const [stateChecked, setStateChecked] = useState<string[]>([]);
+
+    // dropdown menu open/close
+    const [stageOpen, setStageOpen] = useState(false);
+    const [stateOpen, setStateOpen] = useState(false);
+
+    const jobs = useSelector((state: CombinedState) => state.jobs.current);
+    const jobStageList = [JobStage.ANNOTATION, JobStage.REVIEW, JobStage.ACCEPTANCE];
+    const jobStateList = [JobState.NEW, JobState.IN_PROGRESS, JobState.REJECTED, JobState.COMPLETED];
+
+    const dimensions = {
+        md: 22,
+        lg: 22,
+        xl: 18,
+        xxl: 16,
+    };
 
     return (
         <Row className='cvat-jobs-page-top-bar' justify='center' align='middle'>
-            <Col md={22} lg={18} xl={16} xxl={16}>
-                <div>
-                    <Input.Search
-                        enterButton
-                        onSearch={(phrase: string) => {
-                            onApplySearch(phrase);
-                        }}
-                        defaultValue={query.search || ''}
-                        className='cvat-jobs-page-search-bar'
-                        placeholder='Search ...'
-                    />
-                    <div>
-                        <SortingComponent
-                            visible={visibility.sorting}
-                            onVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, sorting: visible })
+            <Col {...dimensions}>
+                <Text className='cvat-text-color cvat-jobs-header'> {t('title.jobs')} </Text>
+                <Space>
+                    <Dropdown
+                        destroyPopupOnHide
+                        open={stageOpen}
+                        onOpenChange={() => setStageOpen(!stageOpen)}
+                        trigger={['click']}
+                        placement='bottomLeft'
+                        dropdownRender={() => (
+                            <div className='cvat-resource-page-predefined-filters-list'>
+                                {jobStageList.map(
+                                    (stage: string): JSX.Element => (
+                                        <Checkbox
+                                            checked={stageChecked.some((data) => data === stage)}
+                                            onChange={(event: CheckboxChangeEvent) => {
+                                                if (event.target.checked) {
+                                                    setStageChecked([...stageChecked, stage]);
+                                                } else {
+                                                    setStageChecked(stageChecked.filter((data) => data !== stage));
+                                                }
+                                            }}
+                                            key={stage}
+                                        >
+                                            {t(`filter.jobs.stage.${stage}`)}
+                                        </Checkbox>
+                                    ),
+                                )}
+                                <Row style={{ padding: 6 }} justify='center'>
+                                    <Col>
+                                        <Button
+                                            type='default'
+                                            onClick={() => {
+                                                setStageChecked([]);
+                                                onFilterDataSource(changeToDataSource(jobs));
+                                                setStageOpen(false);
+                                            }}
+                                        >
+                                            Reset
+                                        </Button>
+                                    </Col>
+                                    <Col offset={2}>
+                                        <Button
+                                            type='primary'
+                                            onClick={() => {
+                                                if (stageChecked.length === 0) {
+                                                    return;
+                                                }
+                                                const data = jobs.filter(
+                                                    (jobInstance) => stageChecked.includes(jobInstance.stage) &&
+                                                        (stateChecked.length > 0
+                                                            ? stateChecked.includes(jobInstance.state)
+                                                            : true),
+                                                );
+                                                onFilterDataSource(changeToDataSource(data));
+                                                setStageOpen(false);
+                                            }}
+                                        >
+                                            OK
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </div>
+                        )}
+                    >
+                        <Button type='default' className={`filter-btn ${stageChecked.length > 0 && 'filtered'}`}>
+                            <span>{t('filter.stage')}</span>
+                            {stageChecked.length > 0 ? (
+                                <Icon component={FilterSolidIcon} />
+                            ) : (
+                                <Icon component={FilterIcon} style={{ fill: '#fff' }} />
                             )}
-                            defaultFields={query.sort?.split(',') || ['-ID']}
-                            sortingFields={['ID', 'Assignee', 'Updated date', 'Stage', 'State', 'Task ID', 'Project ID', 'Task name', 'Project name']}
-                            onApplySorting={onApplySorting}
-                        />
-                        <FilteringComponent
-                            value={query.filter}
-                            predefinedVisible={visibility.predefined}
-                            builderVisible={visibility.builder}
-                            recentVisible={visibility.recent}
-                            onPredefinedVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, predefined: visible })
+                        </Button>
+                    </Dropdown>
+                    <Dropdown
+                        destroyPopupOnHide
+                        open={stateOpen}
+                        onOpenChange={() => setStateOpen(!stateOpen)}
+                        trigger={['click']}
+                        placement='bottomLeft'
+                        dropdownRender={() => (
+                            <div className='cvat-resource-page-predefined-filters-list'>
+                                {jobStateList.map(
+                                    (state: string): JSX.Element => (
+                                        <Checkbox
+                                            checked={stateChecked.some((data) => data === state)}
+                                            onChange={(event: CheckboxChangeEvent) => {
+                                                if (event.target.checked) {
+                                                    setStateChecked([...stateChecked, state]);
+                                                } else {
+                                                    setStateChecked(stateChecked.filter((data) => data !== state));
+                                                }
+                                            }}
+                                            key={state}
+                                        >
+                                            {t(`filter.jobs.state.${state}`)}
+                                        </Checkbox>
+                                    ),
+                                )}
+                                <Row style={{ padding: 6 }} justify='center'>
+                                    <Col>
+                                        <Button
+                                            type='default'
+                                            onClick={() => {
+                                                setStateChecked([]);
+                                                onFilterDataSource(changeToDataSource(jobs));
+                                                setStateOpen(false);
+                                            }}
+                                        >
+                                            Reset
+                                        </Button>
+                                    </Col>
+                                    <Col offset={2}>
+                                        <Button
+                                            type='primary'
+                                            onClick={() => {
+                                                if (stateChecked.length === 0) {
+                                                    return;
+                                                }
+                                                const data = jobs.filter(
+                                                    (jobInstance) => stateChecked.includes(jobInstance.state) &&
+                                                        (stageChecked.length > 0
+                                                            ? stageChecked.includes(jobInstance.stage)
+                                                            : true),
+                                                );
+                                                onFilterDataSource(changeToDataSource(data));
+                                                setStateOpen(false);
+                                            }}
+                                        >
+                                            OK
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </div>
+                        )}
+                    >
+                        <Button type='default' className={`filter-btn ${stateChecked.length > 0 && 'filtered'}`}>
+                            <span> {t('filter.state')}</span>
+                            {stateChecked.length > 0 ? (
+                                <Icon component={FilterSolidIcon} />
+                            ) : (
+                                <Icon component={FilterIcon} style={{ fill: '#fff' }} />
                             )}
-                            onBuilderVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, builder: visible })
-                            )}
-                            onRecentVisibleChange={(visible: boolean) => (
-                                setVisibility({ ...defaultVisibility, builder: visibility.builder, recent: visible })
-                            )}
-                            onApplyFilter={onApplyFilter}
-                        />
-                    </div>
-                </div>
+                        </Button>
+                    </Dropdown>
+                </Space>
             </Col>
         </Row>
     );

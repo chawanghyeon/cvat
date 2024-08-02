@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -39,6 +34,7 @@ interface StateToProps {
     objectStates: ObjectState[];
     annotationsFilters: any[];
     colors: string[];
+    leftSidebarCollapsed: boolean;
     colorBy: ColorBy;
     activatedStateID: number | null;
     activatedElementID: number | null;
@@ -75,6 +71,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 frame: { number: frameNumber },
             },
             colors,
+            leftSidebarCollapsed,
         },
         settings: {
             shapes: { colorBy },
@@ -111,6 +108,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         jobInstance,
         annotationsFilters,
         colors,
+        leftSidebarCollapsed,
         colorBy,
         activatedStateID,
         activatedElementID,
@@ -271,11 +269,10 @@ class ObjectsListContainer extends React.PureComponent<Props, State> {
             maxZLayer,
             minZLayer,
             keyMap,
-            normalizedKeyMap,
             colors,
+            leftSidebarCollapsed,
             colorBy,
             readonly,
-            statesCollapsedAll,
             updateAnnotations,
             changeGroupColor,
             removeObject,
@@ -283,7 +280,7 @@ class ObjectsListContainer extends React.PureComponent<Props, State> {
             switchPropagateVisibility,
             changeFrame,
         } = this.props;
-        const { objectStates, sortedStatesID, statesOrdering } = this.state;
+        const { objectStates, sortedStatesID } = this.state;
 
         const subKeyMap = {
             SWITCH_ALL_LOCK: keyMap.SWITCH_ALL_LOCK,
@@ -477,22 +474,10 @@ class ObjectsListContainer extends React.PureComponent<Props, State> {
             <>
                 <GlobalHotKeys keyMap={subKeyMap} handlers={handlers} />
                 <ObjectsListComponent
-                    statesHidden={statesHidden}
-                    statesLocked={statesLocked}
-                    statesCollapsedAll={statesCollapsedAll}
                     readonly={readonly || false}
-                    statesOrdering={statesOrdering}
                     sortedStatesID={sortedStatesID}
                     objectStates={objectStates}
-                    switchHiddenAllShortcut={normalizedKeyMap.SWITCH_ALL_HIDDEN}
-                    switchLockAllShortcut={normalizedKeyMap.SWITCH_ALL_LOCK}
-                    changeStatesOrdering={this.onChangeStatesOrdering}
-                    lockAllStates={this.onLockAllStates}
-                    unlockAllStates={this.onUnlockAllStates}
-                    collapseAllStates={this.onCollapseAllStates}
-                    expandAllStates={this.onExpandAllStates}
-                    hideAllStates={this.onHideAllStates}
-                    showAllStates={this.onShowAllStates}
+                    leftSidebarCollapsed={leftSidebarCollapsed}
                 />
             </>
         );

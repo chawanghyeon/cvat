@@ -1,7 +1,3 @@
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from copy import deepcopy
 from datetime import datetime, timezone
 import traceback
@@ -109,6 +105,12 @@ def _get_value(obj, key):
 def request_id(instance=None):
     request = _get_current_request(instance)
     return _get_value(request, "uuid")
+
+def _get_current_worker(instance):
+    if isinstance(instance, Job):
+        return instance.worker
+
+    return get_current_user()
 
 def user_id(instance=None):
     current_user = _get_current_user(instance)

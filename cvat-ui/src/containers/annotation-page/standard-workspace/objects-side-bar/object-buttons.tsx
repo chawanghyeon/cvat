@@ -1,20 +1,24 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { connect } from 'react-redux';
 
 import { LogType } from 'cvat-logger';
 import isAbleToChangeFrame from 'utils/is-able-to-change-frame';
 import { ThunkDispatch } from 'utils/redux';
-import { updateAnnotationsAsync, changeFrameAsync } from 'actions/annotation-actions';
+import {
+    updateAnnotationsAsync,
+    changeFrameAsync,
+    removeObject as removeObjectAction,
+} from 'actions/annotation-actions';
 import { CombinedState } from 'reducers';
-import ItemButtonsComponent from 'components/annotation-page/standard-workspace/objects-side-bar/object-item-buttons';
+import ItemButtonsComponent, {
+    ItemButtonsTrackComponent,
+} from 'components/annotation-page/standard-workspace/objects-side-bar/object-item-buttons';
 
 interface OwnProps {
     readonly: boolean;
     clientID: number;
+    isTrack: boolean;
+    isContextMenu: boolean;
     outsideDisabled?: boolean;
     hiddenDisabled?: boolean;
     keyframeDisabled?: boolean;
@@ -33,6 +37,7 @@ interface StateToProps {
 interface DispatchToProps {
     updateAnnotations(statesToUpdate: any[]): void;
     changeFrame(frame: number): void;
+    removeObject(objectState: any): void;
 }
 
 function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
@@ -47,9 +52,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
         shortcuts: { normalizedKeyMap },
     } = state;
 
-    const {
-        clientID, outsideDisabled, hiddenDisabled, keyframeDisabled,
-    } = own;
+    const { clientID, outsideDisabled, hiddenDisabled, keyframeDisabled } = own;
     let [objectState] = states.filter((_objectState): boolean => _objectState.clientID === clientID);
     if (!objectState) {
         const elements = states.map((_objectState: any): any[] => _objectState.elements).flat();
@@ -74,6 +77,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch): DispatchToProps {
         },
         changeFrame(frame: number): void {
             dispatch(changeFrameAsync(frame));
+        },
+        removeObject(objectState: any): void {
+            dispatch(removeObjectAction(objectState, false));
         },
     };
 }
@@ -209,6 +215,14 @@ class ItemButtonsWrapper extends React.PureComponent<StateToProps & DispatchToPr
         }
     };
 
+    private remove = (): void => {
+        const { objectState, readonly, removeObject } = this.props;
+
+        if (!readonly) {
+            removeObject(objectState);
+        }
+    };
+
     private commit(): void {
         const { objectState, readonly, updateAnnotations } = this.props;
 
@@ -233,11 +247,11 @@ class ItemButtonsWrapper extends React.PureComponent<StateToProps & DispatchToPr
             hiddenDisabled,
             keyframeDisabled,
             normalizedKeyMap,
+            isTrack,
+            isContextMenu,
         } = this.props;
 
-        const {
-            first, prev, next, last,
-        } = objectState.keyframes || {
+        const { first, prev, next, last } = objectState.keyframes || {
             first: null, // shapes don't have keyframes, so we use null
             prev: null,
             next: null,
@@ -245,44 +259,95 @@ class ItemButtonsWrapper extends React.PureComponent<StateToProps & DispatchToPr
         };
 
         return (
-            <ItemButtonsComponent
-                readonly={readonly}
-                parentID={objectState.parentID}
-                objectType={objectState.objectType}
-                shapeType={objectState.shapeType}
-                occluded={objectState.occluded}
-                outside={objectState.outside}
-                locked={objectState.lock}
-                pinned={objectState.pinned}
-                hidden={objectState.hidden}
-                keyframe={objectState.keyframe}
-                switchOccludedShortcut={normalizedKeyMap.SWITCH_OCCLUDED}
-                switchOutsideShortcut={normalizedKeyMap.SWITCH_OUTSIDE}
-                switchLockShortcut={normalizedKeyMap.SWITCH_LOCK}
-                switchHiddenShortcut={normalizedKeyMap.SWITCH_HIDDEN}
-                switchKeyFrameShortcut={normalizedKeyMap.SWITCH_KEYFRAME}
-                nextKeyFrameShortcut={normalizedKeyMap.NEXT_KEY_FRAME}
-                prevKeyFrameShortcut={normalizedKeyMap.PREV_KEY_FRAME}
-                outsideDisabled={outsideDisabled}
-                hiddenDisabled={hiddenDisabled}
-                keyframeDisabled={keyframeDisabled}
-                navigateFirstKeyframe={first >= frameNumber || first === null ? null : this.navigateFirstKeyframe}
-                navigatePrevKeyframe={prev === frameNumber || prev === null ? null : this.navigatePrevKeyframe}
-                navigateNextKeyframe={next === frameNumber || next === null ? null : this.navigateNextKeyframe}
-                navigateLastKeyframe={last <= frameNumber || last === null ? null : this.navigateLastKeyframe}
-                setOccluded={this.setOccluded}
-                unsetOccluded={this.unsetOccluded}
-                setOutside={this.setOutside}
-                unsetOutside={this.unsetOutside}
-                setKeyframe={this.setKeyframe}
-                unsetKeyframe={this.unsetKeyframe}
-                lock={this.lock}
-                unlock={this.unlock}
-                pin={this.pin}
-                unpin={this.unpin}
-                hide={this.hide}
-                show={this.show}
-            />
+            <>
+                {!isTrack ? (
+                    <ItemButtonsComponent
+                        readonly={readonly}
+                        parentID={objectState.parentID}
+                        objectType={objectState.objectType}
+                        shapeType={objectState.shapeType}
+                        occluded={objectState.occluded}
+                        outside={objectState.outside}
+                        locked={objectState.lock}
+                        pinned={objectState.pinned}
+                        hidden={objectState.hidden}
+                        keyframe={objectState.keyframe}
+                        switchOccludedShortcut={normalizedKeyMap.SWITCH_OCCLUDED}
+                        switchOutsideShortcut={normalizedKeyMap.SWITCH_OUTSIDE}
+                        switchLockShortcut={normalizedKeyMap.SWITCH_LOCK}
+                        switchHiddenShortcut={normalizedKeyMap.SWITCH_HIDDEN}
+                        switchKeyFrameShortcut={normalizedKeyMap.SWITCH_KEYFRAME}
+                        nextKeyFrameShortcut={normalizedKeyMap.NEXT_KEY_FRAME}
+                        prevKeyFrameShortcut={normalizedKeyMap.PREV_KEY_FRAME}
+                        isContextMenu={isContextMenu}
+                        outsideDisabled={outsideDisabled}
+                        hiddenDisabled={hiddenDisabled}
+                        keyframeDisabled={keyframeDisabled}
+                        navigateFirstKeyframe={
+                            first >= frameNumber || first === null ? null : this.navigateFirstKeyframe
+                        }
+                        navigatePrevKeyframe={prev === frameNumber || prev === null ? null : this.navigatePrevKeyframe}
+                        navigateNextKeyframe={next === frameNumber || next === null ? null : this.navigateNextKeyframe}
+                        navigateLastKeyframe={last <= frameNumber || last === null ? null : this.navigateLastKeyframe}
+                        setOccluded={this.setOccluded}
+                        unsetOccluded={this.unsetOccluded}
+                        setOutside={this.setOutside}
+                        unsetOutside={this.unsetOutside}
+                        setKeyframe={this.setKeyframe}
+                        unsetKeyframe={this.unsetKeyframe}
+                        lock={this.lock}
+                        unlock={this.unlock}
+                        pin={this.pin}
+                        unpin={this.unpin}
+                        hide={this.hide}
+                        show={this.show}
+                        remove={this.remove}
+                    />
+                ) : (
+                    <ItemButtonsTrackComponent
+                        readonly={readonly}
+                        parentID={objectState.parentID}
+                        objectType={objectState.objectType}
+                        shapeType={objectState.shapeType}
+                        occluded={objectState.occluded}
+                        outside={objectState.outside}
+                        locked={objectState.lock}
+                        pinned={objectState.pinned}
+                        hidden={objectState.hidden}
+                        keyframe={objectState.keyframe}
+                        switchOccludedShortcut={normalizedKeyMap.SWITCH_OCCLUDED}
+                        switchOutsideShortcut={normalizedKeyMap.SWITCH_OUTSIDE}
+                        switchLockShortcut={normalizedKeyMap.SWITCH_LOCK}
+                        switchHiddenShortcut={normalizedKeyMap.SWITCH_HIDDEN}
+                        switchKeyFrameShortcut={normalizedKeyMap.SWITCH_KEYFRAME}
+                        nextKeyFrameShortcut={normalizedKeyMap.NEXT_KEY_FRAME}
+                        prevKeyFrameShortcut={normalizedKeyMap.PREV_KEY_FRAME}
+                        isContextMenu={isContextMenu}
+                        outsideDisabled={outsideDisabled}
+                        hiddenDisabled={hiddenDisabled}
+                        keyframeDisabled={keyframeDisabled}
+                        navigateFirstKeyframe={
+                            first >= frameNumber || first === null ? null : this.navigateFirstKeyframe
+                        }
+                        navigatePrevKeyframe={prev === frameNumber || prev === null ? null : this.navigatePrevKeyframe}
+                        navigateNextKeyframe={next === frameNumber || next === null ? null : this.navigateNextKeyframe}
+                        navigateLastKeyframe={last <= frameNumber || last === null ? null : this.navigateLastKeyframe}
+                        setOccluded={this.setOccluded}
+                        unsetOccluded={this.unsetOccluded}
+                        setOutside={this.setOutside}
+                        unsetOutside={this.unsetOutside}
+                        setKeyframe={this.setKeyframe}
+                        unsetKeyframe={this.unsetKeyframe}
+                        lock={this.lock}
+                        unlock={this.unlock}
+                        pin={this.pin}
+                        unpin={this.unpin}
+                        hide={this.hide}
+                        show={this.show}
+                        remove={this.remove}
+                    />
+                )}
+            </>
         );
     }
 }

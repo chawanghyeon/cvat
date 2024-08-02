@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Alert from 'antd/lib/alert';
 import Progress from 'antd/lib/progress';

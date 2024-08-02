@@ -1,0 +1,50 @@
+@import '../../base.scss';
+
+.cvat-billing-chart-title {
+    .cvat-billing-chart-title-text {
+        font-size: 1.5em;
+        margin-bottom: 0;
+        color: azure;
+    }
+}
+
+.cvat-billing-chart-container {
+    display: flex;
+    flex-direction: row;
+
+    > li:hover {
+        background-color: $select-color;
+    }
+
+    .ant-menu-submenu-title {
+        margin: 0;
+        width: 13em;
+    }
+
+    .billing-cart-info {
+        margin-left: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        font-size: 1.5em;
+        color: azure;
+    }
+}
+
+.cvat-billing-chart-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 1.5em;
+    color: azure;
+}
+
+.cvat-billing-chart-button {
+    padding: 5px 10px;
+    font-size: 1em;
+    color: azure;
+    background-color: rgba(255, 159, 64, 1);
+    border-radius: 14px;
+}

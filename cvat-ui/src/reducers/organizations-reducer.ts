@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { AuthActions, AuthActionTypes } from 'actions/auth-actions';
 import { OrganizationActions, OrganizationActionsTypes } from 'actions/organization-actions';
 import { OrganizationState } from '.';
@@ -17,6 +13,7 @@ const defaultState: OrganizationState = {
     leaving: false,
     removingMember: false,
     updatingMember: false,
+    statistic: null,
 };
 
 export default function (
@@ -166,6 +163,37 @@ export default function (
             return {
                 ...state,
                 updatingMember: false,
+            };
+        }
+        case OrganizationActionsTypes.GET_STATISTIC: {
+            return {
+                ...state,
+                fetching: true,
+            };
+        }
+        case OrganizationActionsTypes.GET_STATISTIC_SUCCESS: {
+            return {
+                ...state,
+                fetching: false,
+                statistic: action.payload.statistic,
+            };
+        }
+        case OrganizationActionsTypes.GET_STATISTIC_FAILED: {
+            return {
+                ...state,
+                fetching: false,
+            };
+        }
+        case OrganizationActionsTypes.GET_LABELS_SUCCESS: {
+            return {
+                ...state,
+                labels: action.payload.labels,
+            };
+        }
+        case OrganizationActionsTypes.GET_UMAP_SUCCESS: {
+            return {
+                ...state,
+                umap: action.payload.umap,
             };
         }
         case AuthActionTypes.LOGOUT_SUCCESS: {

@@ -1,0 +1,24 @@
+@import '../../base.scss';
+
+.cvat-modal-import-backup {
+
+    .ant-form-vertical {
+        .ant-form-item {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+    }
+    .ant-upload-list-item {
+
+        &:hover {
+            .ant-upload-list-item-info {
+                background-color: $background-color-2;
+            }
+        }
+        &-info {
+            color: $text-color;
+            border-radius: 6px;
+        }
+
+    }
+}

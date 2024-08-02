@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import _cvat from 'cvat-core/src/api';
 import ObjectState from 'cvat-core/src/object-state';
 import Webhook from 'cvat-core/src/webhook';
@@ -15,12 +10,21 @@ import { SerializedAttribute, SerializedLabel } from 'cvat-core/src/server-respo
 import { Job, Task } from 'cvat-core/src/session';
 import Project from 'cvat-core/src/project';
 import {
-    ShapeType, LabelType, ModelKind, ModelProviders, ModelReturnType, DimensionType,
+    ShapeType,
+    LabelType,
+    ModelKind,
+    ModelProviders,
+    ModelReturnType,
+    DimensionType,
+    JobType,
+    JobStage,
+    JobState,
 } from 'cvat-core/src/enums';
 import { Storage, StorageData } from 'cvat-core/src/storage';
 import Issue from 'cvat-core/src/issue';
 import Comment from 'cvat-core/src/comment';
 import { SocialAuthMethods, SocialAuthMethod, SelectionSchema } from 'cvat-core/src/auth-methods';
+import { APIWrapperEnterOptions } from 'cvat-core/src/plugins';
 
 const cvat: any = _cvat;
 
@@ -54,12 +58,16 @@ export {
     ModelReturnType,
     SelectionSchema,
     DimensionType,
+    JobType,
+    JobStage,
+    JobState,
 };
 
 export type {
     SerializedAttribute,
     SerializedLabel,
-    StorageData,
     SocialAuthMethods,
     ModelProvider,
+    APIWrapperEnterOptions,
+    StorageData,
 };

@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 import Popover from 'antd/lib/popover';
@@ -23,17 +19,17 @@ function RotateControl(props: Props): JSX.Element {
 
     return (
         <CustomPopover
-            placement='right'
+            placement='bottom'
             content={(
                 <>
-                    <CVATTooltip title={`Rotate the image anticlockwise ${anticlockwiseShortcut}`} placement='topRight'>
+                    <CVATTooltip title={`반시계방향으로 회전 ${anticlockwiseShortcut}`} placement='bottomRight'>
                         <Icon
                             className='cvat-rotate-canvas-controls-left'
                             onClick={(): void => rotateFrame(Rotation.ANTICLOCKWISE90)}
                             component={RotateIcon}
                         />
                     </CVATTooltip>
-                    <CVATTooltip title={`Rotate the image clockwise ${clockwiseShortcut}`} placement='topRight'>
+                    <CVATTooltip title={`시계방향으로 회전 ${clockwiseShortcut}`} placement='bottomRight'>
                         <Icon
                             className='cvat-rotate-canvas-controls-right'
                             onClick={(): void => rotateFrame(Rotation.CLOCKWISE90)}
@@ -43,6 +39,7 @@ function RotateControl(props: Props): JSX.Element {
                 </>
             )}
             trigger='hover'
+            arrowPointAtCenter
         >
             <Icon className='cvat-rotate-canvas-control' component={RotateIcon} />
         </CustomPopover>

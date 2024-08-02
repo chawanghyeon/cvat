@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -43,7 +38,7 @@ function ImportDatasetStatusModal(): JSX.Element {
     return (
         <Modal
             title={`Importing a dataset for the project #${importingId}`}
-            visible={importing}
+            open={importing}
             closable={false}
             footer={null}
             className='cvat-modal-import-dataset-status'

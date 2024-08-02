@@ -1,7 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 const { defaults } = require('jest-config');
 
 module.exports = {

@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import polylabel from 'polylabel';
 import { fabric } from 'fabric';
 import * as SVG from 'svg.js';
@@ -63,7 +58,22 @@ import {
 
 export interface CanvasView {
     html(): HTMLDivElement;
+    keyControls(key: KeyboardEvent): void;
 }
+
+interface TurnType {
+    left: number;
+    right: number;
+    up: number;
+    down: number;
+}
+
+const turn: TurnType = {
+    left: 1,
+    right: 2,
+    up: 3,
+    down: 4,
+};
 
 export class CanvasViewImpl implements CanvasView, Listener {
     private text: SVGSVGElement;
@@ -99,6 +109,9 @@ export class CanvasViewImpl implements CanvasView, Listener {
     private activeElement: ActiveElement;
     private configuration: Configuration;
     private snapToAngleResize: number;
+    private lastKeyPressTime: number;
+    private addedAngle: number;
+    private debounceTimer: any;
     private innerObjectsFlags: {
         drawHidden: Record<number, boolean>;
         editHidden: Record<number, boolean>;
@@ -355,6 +368,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
                     state,
                     points,
                     rotation: typeof rotation === 'number' ? rotation : state.rotation,
+                    active: false,
                 },
             });
 
@@ -1017,7 +1031,100 @@ export class CanvasViewImpl implements CanvasView, Listener {
         }
     }
 
-    private onShiftKeyDown = (e: KeyboardEvent): void => {
+    private onKeyDown = (e: KeyboardEvent): void => {
+        if ((e.key === 'o' || e.code === 'KeyO') && !e.shiftKey && !e.ctrlKey) {
+            this.interactionHandler.cancel();
+            return;
+        }
+        // show or hide active object in validation mode
+        if ((e.key === 'h' || e.code === 'KeyH') && !e.shiftKey && !e.ctrlKey) {
+            const [state] = this.controller.objects
+                .filter((_state: any): boolean => _state.clientID === this.activeElement.clientID);
+
+            if (state !== undefined) {
+                const changeEvent: CustomEvent = new CustomEvent('canvas.edited', {
+                    bubbles: false,
+                    cancelable: false,
+                    detail: {
+                        state,
+                        points: state.points,
+                        rotation: state.rotation,
+                        active: true,
+                        hidden: true,
+                    },
+                });
+                this.canvas.dispatchEvent(changeEvent);
+                return;
+            }
+        }
+        // rotate cuboid or resize rectangle
+        if (
+            (e.key === 'd' ||
+                e.code === 'KeyD' ||
+                e.key === 'g' ||
+                e.code === 'KeyG' ||
+                e.key === 'r' ||
+                e.code === 'KeyR' ||
+                e.key === 'v' ||
+                e.code === 'KeyV' ||
+                e.key === 'f' ||
+                e.code === 'KeyF') &&
+            e.shiftKey
+        ) {
+            const [state] = this.controller.objects.filter(
+                (_state: any): boolean => _state.clientID === this.activeElement.clientID,
+            );
+
+            if (state?.shapeType === 'cuboid') {
+                let rotatedPoint;
+
+                if (e.key === 'd' || e.code === 'KeyD') rotatedPoint = this.turnCuboid(state.points, turn.left);
+                else if (e.key === 'g' || e.code === 'KeyG') rotatedPoint = this.turnCuboid(state.points, turn.right);
+                else if (e.key === 'r' || e.code === 'KeyR') rotatedPoint = this.turnCuboid(state.points, turn.up);
+                else if (e.key === 'v' || e.code === 'KeyV') rotatedPoint = this.turnCuboid(state.points, turn.down);
+                else if (e.key === 'f' || e.code === 'KeyF') rotatedPoint = this.switchCuboid(state.points);
+
+                if (state && rotatedPoint?.length === 16) {
+                    const changeEvent: CustomEvent = new CustomEvent('canvas.edited', {
+                        bubbles: false,
+                        cancelable: false,
+                        detail: {
+                            state,
+                            points: rotatedPoint,
+                            rotation: state.rotation,
+                            active: true,
+                        },
+                    });
+                    this.canvas.dispatchEvent(changeEvent);
+                    this.debouncedCancel();
+                    return;
+                }
+            } else if (state?.shapeType === 'rectangle') {
+                const expand = 1;
+                const reduce = 0;
+                let resizePoint;
+
+                if (e.key === 'd' || e.code === 'KeyD') resizePoint = this.resizeRectangle(state.points, expand);
+                else if (e.key === 'f' || e.code === 'KeyF') resizePoint = this.resizeRectangle(state.points, reduce);
+
+                if (state && resizePoint?.length === 4) {
+                    const changeEvent: CustomEvent = new CustomEvent('canvas.edited', {
+                        bubbles: false,
+                        cancelable: false,
+                        detail: {
+                            state,
+                            points: resizePoint,
+                            rotation: state.rotation,
+                            active: true,
+                        },
+                    });
+                    this.canvas.dispatchEvent(changeEvent);
+                    this.debouncedCancel();
+                    return;
+                }
+            }
+        }
+        // else
         if (!e.repeat && e.code.toLowerCase().includes('shift')) {
             this.snapToAngleResize = consts.SNAP_TO_ANGLE_RESIZE_SHIFT;
             if (this.activeElement) {
@@ -1079,7 +1186,9 @@ export class CanvasViewImpl implements CanvasView, Listener {
             drawHidden: {},
             editHidden: {},
         };
-
+        this.lastKeyPressTime = 0;
+        this.addedAngle = 2;
+        this.debounceTimer = null;
         // Create HTML elements
         this.text = window.document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this.adoptedText = SVG.adopt((this.text as any) as HTMLElement) as SVG.Container;
@@ -1107,7 +1216,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
 
         this.issueRegionPattern_1 = contentDefs
             .pattern(consts.BASE_PATTERN_SIZE, consts.BASE_PATTERN_SIZE, (add): void => {
-                add.line(0, 0, 0, 10).stroke('red');
+                add.line(0, 0, 0, 10).stroke('#FB6E77');
             })
             .attr({
                 id: 'cvat_issue_region_pattern_1',
@@ -1147,6 +1256,32 @@ export class CanvasViewImpl implements CanvasView, Listener {
         this.content.setAttribute('id', 'cvat_canvas_content');
         this.bitmap.setAttribute('id', 'cvat_canvas_bitmap');
         this.bitmap.style.display = 'none';
+
+        // text label
+        const textFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+        textFilter.setAttribute('id', 'bg');
+        textFilter.setAttribute('x', '0');
+        textFilter.setAttribute('y', '0');
+        textFilter.setAttribute('width', '1');
+        textFilter.setAttribute('height', '1');
+
+        const flood = document.createElementNS('http://www.w3.org/2000/svg', 'feFlood');
+        flood.setAttribute('result', 'bg');
+
+        const femerge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
+        const feMergeNode = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+        const feMergeNode2 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+        feMergeNode.setAttribute('in', 'bg');
+        feMergeNode2.setAttribute('in', 'SourceGraphic');
+
+        femerge.appendChild(feMergeNode);
+        femerge.appendChild(feMergeNode2);
+        textFilter.appendChild(flood);
+        textFilter.appendChild(femerge);
+
+        const textDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        textDefs.appendChild(textFilter);
+        this.text.appendChild(textDefs);
 
         // Setup sticked div
         this.attachmentBoard.setAttribute('id', 'cvat_canvas_attachment_board');
@@ -1235,7 +1370,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
         });
 
         window.document.addEventListener('mouseup', this.onMouseUp);
-        window.document.addEventListener('keydown', this.onShiftKeyDown);
+        window.document.addEventListener('keydown', this.onKeyDown, { passive: true });
         window.document.addEventListener('keyup', this.onShiftKeyUp);
 
         this.canvas.addEventListener('wheel', (event): void => {
@@ -1275,6 +1410,238 @@ export class CanvasViewImpl implements CanvasView, Listener {
 
         this.content.oncontextmenu = (): boolean => false;
         model.subscribe(this);
+    }
+
+    public resizeRectangle(rectangle: number[], type: number): number[] {
+        const width = Math.abs(rectangle[2] - rectangle[0]);
+        const height = Math.abs(rectangle[3] - rectangle[1]);
+        const expand = 1;
+
+        const resizeWidth = width * (type === expand ? 1.05 : 0.95);
+        const resizeHeight = height * (type === expand ? 1.05 : 0.95);
+
+        const resizedRectangle = [
+            rectangle[0] + (width - resizeWidth) / 2,
+            rectangle[1] + (height - resizeHeight) / 2,
+            rectangle[2] - (width - resizeWidth) / 2,
+            rectangle[3] - (height - resizeHeight) / 2,
+        ];
+
+        return resizedRectangle;
+    }
+
+    public switchCuboid(pts: number[]): number[] {
+        function cuboidOrientationIsLeft(p: number[]): boolean {
+            if (p?.length > 11) return p[12] > p[0];
+            return false;
+        }
+
+        function shift<T>(array: Array<T>, k: number): Array<T> {
+            if (k % array.length !== 0) {
+                return array.slice(k % array.length).concat(array.slice(0, k % array.length));
+            }
+            return array;
+        }
+
+        let points = pts;
+
+        const minD = {
+            x: (points[6] - points[2]) * 0.001,
+            y: (points[3] - points[1]) * 0.001,
+        };
+
+        if (cuboidOrientationIsLeft(points)) {
+            points[14] = points[10] + points[2] - points[6] + minD.x;
+            points[15] = points[11] + points[3] - points[7];
+            points[8] = points[10] + points[4] - points[6];
+            points[9] = points[11] + points[5] - points[7] + minD.y;
+            points[12] = points[14] + points[0] - points[2];
+            points[13] = points[15] + points[1] - points[3] + minD.y;
+        } else {
+            points[10] = points[14] + points[6] - points[2] - minD.x;
+            points[11] = points[15] + points[7] - points[3];
+            points[12] = points[14] + points[0] - points[2];
+            points[13] = points[15] + points[1] - points[3] + minD.y;
+            points[8] = points[12] + points[4] - points[0] - minD.x;
+            points[9] = points[13] + points[5] - points[1];
+        }
+        points = shift(points, cuboidOrientationIsLeft(points) ? 4 : -4);
+        return points;
+    }
+
+    public getCuboidRotationCenter(points: number[]): [number, number] {
+        const xValues = points.filter((_, i) => i % 2 === 0);
+        const yValues = points.filter((_, i) => i % 2 !== 0);
+        const centerX = (Math.max(...xValues) + Math.min(...xValues)) / 2;
+        const centerY = (Math.max(...yValues) + Math.min(...yValues)) / 2;
+        return [centerX, centerY];
+    }
+
+    public rotate2DPointsXAxis(angle: number, points: number[]): number[] {
+        const frontPoints = points.slice(0, 8);
+        const dorsalPoints = points.slice(8, 16);
+
+        const [fcx, fcy] = this.getCuboidRotationCenter(frontPoints);
+        const [dcx, dcy] = this.getCuboidRotationCenter(dorsalPoints);
+
+        const rad = (Math.PI / 180) * angle;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
+        const result = [];
+        for (let i = 0; i < 8; i += 2) {
+            const x = points[i];
+            const y = points[i + 1];
+            result.push((x - fcx) * cos + (y - fcy) * sin + fcx, (y - fcy) * cos - (x - fcx) * sin + fcy);
+        }
+        for (let i = 8; i < 16; i += 2) {
+            const x = points[i];
+            const y = points[i + 1];
+            result.push((x - dcx) * cos + (y - dcy) * sin + dcx, (y - dcy) * cos - (x - dcx) * sin + dcy);
+        }
+        return result;
+    }
+
+    public rotate2DPointsYAxis(angle: number, points: number[]): number[] {
+        const topPoints = points
+            .slice(0, 2)
+            .concat(points.slice(4, 6))
+            .concat(points.slice(8, 10))
+            .concat(points.slice(12, 14));
+        const bottomPoints = points
+            .slice(2, 4)
+            .concat(points.slice(6, 8))
+            .concat(points.slice(10, 12))
+            .concat(points.slice(14, 16));
+
+        const [tcx, tcy] = this.getCuboidRotationCenter(topPoints);
+        const [bcx, bcy] = this.getCuboidRotationCenter(bottomPoints);
+
+        const rad = (Math.PI / 180) * angle;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
+        const result = [];
+        for (let i = 0; i < points.length; i += 2) {
+            const x = points[i];
+            const y = points[i + 1];
+            if (i === 0 || i === 4 || i === 8 || i === 12) {
+                result.push((x - tcx) * cos + (y - tcy) * sin + tcx, (y - tcy) * cos - (x - tcx) * sin + tcy);
+            } else {
+                result.push((x - bcx) * cos + (y - bcy) * sin + bcx, (y - bcy) * cos - (x - bcx) * sin + bcy);
+            }
+        }
+        return result;
+    }
+
+    public debouncedCancel(): void {
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+        this.debounceTimer = setTimeout(() => {
+            const event: CustomEvent = new CustomEvent('canvas.canceled', {
+                bubbles: false,
+                cancelable: true,
+            });
+            this.canvas.dispatchEvent(event);
+        }, 200);
+    }
+
+    public turnCuboid(pts: number[], type: number): number[] {
+        const currentTime = Date.now();
+        if (currentTime - this.lastKeyPressTime < 150) {
+            this.addedAngle += 2;
+            return pts;
+        }
+        this.lastKeyPressTime = currentTime;
+        let points = pts;
+
+        if (type === turn.left) points = this.rotate2DPointsYAxis(-this.addedAngle, points);
+        else if (type === turn.right) points = this.rotate2DPointsYAxis(this.addedAngle, points);
+        else if (type === turn.up) points = this.rotate2DPointsXAxis(this.addedAngle, points);
+        else if (type === turn.down) points = this.rotate2DPointsXAxis(-this.addedAngle, points);
+        this.addedAngle = 2;
+
+        return points;
+    }
+
+    public keyControls(key: KeyboardEvent): void {
+        key.preventDefault();
+        const [state] = this.controller.objects.filter(
+            (_state: any): boolean => _state.clientID === this.activeElement.clientID,
+        );
+        if (key.shiftKey) {
+            if (key.ctrlKey) {
+                this.sizeChangeObject(state, key, 10);
+            }
+            // 사이즈를 변경하는 로직 (1px)
+            this.sizeChangeObject(state, key, 1);
+        } else {
+            // 방향키로 이동하는 로직
+            this.moveObject(state, key);
+        }
+    }
+
+    public sizeChangeObject(state: any, key: KeyboardEvent, px: number): void {
+        switch (key.code) {
+            case 'ArrowUp':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i === 3 ? _point - px : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            case 'ArrowDown':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i === 3 ? _point + px : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            case 'ArrowLeft':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i === 2 ? _point - px : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            case 'ArrowRight':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i === 2 ? _point + px : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    public moveObject(state: any, key: KeyboardEvent): void {
+        switch (key.code) {
+            case 'ArrowUp':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i % 2 !== 0 ? _point - 1 : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            case 'ArrowDown':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i % 2 !== 0 ? _point + 1 : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            case 'ArrowLeft':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i % 2 === 0 ? _point - 1 : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            case 'ArrowRight':
+                {
+                    const points = state.points.map((_point: number, i: number) => (i % 2 === 0 ? _point + 1 : _point));
+                    this.onEditDone(state, points);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     public notify(model: CanvasModel & Master, reason: UpdateReasons): void {
@@ -1694,7 +2061,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
                 }),
             );
 
-            window.document.removeEventListener('keydown', this.onShiftKeyDown);
+            window.document.removeEventListener('keydown', this.onKeyDown);
             window.document.removeEventListener('keyup', this.onShiftKeyUp);
             window.document.removeEventListener('mouseup', this.onMouseUp);
             this.interactionHandler.destroy();
@@ -1839,9 +2206,13 @@ export class CanvasViewImpl implements CanvasView, Listener {
         return result;
     }
 
-    private getShapeColorization(state: any, opts: {
-        parentState?: any,
-    } = {}): { fill: string; stroke: string, 'fill-opacity': number } {
+    private getShapeColorization(
+        state: any,
+        opts: {
+            configuration?: Configuration;
+            parentState?: any;
+        } = {},
+    ): { fill: string; stroke: string; 'fill-opacity': number } {
         const { shapeType } = state;
         const parentShapeType = opts.parentState?.shapeType;
         const { configuration } = this;
@@ -2548,14 +2919,16 @@ export class CanvasViewImpl implements CanvasView, Listener {
             };
 
             // first try to put to the top right corner
-            [clientX, clientY] = [box.x + box.width, box.y];
-            if (
-                clientX + ((text.node as any) as SVGTextElement)
-                    .getBBox().width + consts.TEXT_MARGIN > this.canvas.offsetWidth
-            ) {
-                // if out of visible area, try to put text to top left corner
-                [clientX, clientY] = [box.x, box.y];
-            }
+            // [clientX, clientY] = [box.x + box.width, box.y];
+            // if (
+            //     clientX + ((text.node as any) as SVGTextElement)
+            //         .getBBox().width + consts.TEXT_MARGIN > this.canvas.offsetWidth
+            // ) {
+            //     // if out of visible area, try to put text to top left corner
+            //     [clientX, clientY] = [box.x, box.y];
+            // }
+            // 좌측 위로 text 고정
+            [clientX, clientY] = [box.x - 10, box.y - (text.node as any as SVGTextElement).getBBox().height * 2];
         }
 
         // Translate found coordinates to text SVG
@@ -2642,7 +3015,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
             });
         }
 
-        return this.adoptedText
+        const text = this.adoptedText
             .text((block): void => {
                 block.tspan(`${withLabel ? label.name : ''} ${withID ? clientID : ''} ${withSource ? `(${source})` : ''}`).style({
                     'text-transform': 'uppercase',
@@ -2674,8 +3047,20 @@ export class CanvasViewImpl implements CanvasView, Listener {
             })
             .move(0, 0)
             .attr({ 'data-client-id': state.clientID })
-            .style({ 'font-size': textFontSize })
+            .style({ 'font-size': textFontSize, filter: 'url(#bg)' })
             .addClass('cvat_canvas_text');
+
+        const filter = document.getElementById('bg');
+        const children = Object.values(filter.childNodes) as HTMLElement[];
+        for (const child of children) {
+            if (child.tagName === 'feFlood') {
+                child.removeAttribute('flood-color');
+                child.setAttribute('flood-color', state.color);
+                child.setAttribute('color-rendering', 'optimizeQuality');
+            }
+        }
+
+        return text;
     }
 
     private addRect(points: number[], state: any): SVG.Rect {

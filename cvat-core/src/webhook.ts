@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import PluginRegistry from './plugins';
 import User from './user';
 import serverProxy from './server-proxy';

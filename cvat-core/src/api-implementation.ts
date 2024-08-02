@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { SocialAuthMethod, SocialAuthMethodsRawType } from './auth-methods';
 import config from './config';
 
@@ -36,7 +31,6 @@ export default function implementAPI(cvat) {
     cvat.lambda.cancel.implementation = lambdaManager.cancel.bind(lambdaManager);
     cvat.lambda.listen.implementation = lambdaManager.listen.bind(lambdaManager);
     cvat.lambda.requests.implementation = lambdaManager.requests.bind(lambdaManager);
-    cvat.lambda.providers.implementation = lambdaManager.providers.bind(lambdaManager);
 
     cvat.server.about.implementation = async () => {
         const result = await serverProxy.server.about();
@@ -183,6 +177,8 @@ export default function implementAPI(cvat) {
             sort: isString,
             search: isString,
             jobID: isInteger,
+            taskID: isInteger,
+            username: isString,
         });
 
         checkExclusiveFields(query, ['jobID', 'filter', 'search'], ['page', 'sort']);
@@ -200,7 +196,7 @@ export default function implementAPI(cvat) {
 
         const searchParams = {};
         for (const key of Object.keys(query)) {
-            if (['page', 'sort', 'search', 'filter', 'task_id'].includes(key)) {
+            if (['page', 'sort', 'search', 'filter', 'task_id', 'username'].includes(key)) {
                 searchParams[key] = query[key];
             }
         }
@@ -209,6 +205,11 @@ export default function implementAPI(cvat) {
         const jobs = jobsData.results.map((jobData) => new Job(jobData));
         jobs.count = jobsData.count;
         return jobs;
+    };
+
+    cvat.jobs.getGuides.implementation = async (projectId: number) => {
+        const guides = await serverProxy.jobs.getGuides(projectId);
+        return guides;
     };
 
     cvat.tasks.get.implementation = async (filter) => {
@@ -258,6 +259,11 @@ export default function implementAPI(cvat) {
 
         tasks.count = tasksData.count;
         return tasks;
+    };
+
+    cvat.tasksIssues.get.implementation = async (id:number) => {
+        const tasksData = await serverProxy.tasksIssues.get(id);
+        return tasksData;
     };
 
     cvat.projects.get.implementation = async (filter) => {
@@ -333,6 +339,26 @@ export default function implementAPI(cvat) {
     cvat.organizations.deactivate.implementation = async () => {
         config.organizationID = null;
     };
+
+    cvat.organizations.getStatistic.implementation = async (userID) => {
+        const statistic = await serverProxy.organizations.getStatistic(userID);
+        return statistic;
+    }
+
+    cvat.organizations.getUmap.implementation = async (labelId) => {
+        const umap = await serverProxy.organizations.getUmap(labelId);
+        return umap;
+    }
+
+    cvat.labels.get.implementation = async (filter) => {
+        const labels = await serverProxy.labels.get(filter);
+        return labels;
+    }
+
+    cvat.frames.getData.implementation = async (tid, jid, chunk) => {
+        const data = await serverProxy.frames.getData(tid, jid, chunk);
+        return data;
+    }
 
     cvat.webhooks.get.implementation = async (filter) => {
         checkFilter(filter, {

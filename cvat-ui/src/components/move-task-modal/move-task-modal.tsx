@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, {
     useState, useEffect, useCallback, useRef,
@@ -20,6 +15,7 @@ import CVATTooltip from 'components/common/cvat-tooltip';
 import { CombinedState } from 'reducers';
 import { switchMoveTaskModalVisible } from 'actions/tasks-actions';
 import { getCore, Task, Label } from 'cvat-core-wrapper';
+import Text from 'antd/lib/typography/Text';
 import LabelMapperItem, { LabelMapperItemValue } from './label-mapper-item';
 
 const core = getCore();
@@ -82,6 +78,11 @@ function MoveTaskModal({
                 message: 'Please, specify mapping for all the labels',
             });
             return;
+        }
+
+        const agree = confirm('만약 타겟 프로젝트에서 특정 라벨에 속성이 없다면, 해당 라벨로 매핑되는 이전 태스크 라벨의 모든 속성이 제거됩니다. 계속하시겠습니까?');
+        if (!agree) {
+            onCancel();
         }
 
         taskInstance.projectId = projectId;
@@ -174,7 +175,7 @@ function MoveTaskModal({
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             onCancel={onCancel}
             onOk={submitMove}
             okButtonProps={{ disabled: isUpdating }}
@@ -191,8 +192,8 @@ function MoveTaskModal({
         >
             { taskFetching && <CVATLoadingSpinner size='large' /> }
             <Row align='middle'>
-                <Col>Project:</Col>
-                <Col>
+                <Col span={5} className='cvat-text-color'>Project:</Col>
+                <Col span={19}>
                     <ProjectSearch
                         value={projectId}
                         onSelect={setProjectId}
@@ -200,7 +201,8 @@ function MoveTaskModal({
                     />
                 </Col>
             </Row>
-            <Divider orientation='left'>Label mapping</Divider>
+            <Divider />
+            <Text className='cvat-text-color'>Label mapping</Text>
             {!!Object.keys(labelMap).length &&
                 !isUpdating &&
                 taskInstance?.labels.map((label: any) => (

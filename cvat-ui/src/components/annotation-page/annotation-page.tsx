@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router';
 import Layout from 'antd/lib/layout';
@@ -15,19 +10,21 @@ import ReviewAnnotationsWorkspace from 'components/annotation-page/review-worksp
 import StandardWorkspaceComponent from 'components/annotation-page/standard-workspace/standard-workspace';
 import StandardWorkspace3DComponent from 'components/annotation-page/standard3D-workspace/standard3D-workspace';
 import TagAnnotationWorkspace from 'components/annotation-page/tag-annotation-workspace/tag-annotation-workspace';
-import FiltersModalComponent from 'components/annotation-page/top-bar/filters-modal';
-import StatisticsModalComponent from 'components/annotation-page/top-bar/statistics-modal';
-import AnnotationTopBarContainer from 'containers/annotation-page/top-bar/top-bar';
+import FiltersModalComponent from 'components/header/top-bar/filters-modal';
+import StatisticsModalComponent from 'components/header/top-bar/statistics-modal';
 import { Workspace } from 'reducers';
 import { usePrevious } from 'utils/hooks';
 import './styles.scss';
 import Button from 'antd/lib/button';
+import { SALMONLogo } from 'icons';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     job: any | null | undefined;
     fetching: boolean;
     frameNumber: number;
     workspace: Workspace;
+    frameID: number;
     getJob(): void;
     saveLogs(): void;
     closeJob(): void;
@@ -35,13 +32,12 @@ interface Props {
 }
 
 export default function AnnotationPageComponent(props: Props): JSX.Element {
-    const {
-        job, fetching, workspace, frameNumber, getJob, closeJob, saveLogs, changeFrame,
-    } = props;
+    const { t } = useTranslation();
+    const { job, fetching, workspace, frameNumber, frameID, getJob, closeJob, saveLogs, changeFrame } = props;
     const prevJob = usePrevious(job);
     const prevFetching = usePrevious(fetching);
-
     const history = useHistory();
+
     useEffect(() => {
         saveLogs();
         const root = window.document.getElementById('root');
@@ -76,7 +72,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                     const notificationKey = `cvat-notification-continue-job-${job.id}`;
                     notification.info({
                         key: notificationKey,
-                        message: `You finished working on frame ${parsedFrame}`,
+                        message: `${t('message.annotation.frame_1')} ${parsedFrame} ${t('message.annotation.frame_2')}`,
                         description: (
                             <span>
                                 Press
@@ -88,9 +84,9 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                                         notification.close(notificationKey);
                                     }}
                                 >
-                                    here
+                                    {t('message.annotation.button.here')}
                                 </Button>
-                                if you would like to continue
+                                {t('message.annotation.button.if you would like to continue')}
                             </span>
                         ),
                         placement: 'topRight',
@@ -98,19 +94,18 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                     });
                 }
             }
-
-            if (!job.labels.length) {
+            if (frameID > 0) {
+                changeFrame(frameID);
+            } else if (!job.labels.length) {
                 notification.warning({
-                    message: 'No labels',
+                    message: t('message.annotation.notification.No labels'),
                     description: (
                         <span>
-                            {`${job.projectId ? 'Project' : 'Task'} ${
-                                job.projectId || job.taskId
-                            } does not contain any label. `}
-                            <a href={`/${job.projectId ? 'projects' : 'tasks'}/${job.projectId || job.taskId}/`}>
-                                Add
-                            </a>
-                            {' the first one for editing annotation.'}
+                            {`${job.projectId ? 'Project' : 'Task'} ${job.projectId || job.taskId} ${t(
+                                'message.annotation.notification.label_description',
+                            )} `}
+                            <a href={`/${job.projectId ? 'projects' : 'tasks'}/${job.projectId || job.taskId}/`}>Add</a>
+                            {t('message.annotation.notification.description')}
                         </span>
                     ),
                     placement: 'topRight',
@@ -118,7 +113,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                 });
             }
         }
-    }, [job, fetching, prevJob, prevFetching]);
+    }, [job, fetching, prevJob, prevFetching, frameID]);
 
     if (job === null) {
         return <Spin size='large' className='cvat-spinner' />;
@@ -128,25 +123,37 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
         return (
             <Result
                 className='cvat-not-found'
+                icon={<SALMONLogo />}
                 status='404'
-                title='Sorry, but this job was not found'
-                subTitle='Please, be sure information you tried to get exist and you have access'
+                title={t('message.annotation.result.title')}
+                subTitle={t('message.annotation.result.subTitle')}
+                extra={
+                    <Button type='primary' onClick={() => history.replace('/tasks')}>
+                        {t('message.annotation.result.Go Tasks page')}
+                    </Button>
+                }
             />
         );
     }
 
     return (
         <Layout className='cvat-annotation-page'>
-            <Layout.Header className='cvat-annotation-header'>
+            {/* <Layout.Header className='cvat-annotation-header'>
                 <AnnotationTopBarContainer />
-            </Layout.Header>
-            <Layout.Content className='cvat-annotation-layout-content'>
-                {workspace === Workspace.STANDARD3D && <StandardWorkspace3DComponent />}
-                {workspace === Workspace.STANDARD && <StandardWorkspaceComponent />}
-                {workspace === Workspace.ATTRIBUTE_ANNOTATION && <AttributeAnnotationWorkspace />}
-                {workspace === Workspace.TAG_ANNOTATION && <TagAnnotationWorkspace />}
-                {workspace === Workspace.REVIEW_WORKSPACE && <ReviewAnnotationsWorkspace />}
-            </Layout.Content>
+            </Layout.Header> */}
+            {workspace === Workspace.STANDARD3D && <StandardWorkspace3DComponent />}
+            {workspace === Workspace.STANDARD && <StandardWorkspaceComponent />}
+            {workspace === Workspace.ATTRIBUTE_ANNOTATION && (
+                <Layout.Content className='cvat-annotation-layout-content'>
+                    <AttributeAnnotationWorkspace />
+                </Layout.Content>
+            )}
+            {workspace === Workspace.TAG_ANNOTATION && (
+                <Layout.Content className='cvat-annotation-layout-content'>
+                    <TagAnnotationWorkspace />
+                </Layout.Content>
+            )}
+            {workspace === Workspace.REVIEW_WORKSPACE && <ReviewAnnotationsWorkspace />}
             <FiltersModalComponent />
             <StatisticsModalComponent />
         </Layout>

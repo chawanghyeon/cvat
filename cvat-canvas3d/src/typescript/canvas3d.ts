@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import pjson from '../../package.json';
 import { Canvas3dController, Canvas3dControllerImpl } from './canvas3dController';
 import {
@@ -33,6 +28,8 @@ interface Canvas3d {
     render(): void;
     keyControls(keys: KeyboardEvent): void;
     draw(drawData: DrawData): void;
+    brush(drawData: DrawData): void;
+    fixedObject(clientID: number): void;
     cancel(): void;
     dragCanvas(enable: boolean): void;
     activate(clientID: number | null, attributeID?: number): void;
@@ -70,6 +67,14 @@ class Canvas3dImpl implements Canvas3d {
 
     public draw(drawData: DrawData): void {
         this.model.draw(drawData);
+    }
+
+    public brush(drawData: DrawData): void {
+        this.model.brush(drawData);
+    }
+
+    public fixedObject(clientID: number): void {
+        this.model.fixedObject(clientID);
     }
 
     public setup(frameData: any, objectStates: any[]): void {

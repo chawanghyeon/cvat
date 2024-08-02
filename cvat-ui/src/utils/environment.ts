@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corp
-//
-// SPDX-License-Identifier: MIT
-
 /* eslint-disable @typescript-eslint/no-implied-eval */
 /* eslint-disable no-new-func */
 

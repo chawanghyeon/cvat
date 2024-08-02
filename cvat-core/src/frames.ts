@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { isBrowser, isNode } from 'browser-or-node';
 
 import * as cvatData from 'cvat-data';
@@ -739,6 +734,9 @@ export async function patchMeta(jobID) {
     frameDataCache[jobID].meta.deleted_frames = prevDeletedFrames;
 }
 
+/**
+ * 삭제되지 않은 마지막 프레임 반환
+ */
 export async function findNotDeletedFrame(jobID, frameFrom, frameTo, offset) {
     let meta;
     if (!frameDataCache[jobID]) {

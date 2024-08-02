@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { RefObject } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
@@ -20,10 +15,10 @@ import ConnectedFileManager from 'containers/file-manager/file-manager';
 import LabelsEditor from 'components/labels-editor/labels-editor';
 import { Files } from 'components/file-manager/file-manager';
 import { getFileContentType, getContentTypeRemoteFile, getFileNameFromPath } from 'utils/files';
-
+import { DownIcon, UpIcon } from 'icons';
+import Icon from '@ant-design/icons';
 import BasicConfigurationForm, { BaseConfiguration } from './basic-configuration-form';
 import ProjectSearchField from './project-search-field';
-import ProjectSubsetField from './project-subset-field';
 import MultiTasksProgress from './multi-task-progress';
 import AdvancedConfigurationForm, { AdvancedConfiguration, SortingMethod } from './advanced-configuration-form';
 
@@ -668,14 +663,16 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
         const exampleMultiTaskName = many ? this.getTaskName(0, 'local', 'fileName.mp4') : '';
 
         return (
-            <Col span={24}>
-                <BasicConfigurationForm
-                    ref={this.basicConfigurationComponent}
-                    many={many}
-                    exampleMultiTaskName={exampleMultiTaskName}
-                    onChange={this.handleChangeBasicConfiguration}
-                />
-            </Col>
+            <Row>
+                <Col span={24}>
+                    <BasicConfigurationForm
+                        ref={this.basicConfigurationComponent}
+                        many={many}
+                        exampleMultiTaskName={exampleMultiTaskName}
+                        onChange={this.handleChangeBasicConfiguration}
+                    />
+                </Col>
+            </Row>
         );
     }
 
@@ -683,38 +680,15 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
         const { projectId } = this.state;
 
         return (
-            <>
-                <Col span={24}>
+            <Row>
+                <Col span={4}>
                     <Text className='cvat-text-color'>Project</Text>
                 </Col>
-                <Col span={24}>
+                <Col span={20}>
                     <ProjectSearchField onSelect={this.handleProjectIdChange} value={projectId} />
                 </Col>
-            </>
+            </Row>
         );
-    }
-
-    private renderSubsetBlock(): JSX.Element | null {
-        const { projectId, subset } = this.state;
-
-        if (projectId !== null) {
-            return (
-                <>
-                    <Col span={24}>
-                        <Text className='cvat-text-color'>Subset</Text>
-                    </Col>
-                    <Col span={24}>
-                        <ProjectSubsetField
-                            value={subset}
-                            onChange={this.handleTaskSubsetChange}
-                            projectId={projectId}
-                        />
-                    </Col>
-                </>
-            );
-        }
-
-        return null;
     }
 
     private renderLabelsBlock(): JSX.Element {
@@ -722,30 +696,34 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
 
         if (projectId) {
             return (
-                <>
-                    <Col span={24}>
+                <Row>
+                    <Col span={4}>
                         <Text className='cvat-text-color'>Labels</Text>
                     </Col>
-                    <Col span={24}>
+                    <Col span={20}>
                         <Text type='secondary'>Project labels will be used</Text>
                     </Col>
-                </>
+                </Row>
             );
         }
 
         return (
-            <Col span={24}>
-                <Text type='danger'>* </Text>
-                <Text className='cvat-text-color'>Labels</Text>
-                <LabelsEditor
-                    labels={labels}
-                    onSubmit={(newLabels): void => {
-                        this.setState({
-                            labels: newLabels,
-                        });
-                    }}
-                />
-            </Col>
+            <Row>
+                <Col span={4}>
+                    <Text className='cvat-text-color'>Labels</Text>
+                    <Text type='danger'> *</Text>
+                </Col>
+                <Col span={20}>
+                    <LabelsEditor
+                        labels={labels}
+                        onSubmit={(newLabels): void => {
+                            this.setState({
+                                labels: newLabels,
+                            });
+                        }}
+                    />
+                </Col>
+            </Row>
         );
     }
 
@@ -755,30 +733,35 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
 
         return (
             <>
-                <Col span={24}>
-                    <Text type='danger'>* </Text>
-                    <Text className='cvat-text-color'>Select files</Text>
-                    <ConnectedFileManager
-                        many={many}
-                        onChangeActiveKey={this.changeFileManagerTab}
-                        onUploadLocalFiles={this.handleUploadLocalFiles}
-                        onUploadRemoteFiles={this.handleUploadRemoteFiles}
-                        onUploadShareFiles={this.handleUploadShareFiles}
-                        onUploadCloudStorageFiles={this.handleUploadCloudStorageFiles}
-                        ref={(container: any): void => {
-                            this.fileManagerContainer = container;
-                        }}
-                    />
-                </Col>
+                <Row>
+                    <Col span={4}>
+                        <Text className='cvat-text-color'>Select files</Text>
+                        <Text type='danger'> *</Text>
+                    </Col>
+                    <Col span={20}>
+                        <ConnectedFileManager
+                            many={many}
+                            onChangeActiveKey={this.changeFileManagerTab}
+                            onUploadLocalFiles={this.handleUploadLocalFiles}
+                            onUploadRemoteFiles={this.handleUploadRemoteFiles}
+                            onUploadShareFiles={this.handleUploadShareFiles}
+                            onUploadCloudStorageFiles={this.handleUploadCloudStorageFiles}
+                            ref={(container: any): void => {
+                                this.fileManagerContainer = container;
+                            }}
+                        />
+                    </Col>
+                </Row>
                 { uploadFileErrorMessage ? (
-                    <Col span={24}>
+                    <Row>
                         <Alert
                             className='cvat-create-task-content-alert'
                             type='error'
                             message={uploadFileErrorMessage}
                             showIcon
+                            style={{ width: '100%' }}
                         />
-                    </Col>
+                    </Row>
                 ) : null }
             </>
         );
@@ -801,32 +784,38 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
             },
         } = this.state;
         return (
-            <Col span={24}>
-                <Collapse className='cvat-advanced-configuration-wrapper'>
-                    <Collapse.Panel key='1' header={<Text className='cvat-title'>Advanced configuration</Text>}>
-                        <AdvancedConfigurationForm
-                            dumpers={dumpers}
-                            installedGit={installedGit}
-                            activeFileManagerTab={activeFileManagerTab}
-                            ref={this.advancedConfigurationComponent}
-                            onSubmit={this.handleSubmitAdvancedConfiguration}
-                            projectId={projectId}
-                            useProjectSourceStorage={useProjectSourceStorage}
-                            useProjectTargetStorage={useProjectTargetStorage}
-                            sourceStorageLocation={sourceStorageLocation}
-                            targetStorageLocation={targetStorageLocation}
-                            onChangeUseProjectSourceStorage={this.handleUseProjectSourceStorageChange}
-                            onChangeUseProjectTargetStorage={this.handleUseProjectTargetStorageChange}
-                            onChangeSourceStorageLocation={(value: StorageLocation) => {
-                                this.handleChangeStorageLocation('sourceStorage', value);
-                            }}
-                            onChangeTargetStorageLocation={(value: StorageLocation) => {
-                                this.handleChangeStorageLocation('targetStorage', value);
-                            }}
-                        />
-                    </Collapse.Panel>
-                </Collapse>
-            </Col>
+            <Row>
+                <Col span={24}>
+                    <Collapse
+                        expandIconPosition='end'
+                        expandIcon={(panelProps) => (panelProps.isActive ?
+                            <Icon component={UpIcon} /> : <Icon component={DownIcon} />)}
+                    >
+                        <Collapse.Panel key='1' header={<span className='cvat-text-color'>Advanced configuration</span>}>
+                            <AdvancedConfigurationForm
+                                dumpers={dumpers}
+                                installedGit={installedGit}
+                                activeFileManagerTab={activeFileManagerTab}
+                                ref={this.advancedConfigurationComponent}
+                                onSubmit={this.handleSubmitAdvancedConfiguration}
+                                projectId={projectId}
+                                useProjectSourceStorage={useProjectSourceStorage}
+                                useProjectTargetStorage={useProjectTargetStorage}
+                                sourceStorageLocation={sourceStorageLocation}
+                                targetStorageLocation={targetStorageLocation}
+                                onChangeUseProjectSourceStorage={this.handleUseProjectSourceStorageChange}
+                                onChangeUseProjectTargetStorage={this.handleUseProjectTargetStorageChange}
+                                onChangeSourceStorageLocation={(value: StorageLocation) => {
+                                    this.handleChangeStorageLocation('sourceStorage', value);
+                                }}
+                                onChangeTargetStorageLocation={(value: StorageLocation) => {
+                                    this.handleChangeStorageLocation('targetStorage', value);
+                                }}
+                            />
+                        </Collapse.Panel>
+                    </Collapse>
+                </Col>
+            </Row>
         );
     }
 
@@ -837,7 +826,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
             return (<Alert message={status} />);
         }
         return (
-            <Row justify='end' gutter={5}>
+            <Row justify='center'>
                 <Col>
                     <Button
                         className='cvat-submit-open-task-button'
@@ -848,7 +837,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
                         Submit & Open
                     </Button>
                 </Col>
-                <Col>
+                <Col offset={1}>
                     <Button
                         className='cvat-submit-open-task-button'
                         type='primary'
@@ -910,13 +899,8 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
 
         return (
             <Row justify='start' align='middle' className='cvat-create-task-content'>
-                <Col span={24}>
-                    <Text className='cvat-title'>Basic configuration</Text>
-                </Col>
-
                 {this.renderBasicBlock()}
                 {this.renderProjectBlock()}
-                {this.renderSubsetBlock()}
                 {this.renderLabelsBlock()}
                 {this.renderFilesBlock()}
                 {this.renderAdvancedBlock()}

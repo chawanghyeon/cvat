@@ -1,15 +1,10 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React from 'react';
 import Layout from 'antd/lib/layout';
 import { Col, Row } from 'antd/lib/grid';
-import { CVATLogo } from 'icons';
+import { SALMONLogo } from 'icons';
 import Icon from '@ant-design/icons';
 import Title from 'antd/lib/typography/Title';
-import SVGSigningBackground from '../../assets/signing-background.svg';
 
 interface SignInLayoutComponentProps {
     children: JSX.Element | JSX.Element[];
@@ -69,11 +64,10 @@ function SignInLayout(props: SignInLayoutComponentProps): JSX.Element {
     };
     return (
         <Layout>
-            <SVGSigningBackground className='cvat-signing-background' />
             <Header className='cvat-signing-header'>
                 <Row justify='center' align='middle'>
                     <Col {...logoSizes}>
-                        <Icon className='cvat-logo-icon' component={CVATLogo} />
+                        <Icon className='cvat-logo-icon' component={SALMONLogo} />
                     </Col>
                 </Row>
             </Header>

@@ -32,7 +32,8 @@ import data.organizations
 #             "assignee": { "id": <num> }
 #         },
 #         "job": {
-#             "assignee": { "id": <num> }
+#             "worker": { "id": <num> },
+#             "checker": { "id": <num> }
 #         },
 #         "organization": { "id": <num> } or null
 #     }
@@ -47,7 +48,11 @@ is_issue_assignee {
 }
 
 is_job_assignee {
-    input.resource.job.assignee.id == input.auth.user.id
+    input.resource.job.worker.id == input.auth.user.id
+}
+
+is_job_assignee {
+    input.resource.job.checker.id == input.auth.user.id
 }
 
 is_task_owner {
@@ -154,6 +159,16 @@ allow {
     organizations.is_member
 }
 
+allow {
+    input.scope == utils.VIEW
+    utils.is_sandbox
+}
+
+allow {
+    input.scope == utils.VIEW
+    organizations.is_member
+}
+
 filter = [] { # Django Q object to filter list of entries
     utils.is_admin
     utils.is_sandbox
@@ -170,7 +185,8 @@ filter = [] { # Django Q object to filter list of entries
     user := input.auth.user
     qobject := [
         {"owner": user.id}, {"assignee": user.id}, "|",
-        {"job__assignee": user.id}, "|",
+        {"job__worker": user.id}, "|",
+        {"job__checker": user.id}, "|",
         {"job__segment__task__owner": user.id}, "|",
         {"job__segment__task__assignee": user.id}, "|",
         {"job__segment__task__project__owner": user.id}, "|",
@@ -191,7 +207,8 @@ filter = [] { # Django Q object to filter list of entries
     org := input.auth.organization
     qobject := [
         {"owner": user.id}, {"assignee": user.id}, "|",
-        {"job__assignee": user.id}, "|",
+        {"job__worker": user.id}, "|",
+        {"job__checker": user.id}, "|",
         {"job__segment__task__owner": user.id}, "|",
         {"job__segment__task__assignee": user.id}, "|",
         {"job__segment__task__project__owner": user.id}, "|",

@@ -1,7 +1,3 @@
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import hashlib
 import hmac
 from http import HTTPStatus

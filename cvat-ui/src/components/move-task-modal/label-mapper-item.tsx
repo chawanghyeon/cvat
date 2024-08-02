@@ -1,13 +1,11 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { Col, Row } from 'antd/lib/grid';
-import Tag from 'antd/lib/tag';
 import Select from 'antd/lib/select';
-import { ArrowRightOutlined } from '@ant-design/icons';
+import Checkbox from 'antd/lib/checkbox';
+import Text from 'antd/lib/typography/Text';
+import Icon from '@ant-design/icons';
 import CVATTooltip from 'components/common/cvat-tooltip';
+import { ChangeIcon } from 'icons';
 
 export interface LabelMapperItemValue {
     labelId: number;
@@ -32,16 +30,28 @@ export default function LabelMapperItem(props: LabelMapperItemProps): JSX.Elemen
     return (
         <Row className='cvat-move-task-label-mapper-item' align='middle'>
             <Col span={6}>
-                {label.name.length > 12 ? (
+                {label.name.length > 10 ? (
                     <CVATTooltip overlay={label.name}>
-                        <Tag color={label.color}>{`${label.name.slice(0, 12)}...`}</Tag>
+                        <span className='cvat-move-task-label-mapper-item-tag'>
+                            <svg height='8' width='8' style={{ fill: label.color }}>
+                                <circle cx='4' cy='4' r='4' strokeWidth='0' />
+                            </svg>
+                            <Text>{`${label.name.slice(0, 10)}...`}</Text>
+                        </span>
                     </CVATTooltip>
                 ) : (
-                    <Tag color={label.color}>{label.name}</Tag>
+                    <span className='cvat-move-task-label-mapper-item-tag'>
+                        <svg height='8' width='8' style={{ fill: label.color }}>
+                            <circle cx='4' cy='4' r='4' strokeWidth='0' />
+                        </svg>
+                        <Text>{label.name}</Text>
+                    </span>
                 )}
-                <ArrowRightOutlined />
             </Col>
-            <Col>
+            <Col span={1} offset={1}>
+                <Icon component={ChangeIcon} />
+            </Col>
+            <Col span={7} offset={1}>
                 <Select
                     className='cvat-move-task-label-mapper-item-select'
                     disabled={typeof projectLabels === 'undefined'}
@@ -59,6 +69,15 @@ export default function LabelMapperItem(props: LabelMapperItemProps): JSX.Elemen
                             </Select.Option>
                         ))}
                 </Select>
+            </Col>
+            <Col span={7} offset={1}>
+                <Checkbox
+                    disabled
+                    checked={true}
+                    className='cvat-move-task-label-mapper-item-checkbox'
+                >
+                    Clear attributes
+                </Checkbox>
             </Col>
         </Row>
     );

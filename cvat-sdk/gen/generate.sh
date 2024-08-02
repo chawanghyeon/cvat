@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 set -e
 
 GENERATOR_VERSION="v6.0.1"

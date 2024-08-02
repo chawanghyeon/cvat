@@ -1,12 +1,8 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { connect } from 'react-redux';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MenuInfo } from 'rc-menu/lib/interface';
+
 import ActionsMenuComponent, { Actions } from 'components/actions-menu/actions-menu';
 import { CombinedState } from 'reducers';
 
@@ -112,6 +108,7 @@ function ActionsMenuContainer(props: OwnProps & StateToProps & DispatchToProps):
     return (
         <ActionsMenuComponent
             taskID={taskInstance.id}
+            projectID={taskInstance.projectId}
             taskMode={taskInstance.mode}
             bugTracker={taskInstance.bugTracker}
             loaders={loaders}

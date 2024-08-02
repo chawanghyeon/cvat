@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Config } from 'react-awesome-query-builder';
 
 export const config: Partial<Config> = {
@@ -76,7 +72,7 @@ export const localStorageRecentCapacity = 10;
 export const localStorageRecentKeyword = 'recentlyAppliedCloudStoragesFilters';
 
 export const predefinedFilterValues = {
-    'Owned by me': '{"and":[{"==":[{"var":"owner"},"<username>"]}]}',
+    '내가 소유자인': '{"and":[{"==":[{"var":"owner"},"<username>"]}]}',
     'AWS storages': '{"and":[{"==":[{"var":"provider_type"},"AWS_S3_BUCKET"]}]}',
     'Azure storages': '{"and":[{"==":[{"var":"provider_type"},"AZURE_CONTAINER"]}]}',
     'Google cloud storages': '{"and":[{"==":[{"var":"provider_type"},"GOOGLE_CLOUD_STORAGE"]}]}',

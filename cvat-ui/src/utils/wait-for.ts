@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 export default function waitFor(frequencyHz: number, predicate: CallableFunction): Promise<void> {
     return new Promise((resolve, reject) => {
         if (typeof predicate !== 'function') {

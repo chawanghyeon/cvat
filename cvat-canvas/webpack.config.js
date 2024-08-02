@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 

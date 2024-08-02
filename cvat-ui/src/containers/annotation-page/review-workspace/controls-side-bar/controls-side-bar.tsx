@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { connect } from 'react-redux';
 
 import { Canvas } from 'cvat-canvas-wrapper';

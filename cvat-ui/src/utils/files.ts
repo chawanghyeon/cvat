@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 export function getFileContentTypeByMimeType(mime_type: string): string {
     return mime_type.split('/')[0];
 }

@@ -1,16 +1,12 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import Spin from 'antd/lib/spin';
+
 import { CombinedState, Indexable } from 'reducers';
 import { getProjectsAsync } from 'actions/projects-actions';
-import FeedbackComponent from 'components/feedback/feedback';
+// import FeedbackComponent from 'components/feedback/feedback';
 import { updateHistoryFromQuery } from 'components/resource-sorting-filtering';
 import EmptyListComponent from './empty-list';
 import TopBarComponent from './top-bar';
@@ -89,7 +85,7 @@ export default function ProjectsPageComponent(): JSX.Element {
                     <Spin size='large' className='cvat-spinner' />
                 </div>
             ) : content }
-            <FeedbackComponent />
+            {/* <FeedbackComponent /> */}
         </div>
     );
 }

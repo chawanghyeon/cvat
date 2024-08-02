@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,12 +10,14 @@ import Text from 'antd/lib/typography/Text';
 import { CombinedState } from 'reducers';
 import { getCloudStoragesAsync } from 'actions/cloud-storage-actions';
 import CreateCloudStorageForm from 'components/create-cloud-storage-page/cloud-storage-form';
+import { useTranslation } from 'react-i18next';
 
 interface ParamType {
     id: string;
 }
 
 export default function UpdateCloudStoragePageComponent(): JSX.Element {
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const cloudStorageId = +useParams<ParamType>().id;
     const isFetching = useSelector((state: CombinedState) => state.cloudStorages.fetching);
@@ -42,8 +40,10 @@ export default function UpdateCloudStoragePageComponent(): JSX.Element {
             <Result
                 className='cvat-not-found'
                 status='404'
-                title={`Sorry, but the cloud storage #${cloudStorageId} was not found`}
-                subTitle='Please, be sure id you requested exists and you have appropriate permissions'
+                title={`${t('message.cloudStorage.result.title_1')}${cloudStorageId}${t(
+                    'message.cloudStorage.result.title_2',
+                )}`}
+                subTitle={t('message.cloudStorage.result.subTitle')}
             />
         );
     }

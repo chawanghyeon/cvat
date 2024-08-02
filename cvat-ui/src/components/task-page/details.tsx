@@ -1,9 +1,4 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import { Row, Col } from 'antd/lib/grid';
@@ -17,17 +12,16 @@ import moment from 'moment';
 import Paragraph from 'antd/lib/typography/Paragraph';
 import Select from 'antd/lib/select';
 import Checkbox, { CheckboxChangeEvent } from 'antd/lib/checkbox';
-import Descriptions from 'antd/lib/descriptions';
-import Space from 'antd/lib/space';
 
 import { getCore, Task } from 'cvat-core-wrapper';
 import { getReposData, syncRepos, changeRepo } from 'utils/git-utils';
-import AutomaticAnnotationProgress from 'components/tasks-page/automatic-annotation-progress';
+import Space from 'antd/lib/space';
+import { Divider, Progress } from 'antd';
 import Preview from 'components/common/preview';
 import { cancelInferenceAsync } from 'actions/models-actions';
 import { CombinedState, ActiveInference } from 'reducers';
+import { useTranslation } from 'react-i18next';
 import UserSelector, { User } from './user-selector';
-import BugTrackerEditor from './bug-tracker-editor';
 import LabelsEditorComponent from '../labels-editor/labels-editor';
 import ProjectSubsetField from '../create-task-page/project-subset-field';
 
@@ -48,7 +42,355 @@ interface DispatchToProps {
     cancelAutoAnnotation(): void;
 }
 
-function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps & OwnProps {
+const core = getCore();
+
+const DetailsComponent = ({
+    task,
+    onUpdateTask,
+    activeInference,
+    installedGit,
+    projectSubsets,
+    dumpers,
+    user,
+    cancelAutoAnnotation,
+}: any) => {
+    const { t, i18n } = useTranslation();
+    const [name, setName] = useState(task.name);
+    const [subset, setSubset] = useState(task.subset);
+    const [repository, setRepository] = useState('');
+    const [repositoryStatus, setRepositoryStatus] = useState('');
+    const [format, setFormat] = useState('');
+    const [lfs, setLfs] = useState(false);
+    const [updatingRepository, setUpdatingRepository] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        getReposData(task.id)
+            .then((data) => {
+                if (!isMounted) return;
+                if (data !== null) {
+                    if (data.status.error) {
+                        notification.error({
+                            message: 'Could not receive repository status',
+                            description: data.status.error,
+                        });
+                    } else {
+                        setRepositoryStatus(data.status.value);
+                    }
+
+                    setRepository(data.url);
+                    setFormat(data.format);
+                    setLfs(!!data.lfs);
+                }
+            })
+            .catch((error) => {
+                if (!isMounted) return;
+                notification.error({
+                    message: 'Could not receive repository status',
+                    description: error.toString(),
+                });
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [task.id]);
+
+    useEffect(() => {
+        setName(task.name);
+    }, [task.name]);
+
+    const onChangeRepoValue = (value: string) => {
+        const old = repository;
+        setRepository(value);
+        setUpdatingRepository(true);
+        changeRepo(task.id, 'url', value)
+            .catch((error) => {
+                setRepository(old);
+                notification.error({
+                    message: 'Could not update repository',
+                    description: error,
+                });
+            })
+            .finally(() => setUpdatingRepository(false));
+    };
+
+    const onChangeLFSValue = (event: CheckboxChangeEvent) => {
+        const old = lfs;
+        setLfs(event.target.checked);
+        setUpdatingRepository(true);
+        changeRepo(task.id, 'lfs', event.target.checked)
+            .catch((error) => {
+                setLfs(old);
+                notification.error({
+                    message: 'Could not update LFS',
+                    description: error,
+                });
+            })
+            .finally(() => setUpdatingRepository(false));
+    };
+
+    const onChangeFormatValue = (value: string) => {
+        const old = format;
+        setFormat(value);
+        setUpdatingRepository(true);
+        changeRepo(task.id, 'format', value)
+            .catch((error) => {
+                setFormat(old);
+                notification.error({
+                    message: 'Could not update format',
+                    description: error,
+                });
+            })
+            .finally(() => setUpdatingRepository(false));
+    };
+
+    const renderTaskName = () => {
+        const owner = task.owner ? task.owner.username : null;
+        const created = moment(task.createdDate).format('YYYY.MM.DD');
+
+        return (
+            <>
+                <Title
+                    level={4}
+                    editable={{
+                        onChange: (value: string) => {
+                            setName(value);
+                            task.name = value;
+                            onUpdateTask(task);
+                        },
+                    }}
+                    className='cvat-text-color'
+                >
+                    {name}
+                </Title>
+                <div className='cvat-task-description'>
+                    <Text>{`#${task.id}`}</Text>
+                    <Divider type='vertical' />
+                    {owner && <Text>{owner}</Text>}
+                    <Divider type='vertical' />
+                    <Text>{created}</Text>
+                </div>
+            </>
+        );
+    };
+
+    const renderProgress = () => {
+        const totalJobs = task.jobs.length;
+        const completedJobs = task.jobs.filter(
+            (job: any) => job.stage === 'acceptance' && job.state === 'completed',
+        ).length;
+        const jobProgress = (completedJobs / totalJobs) * 100;
+
+        return (
+            <Row style={{ justifyContent: 'space-between' }}>
+                <Col style={{ marginBottom: 10 }}>
+                    {totalJobs === completedJobs && (
+                        <Text className='cvat-task-completed-progress'>{t('filter.jobs.state.completed')}</Text>
+                    )}
+                    {completedJobs !== 0 && totalJobs !== completedJobs && (
+                        <Text className='cvat-task-progress-progress'>{t('filter.jobs.state.in progress')}</Text>
+                    )}
+                    {completedJobs === 0 && (
+                        <Text className='cvat-task-pending-progress'>{t('filter.jobs.state.new')}</Text>
+                    )}
+                </Col>
+                <Col>
+                    <Text>
+                        {i18n.language === 'ko' ?
+                            `${totalJobs}개의 하위 작업 중 ${completedJobs}` :
+                            `${completedJobs} of ${totalJobs} jobs`}
+                    </Text>
+                </Col>
+                <Progress
+                    className='cvat-task-progress'
+                    percent={jobProgress}
+                    strokeColor='#FFFFFF'
+                    showInfo={false}
+                    strokeWidth={5}
+                    size='small'
+                />
+            </Row>
+        );
+    };
+
+    const renderParameters = () => (
+        <Paragraph>
+            <ul>
+                <li>
+                    {t('projects.detail.overlapSize')} :<span>{task.overlap}</span>
+                </li>
+                <li>
+                    {t('projects.detail.segmentSize')} :<span>{task.segmentSize}</span>
+                </li>
+                <li>
+                    {t('projects.detail.imageQuality')} :<span>{task.imageQuality}</span>
+                </li>
+            </ul>
+        </Paragraph>
+    );
+
+    const renderUserBlock = () => {
+        const assignee = task.assignee ? task.assignee : null;
+
+        return (
+            <Col>
+                <Text>{t('projects.detail.assignee')}</Text>
+                <UserSelector
+                    value={assignee}
+                    onSelect={(value: User | null) => {
+                        if (task?.assignee?.id === value?.id) return;
+                        task.assignee = value;
+                        onUpdateTask(task);
+                    }}
+                    prefix
+                    suffix
+                />
+            </Col>
+        );
+    };
+
+    const renderDatasetRepository = () => !!repository && (
+        <Row>
+            <Col className='cvat-dataset-repository-url'>
+                <Text strong className='cvat-text-color'>
+                    Dataset Repository
+                </Text>
+                <Paragraph>
+                    <Text editable={{ onChange: onChangeRepoValue }} disabled={updatingRepository}>
+                        {repository}
+                    </Text>
+                    {repositoryStatus === 'sync' && (
+                        <Tag color='blue'>
+                            <CheckCircleOutlined />
+                            Synchronized
+                        </Tag>
+                    )}
+                    {repositoryStatus === 'merged' && (
+                        <Tag color='green'>
+                            <CheckCircleOutlined />
+                            Merged
+                        </Tag>
+                    )}
+                    {repositoryStatus === 'syncing' && (
+                        <Tag color='purple'>
+                            <LoadingOutlined />
+                            Syncing
+                        </Tag>
+                    )}
+                    {repositoryStatus === '!sync' && (
+                        <Tag
+                            color='red'
+                            onClick={() => {
+                                setRepositoryStatus('syncing');
+                                syncRepos(task.id)
+                                    .then(() => {
+                                        setRepositoryStatus('sync');
+                                    })
+                                    .catch((error) => {
+                                        Modal.error({
+                                            width: 800,
+                                            title: 'Could not synchronize the repository',
+                                            content: error.toString(),
+                                        });
+                                        setRepositoryStatus('!sync');
+                                    });
+                            }}
+                        >
+                            <ExclamationCircleOutlined />
+                            Synchronize
+                        </Tag>
+                    )}
+                </Paragraph>
+                <Text strong className='cvat-text-color'>
+                    Using format:{' '}
+                </Text>
+                <Space>
+                    <Select
+                        disabled={updatingRepository}
+                        onChange={onChangeFormatValue}
+                        className='cvat-repository-format-select'
+                        value={format}
+                    >
+                        {dumpers.map((dumper: any) => (
+                            <Select.Option key={dumper.name} value={dumper.name}>
+                                {dumper.name}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                    <Checkbox disabled={updatingRepository} onChange={onChangeLFSValue} checked={lfs}>
+                        Large file support
+                    </Checkbox>
+                    {updatingRepository && <LoadingOutlined style={{ fontSize: 14 }} spin />}
+                </Space>
+            </Col>
+        </Row>
+    );
+
+    const renderLabelsEditor = () => (
+        <LabelsEditorComponent
+            labels={task.labels.map((label: any) => label.toJSON())}
+            onSubmit={(labels: any[]) => {
+                task.labels = labels.map((labelData) => new core.classes.Label(labelData));
+                onUpdateTask(task);
+            }}
+            hasProject={!!task.projectId}
+        />
+    );
+
+    const renderSubsetField = () => (
+        <Row>
+            <Col span={24}>
+                <Text className='cvat-text-color'>Subset:</Text>
+            </Col>
+            <Col span={24}>
+                <ProjectSubsetField
+                    value={subset}
+                    projectId={task.projectId}
+                    projectSubsets={projectSubsets}
+                    onChange={(value) => {
+                        setSubset(value);
+                        if (task.subset !== value) {
+                            task.subset = value;
+                            onUpdateTask(task);
+                        }
+                    }}
+                />
+            </Col>
+        </Row>
+    );
+
+    return (
+        <Row className='cvat-task-details'>
+            <Col className='cvat-task-details-left-group' span={11}>
+                {renderTaskName()}
+                <Row>
+                    <Col span={12}>
+                        <Row className='cvat-task-details-progress'>
+                            <Col>{renderProgress()}</Col>
+                            {renderUserBlock()}
+                        </Row>
+                    </Col>
+                    <Col span={10} offset={2}>
+                        <div>
+                            <Preview
+                                task={task}
+                                loadingClassName='cvat-task-item-loading-preview'
+                                previewWrapperClassName='cvat-task-preview-wrapper'
+                            />
+                            {renderParameters()}
+                        </div>
+                    </Col>
+                </Row>
+            </Col>
+            <Col span={12} offset={1}>
+                {renderLabelsEditor()}
+            </Col>
+        </Row>
+    );
+};
+
+const mapStateToProps = (state: CombinedState, own: OwnProps) => {
     const { list } = state.plugins;
     const [taskProject] = state.projects.current.filter((project) => project.id === own.task.projectId);
 
@@ -58,415 +400,14 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps & Ow
         user: state.auth.user,
         installedGit: list.GIT_INTEGRATION,
         activeInference: state.models.inferences[own.task.id] || null,
-        projectSubsets: taskProject ?
-            ([
-                ...new Set(taskProject.subsets),
-            ] as string[]) :
-            [],
+        projectSubsets: taskProject ? ([...new Set(taskProject.subsets)] as string[]) : [],
     };
-}
+};
 
-function mapDispatchToProps(dispatch: any, own: OwnProps): DispatchToProps {
-    return {
-        cancelAutoAnnotation(): void {
-            dispatch(cancelInferenceAsync(own.task.id));
-        },
-    };
-}
-
-const core = getCore();
-
-interface State {
-    name: string;
-    subset: string;
-    repository: string;
-    repositoryStatus: string;
-    format: string;
-    lfs: boolean;
-    updatingRepository: boolean;
-}
-
-type Props = DispatchToProps & StateToProps & OwnProps;
-
-class DetailsComponent extends React.PureComponent<Props, State> {
-    private mounted: boolean;
-
-    constructor(props: Props) {
-        super(props);
-        const { task: taskInstance } = props;
-        this.mounted = false;
-        this.state = {
-            name: taskInstance.name,
-            subset: taskInstance.subset,
-            repository: '',
-            format: '',
-            repositoryStatus: '',
-            lfs: false,
-            updatingRepository: false,
-        };
-    }
-
-    public componentDidMount(): void {
-        const { task: taskInstance } = this.props;
-        this.mounted = true;
-
-        getReposData(taskInstance.id)
-            .then((data): void => {
-                if (data !== null && this.mounted) {
-                    if (data.status.error) {
-                        notification.error({
-                            message: 'Could not receive repository status',
-                            description: data.status.error,
-                        });
-                    } else {
-                        this.setState({
-                            repositoryStatus: data.status.value,
-                        });
-                    }
-
-                    this.setState({
-                        repository: data.url,
-                        format: data.format,
-                        lfs: !!data.lfs,
-                    });
-                }
-            })
-            .catch((error): void => {
-                if (this.mounted) {
-                    notification.error({
-                        message: 'Could not receive repository status',
-                        description: error.toString(),
-                    });
-                }
-            });
-    }
-
-    public componentDidUpdate(prevProps: Props): void {
-        const { task: taskInstance } = this.props;
-
-        if (prevProps !== this.props) {
-            this.setState({
-                name: taskInstance.name,
-            });
-        }
-    }
-
-    public componentWillUnmount(): void {
-        this.mounted = false;
-    }
-
-    private onChangeRepoValue = (value: string): void => {
-        const { task: taskInstance } = this.props;
-        const { repository } = this.state;
-        const old = repository;
-        this.setState({ repository: value, updatingRepository: true });
-        changeRepo(taskInstance.id, 'url', value)
-            .catch((error) => {
-                this.setState({ repository: old });
-                notification.error({
-                    message: 'Could not update repository',
-                    description: error,
-                });
-            })
-            .finally(() => this.setState({ updatingRepository: false }));
-    };
-
-    private onChangeLFSValue = (event: CheckboxChangeEvent): void => {
-        const { task: taskInstance } = this.props;
-        const { lfs } = this.state;
-        const old = lfs;
-        this.setState({ lfs: event.target.checked, updatingRepository: true });
-        changeRepo(taskInstance.id, 'lfs', event.target.checked)
-            .catch((error) => {
-                this.setState({ lfs: old });
-                notification.error({
-                    message: 'Could not update LFS',
-                    description: error,
-                });
-            })
-            .finally(() => this.setState({ updatingRepository: false }));
-    };
-
-    private onChangeFormatValue = (value: string): void => {
-        const { task: taskInstance } = this.props;
-        const { format } = this.state;
-        const old = format;
-        this.setState({ format: value, updatingRepository: true });
-        changeRepo(taskInstance.id, 'format', value)
-            .catch((error) => {
-                this.setState({ format: old });
-                notification.error({
-                    message: 'Could not update format',
-                    description: error,
-                });
-            })
-            .finally(() => this.setState({ updatingRepository: false }));
-    };
-
-    private renderTaskName(): JSX.Element {
-        const { name } = this.state;
-        const { task: taskInstance, onUpdateTask } = this.props;
-
-        return (
-            <Title
-                level={4}
-                editable={{
-                    onChange: (value: string): void => {
-                        this.setState({
-                            name: value,
-                        });
-
-                        taskInstance.name = value;
-                        onUpdateTask(taskInstance);
-                    },
-                }}
-                className='cvat-text-color'
-            >
-                {name}
-            </Title>
-        );
-    }
-
-    private renderParameters(): JSX.Element {
-        const { task: taskInstance } = this.props;
-        const { overlap, segmentSize, imageQuality } = taskInstance;
-
-        return (
-            <Descriptions className='cvat-task-parameters' bordered layout='vertical' size='small'>
-                <Descriptions.Item label='Overlap size'>{overlap}</Descriptions.Item>
-                <Descriptions.Item label='Segment size'>{segmentSize}</Descriptions.Item>
-                <Descriptions.Item label='Image quality'>{imageQuality}</Descriptions.Item>
-            </Descriptions>
-        );
-    }
-
-    private renderDescription(): JSX.Element {
-        const { task: taskInstance, onUpdateTask } = this.props;
-        const owner = taskInstance.owner ? taskInstance.owner.username : null;
-        const assignee = taskInstance.assignee ? taskInstance.assignee : null;
-        const created = moment(taskInstance.createdDate).format('MMMM Do YYYY');
-        const assigneeSelect = (
-            <UserSelector
-                value={assignee}
-                onSelect={(value: User | null): void => {
-                    if (taskInstance?.assignee?.id === value?.id) return;
-                    taskInstance.assignee = value;
-                    onUpdateTask(taskInstance);
-                }}
-            />
-        );
-
-        return (
-            <Row className='cvat-task-details-user-block' justify='space-between' align='middle'>
-                <Col span={12}>
-                    {owner && (
-                        <Text type='secondary'>{`Task #${taskInstance.id} Created by ${owner} on ${created}`}</Text>
-                    )}
-                </Col>
-                <Col span={10}>
-                    <Text type='secondary'>Assigned to</Text>
-                    {assigneeSelect}
-                </Col>
-            </Row>
-        );
-    }
-
-    private renderDatasetRepository(): JSX.Element | boolean {
-        const { task: taskInstance, dumpers } = this.props;
-        const {
-            repository, repositoryStatus, format, lfs, updatingRepository,
-        } = this.state;
-        return (
-            !!repository && (
-                <Row>
-                    <Col className='cvat-dataset-repository-url'>
-                        <Text strong className='cvat-text-color'>
-                            Dataset Repository
-                        </Text>
-                        <Paragraph>
-                            <Text editable={{ onChange: this.onChangeRepoValue }} disabled={updatingRepository}>
-                                {repository}
-                            </Text>
-                            {repositoryStatus === 'sync' && (
-                                <Tag color='blue'>
-                                    <CheckCircleOutlined />
-                                    Synchronized
-                                </Tag>
-                            )}
-                            {repositoryStatus === 'merged' && (
-                                <Tag color='green'>
-                                    <CheckCircleOutlined />
-                                    Merged
-                                </Tag>
-                            )}
-                            {repositoryStatus === 'syncing' && (
-                                <Tag color='purple'>
-                                    <LoadingOutlined />
-                                    Syncing
-                                </Tag>
-                            )}
-                            {repositoryStatus === '!sync' && (
-                                <Tag
-                                    color='red'
-                                    onClick={(): void => {
-                                        this.setState({
-                                            repositoryStatus: 'syncing',
-                                        });
-
-                                        syncRepos(taskInstance.id)
-                                            .then((): void => {
-                                                if (this.mounted) {
-                                                    this.setState({
-                                                        repositoryStatus: 'sync',
-                                                    });
-                                                }
-                                            })
-                                            .catch((error): void => {
-                                                if (this.mounted) {
-                                                    Modal.error({
-                                                        width: 800,
-                                                        title: 'Could not synchronize the repository',
-                                                        content: error.toString(),
-                                                    });
-
-                                                    this.setState({
-                                                        repositoryStatus: '!sync',
-                                                    });
-                                                }
-                                            });
-                                    }}
-                                >
-                                    <ExclamationCircleOutlined />
-                                    Synchronize
-                                </Tag>
-                            )}
-                        </Paragraph>
-                        <Text strong className='cvat-text-color'>Using format: </Text>
-                        <Space>
-                            <Select disabled={updatingRepository} onChange={this.onChangeFormatValue} className='cvat-repository-format-select' value={format}>
-                                {
-                                    dumpers.map((dumper: any) => (
-                                        <Select.Option
-                                            key={dumper.name}
-                                            value={dumper.name}
-                                        >
-                                            {dumper.name}
-                                        </Select.Option>
-                                    ))
-                                }
-                            </Select>
-                            <Checkbox disabled={updatingRepository} onChange={this.onChangeLFSValue} checked={lfs}>
-                                Large file support
-                            </Checkbox>
-                            {updatingRepository && <LoadingOutlined style={{ fontSize: 14 }} spin />}
-                        </Space>
-                    </Col>
-                </Row>
-            )
-        );
-    }
-
-    private renderLabelsEditor(): JSX.Element {
-        const { task: taskInstance, onUpdateTask } = this.props;
-
-        return (
-            <Row>
-                <Col span={24}>
-                    <LabelsEditorComponent
-                        labels={taskInstance.labels.map((label: any): string => label.toJSON())}
-                        onSubmit={(labels: any[]): void => {
-                            taskInstance.labels = labels.map((labelData): any => new core.classes.Label(labelData));
-                            onUpdateTask(taskInstance);
-                        }}
-                    />
-                </Col>
-            </Row>
-        );
-    }
-
-    private renderSubsetField(): JSX.Element {
-        const { subset } = this.state;
-        const { task: taskInstance, projectSubsets, onUpdateTask } = this.props;
-
-        return (
-            <Row>
-                <Col span={24}>
-                    <Text className='cvat-text-color'>Subset:</Text>
-                </Col>
-                <Col span={24}>
-                    <ProjectSubsetField
-                        value={subset}
-                        projectId={taskInstance.projectId}
-                        projectSubsets={projectSubsets}
-                        onChange={(value) => {
-                            this.setState({
-                                subset: value,
-                            });
-
-                            if (taskInstance.subset !== value) {
-                                taskInstance.subset = value;
-                                onUpdateTask(taskInstance);
-                            }
-                        }}
-                    />
-                </Col>
-            </Row>
-        );
-    }
-
-    public render(): JSX.Element {
-        const {
-            activeInference, cancelAutoAnnotation, task: taskInstance, onUpdateTask,
-        } = this.props;
-
-        return (
-            <div className='cvat-task-details'>
-                <Row justify='start' align='middle'>
-                    <Col className='cvat-task-details-task-name'>{this.renderTaskName()}</Col>
-                </Row>
-                <Row justify='space-between' align='top'>
-                    <Col md={8} lg={7} xl={7} xxl={6}>
-                        <Row justify='start' align='middle'>
-                            <Col span={24}>
-                                <Preview
-                                    task={taskInstance}
-                                    loadingClassName='cvat-task-item-loading-preview'
-                                    emptyPreviewClassName='cvat-task-item-empty-preview'
-                                    previewClassName='cvat-task-item-preview'
-                                />
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col span={24}>{this.renderParameters()}</Col>
-                        </Row>
-                    </Col>
-                    <Col md={16} lg={17} xl={17} xxl={18}>
-                        {this.renderDescription()}
-                        <Row justify='space-between' align='middle'>
-                            <Col span={12}>
-                                <BugTrackerEditor
-                                    instance={taskInstance}
-                                    onChange={(bugTracker) => {
-                                        taskInstance.bugTracker = bugTracker;
-                                        onUpdateTask(taskInstance);
-                                    }}
-                                />
-                            </Col>
-                            <Col span={10}>
-                                <AutomaticAnnotationProgress
-                                    activeInference={activeInference}
-                                    cancelAutoAnnotation={cancelAutoAnnotation}
-                                />
-                            </Col>
-                        </Row>
-                        {this.renderDatasetRepository()}
-                        {!taskInstance.projectId && this.renderLabelsEditor()}
-                        {taskInstance.projectId && this.renderSubsetField()}
-                    </Col>
-                </Row>
-            </div>
-        );
-    }
-}
+const mapDispatchToProps = (dispatch: any, own: OwnProps) => ({
+    cancelAutoAnnotation: () => {
+        dispatch(cancelInferenceAsync(own.task.id));
+    },
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(DetailsComponent);

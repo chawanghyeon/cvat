@@ -1,16 +1,7 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { RefObject } from 'react';
 import { Row, Col } from 'antd/lib/grid';
-import { PercentageOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import Input from 'antd/lib/input';
+import { MinusOutlined, PercentageOutlined, PlusOutlined } from '@ant-design/icons';
 import Select from 'antd/lib/select';
-import Space from 'antd/lib/space';
-import Switch from 'antd/lib/switch';
-import Tooltip from 'antd/lib/tooltip';
 import Radio from 'antd/lib/radio';
 import Checkbox from 'antd/lib/checkbox';
 import Form, { FormInstance, RuleObject, RuleRender } from 'antd/lib/form';
@@ -18,9 +9,8 @@ import Text from 'antd/lib/typography/Text';
 import { Store } from 'antd/lib/form/interface';
 import CVATTooltip from 'components/common/cvat-tooltip';
 import patterns from 'utils/validation-patterns';
+import { InputNumber } from 'antd';
 import { StorageLocation } from 'reducers';
-import SourceStorageField from 'components/storage/source-storage-field';
-import TargetStorageField from 'components/storage/target-storage-field';
 
 import { getCore, Storage, StorageData } from 'cvat-core-wrapper';
 
@@ -182,7 +172,6 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
 
     public submit(): Promise<void> {
         const { onSubmit, projectId } = this.props;
-
         if (this.formRef.current) {
             if (projectId) {
                 return Promise.all([
@@ -215,12 +204,11 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                         const entries = Object.entries(values).filter(
                             (entry: [string, unknown]): boolean => entry[0] !== frameFilter,
                         );
-
                         onSubmit({
                             ...((Object.fromEntries(entries) as any) as AdvancedConfiguration),
                             frameFilter,
-                            sourceStorage: new Storage(values.sourceStorage),
-                            targetStorage: new Storage(values.targetStorage),
+                            sourceStorage: new Storage({ location: StorageLocation.LOCAL }),
+                            targetStorage: new Storage({ location: StorageLocation.LOCAL }),
                         });
                         return Promise.resolve();
                     },
@@ -254,7 +242,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
     private renderSortingMethodRadio(): JSX.Element {
         return (
             <Form.Item
-                label='Sorting method'
+                label={<Text className='cvat-text-color'>Sorting Method</Text>}
                 name='sortingMethod'
                 rules={[
                     {
@@ -262,17 +250,16 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                         message: 'The field is required.',
                     },
                 ]}
-                help='Specify how to sort images. It is not relevant for videos.'
             >
-                <Radio.Group buttonStyle='solid'>
-                    <Radio.Button value={SortingMethod.LEXICOGRAPHICAL} key={SortingMethod.LEXICOGRAPHICAL}>
+                <Radio.Group>
+                    <Radio value={SortingMethod.LEXICOGRAPHICAL} key={SortingMethod.LEXICOGRAPHICAL}>
                         Lexicographical
-                    </Radio.Button>
-                    <Radio.Button value={SortingMethod.NATURAL} key={SortingMethod.NATURAL}>Natural</Radio.Button>
-                    <Radio.Button value={SortingMethod.PREDEFINED} key={SortingMethod.PREDEFINED}>
+                    </Radio>
+                    <Radio value={SortingMethod.NATURAL} key={SortingMethod.NATURAL}>Natural</Radio>
+                    <Radio value={SortingMethod.PREDEFINED} key={SortingMethod.PREDEFINED}>
                         Predefined
-                    </Radio.Button>
-                    <Radio.Button value={SortingMethod.RANDOM} key={SortingMethod.RANDOM}>Random</Radio.Button>
+                    </Radio>
+                    <Radio value={SortingMethod.RANDOM} key={SortingMethod.RANDOM}>Random</Radio>
                 </Radio.Group>
             </Form.Item>
         );
@@ -282,7 +269,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
         return (
             <CVATTooltip title='Defines images compression level'>
                 <Form.Item
-                    label='Image quality'
+                    label={<Text className='cvat-text-color'>Image quality</Text>}
                     name='imageQuality'
                     rules={[
                         {
@@ -292,7 +279,14 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                         { validator: isInteger({ min: 5, max: 100 }) },
                     ]}
                 >
-                    <Input size='large' type='number' min={5} max={100} suffix={<PercentageOutlined />} />
+                    <InputNumber
+                        size='large'
+                        min={5}
+                        max={100}
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
+                        addonAfter={<PercentageOutlined />}
+                    />
                 </Form.Item>
             </CVATTooltip>
         );
@@ -302,12 +296,17 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
         return (
             <CVATTooltip title='Defines a number of intersected frames between different segments'>
                 <Form.Item
-                    label='Overlap size'
+                    label={<Text className='cvat-text-color'>Overlap size</Text>}
                     name='overlapSize'
                     dependencies={['segmentSize']}
                     rules={[{ validator: isInteger({ min: 0 }) }, validateOverlapSize]}
                 >
-                    <Input size='large' type='number' min={0} />
+                    <InputNumber
+                        size='large'
+                        min={0}
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
+                    />
                 </Form.Item>
             </CVATTooltip>
         );
@@ -316,8 +315,13 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
     private renderSegmentSize(): JSX.Element {
         return (
             <CVATTooltip title='Defines a number of frames in a segment'>
-                <Form.Item label='Segment size' name='segmentSize' rules={[{ validator: isInteger({ min: 1 }) }]}>
-                    <Input size='large' type='number' min={1} />
+                <Form.Item label={<Text className='cvat-text-color'>Segment size</Text>} name='segmentSize' rules={[{ validator: isInteger({ min: 1 }) }]}>
+                    <InputNumber
+                        size='large'
+                        min={1}
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
+                    />
                 </Form.Item>
             </CVATTooltip>
         );
@@ -325,8 +329,14 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
 
     private renderStartFrame(): JSX.Element {
         return (
-            <Form.Item label='Start frame' name='startFrame' rules={[{ validator: isInteger({ min: 0 }) }]}>
-                <Input size='large' type='number' min={0} step={1} />
+            <Form.Item label={<Text className='cvat-text-color'>Start frame</Text>} name='startFrame' rules={[{ validator: isInteger({ min: 0 }) }]}>
+                <InputNumber
+                    size='large'
+                    min={0}
+                    step={1}
+                    upHandler={<PlusOutlined />}
+                    downHandler={<MinusOutlined />}
+                />
             </Form.Item>
         );
     }
@@ -334,53 +344,56 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
     private renderStopFrame(): JSX.Element {
         return (
             <Form.Item
-                label='Stop frame'
+                label={<Text className='cvat-text-color'>Stop frame</Text>}
                 name='stopFrame'
                 dependencies={['startFrame']}
                 rules={[{ validator: isInteger({ min: 0 }) }, validateStopFrame]}
             >
-                <Input size='large' type='number' min={0} step={1} />
+                <InputNumber
+                    size='large'
+                    min={0}
+                    step={1}
+                    upHandler={<PlusOutlined />}
+                    downHandler={<MinusOutlined />}
+                />
             </Form.Item>
         );
     }
 
     private renderFrameStep(): JSX.Element {
         return (
-            <Form.Item label='Frame step' name='frameStep' rules={[{ validator: isInteger({ min: 1 }) }]}>
-                <Input size='large' type='number' min={1} step={1} />
+            <Form.Item label={<Text className='cvat-text-color'>Frame step</Text>} name='frameStep' rules={[{ validator: isInteger({ min: 1 }) }]}>
+                <InputNumber
+                    size='large'
+                    min={1}
+                    step={1}
+                    upHandler={<PlusOutlined />}
+                    downHandler={<MinusOutlined />}
+                />
             </Form.Item>
         );
     }
 
     private renderGitLFSBox(): JSX.Element {
         return (
-            <Space>
+            <CVATTooltip
+                title={(
+                    <>
+                        If annotation files are large, you can use git LFS feature
+                    </>
+                )}
+                placement='topLeft'
+            >
                 <Form.Item
                     name='lfs'
+                    label={<Text className='cvat-text-color'>LFS</Text>}
                     valuePropName='checked'
-                    className='cvat-settings-switch'
                 >
-                    <Switch />
+                    <Checkbox>
+                        <span className='cvat-text-color' style={{ fontWeight: 300 }}>Use LFS (Large File Support)</span>
+                    </Checkbox>
                 </Form.Item>
-                <Text className='cvat-text-color'>Use LFS (Large File Support):</Text>
-                <Tooltip title='If annotation files are large, you can use git LFS feature.'>
-                    <QuestionCircleOutlined style={{ opacity: 0.5 }} />
-                </Tooltip>
-            </Space>
-        );
-    }
-
-    private renderGitRepositoryURL(): JSX.Element {
-        return (
-            <Form.Item
-                hasFeedback
-                name='repository'
-                label='Dataset repository URL'
-                extra='Attach a repository to store annotations there'
-                rules={[{ validator: validateRepository }]}
-            >
-                <Input size='large' placeholder='e.g. https//github.com/user/repos [annotation/<anno_file_name>.zip]' />
-            </Form.Item>
+            </CVATTooltip>
         );
     }
 
@@ -390,7 +403,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
             <Form.Item
                 initialValue='CVAT for video 1.1'
                 name='format'
-                label='Choose format'
+                label={<Text className='cvat-text-color'>Choose format</Text>}
             >
                 <Select style={{ width: '100%' }}>
                     {
@@ -412,9 +425,6 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
         return (
             <>
                 <Row>
-                    <Col span={24}>{this.renderGitRepositoryURL()}</Col>
-                </Row>
-                <Row>
                     <Col span={24}>{this.renderGitFormat()}</Col>
                 </Row>
                 <Row>
@@ -425,53 +435,42 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
         );
     }
 
-    private renderBugTracker(): JSX.Element {
-        return (
-            <Form.Item
-                hasFeedback
-                name='bugTracker'
-                label='Issue tracker'
-                extra='Attach issue tracker where the task is described'
-                rules={[{ validator: validateURL }]}
-            >
-                <Input size='large' />
-            </Form.Item>
-        );
-    }
-
     private renderUzeZipChunks(): JSX.Element {
         return (
-            <Space>
+            <CVATTooltip
+                title={(
+                    <>
+                        Force to use zip chunks as compressed data. Cut out content for videos only.
+                    </>
+                )}
+            >
                 <Form.Item
                     name='useZipChunks'
                     valuePropName='checked'
-                    className='cvat-settings-switch'
                 >
-                    <Switch />
+                    <Checkbox>
+                        <span className='cvat-text-color' style={{ fontWeight: 300 }}>Use zip/video chunks</span>
+                    </Checkbox>
                 </Form.Item>
-                <Text className='cvat-text-color'>Use zip/video chunks</Text>
-                <Tooltip title='Force to use zip chunks as compressed data. Cut out content for videos only.'>
-                    <QuestionCircleOutlined style={{ opacity: 0.5 }} />
-                </Tooltip>
-            </Space>
+            </CVATTooltip>
         );
     }
 
     private renderCreateTaskMethod(): JSX.Element {
         return (
-            <Space>
-                <Form.Item
-                    name='useCache'
-                    valuePropName='checked'
-                    className='cvat-settings-switch'
-                >
-                    <Switch defaultChecked />
+            <CVATTooltip
+                title={(
+                    <>
+                        Using cache to store data.
+                    </>
+                )}
+            >
+                <Form.Item name='useCache' valuePropName='checked'>
+                    <Checkbox>
+                        <span className='cvat-text-color' style={{ fontWeight: 300 }}>Use cache</span>
+                    </Checkbox>
                 </Form.Item>
-                <Text className='cvat-text-color'>Use cache</Text>
-                <Tooltip title='Using cache to store data.'>
-                    <QuestionCircleOutlined style={{ opacity: 0.5 }} />
-                </Tooltip>
-            </Space>
+            </CVATTooltip>
         );
     }
 
@@ -495,60 +494,22 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                     </>
                 )}
             >
-                <Form.Item label='Chunk size' name='dataChunkSize' rules={[{ validator: isInteger({ min: 1 }) }]}>
-                    <Input size='large' type='number' />
+                <Form.Item label={<Text className='cvat-text-color'>Chunk size</Text>} name='dataChunkSize' rules={[{ validator: isInteger({ min: 1 }) }]}>
+                    <InputNumber
+                        size='large'
+                        upHandler={<PlusOutlined />}
+                        downHandler={<MinusOutlined />}
+                    />
                 </Form.Item>
             </CVATTooltip>
-        );
-    }
-
-    private renderSourceStorage(): JSX.Element {
-        const {
-            projectId,
-            useProjectSourceStorage,
-            sourceStorageLocation,
-            onChangeUseProjectSourceStorage,
-            onChangeSourceStorageLocation,
-        } = this.props;
-        return (
-            <SourceStorageField
-                instanceId={projectId}
-                locationValue={sourceStorageLocation}
-                switchDescription='Use project source storage'
-                storageDescription='Specify source storage for import resources like annotation, backups'
-                useDefaultStorage={useProjectSourceStorage}
-                onChangeUseDefaultStorage={onChangeUseProjectSourceStorage}
-                onChangeLocationValue={onChangeSourceStorageLocation}
-            />
-        );
-    }
-
-    private renderTargetStorage(): JSX.Element {
-        const {
-            projectId,
-            useProjectTargetStorage,
-            targetStorageLocation,
-            onChangeUseProjectTargetStorage,
-            onChangeTargetStorageLocation,
-        } = this.props;
-        return (
-            <TargetStorageField
-                instanceId={projectId}
-                locationValue={targetStorageLocation}
-                switchDescription='Use project target storage'
-                storageDescription='Specify target storage for export resources like annotation, backups                '
-                useDefaultStorage={useProjectTargetStorage}
-                onChangeUseDefaultStorage={onChangeUseProjectTargetStorage}
-                onChangeLocationValue={onChangeTargetStorageLocation}
-            />
         );
     }
 
     public render(): JSX.Element {
         const { installedGit, activeFileManagerTab } = this.props;
         return (
-            <Form initialValues={initialValues} ref={this.formRef} layout='vertical'>
-                <Row>
+            <Form initialValues={initialValues} ref={this.formRef}>
+                <Row align='middle'>
                     <Col>{this.renderSortingMethodRadio()}</Col>
                 </Row>
                 {activeFileManagerTab === 'share' ? (
@@ -557,46 +518,45 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                     </Row>
                 ) : null}
                 <Row>
-                    <Col span={12}>{this.renderUzeZipChunks()}</Col>
-                    <Col span={12}>{this.renderCreateTaskMethod()}</Col>
+                    <Col span={3}>
+                        <Text className='cvat-text-color'>Options</Text>
+                    </Col>
+                    <Col span={6}>
+                        {this.renderUzeZipChunks()}
+                    </Col>
+                    <Col span={4}>
+                        {this.renderCreateTaskMethod()}
+                    </Col>
+                    <Col span={11}>
+                        {this.renderImageQuality()}
+                    </Col>
                 </Row>
-                <Row justify='start'>
-                    <Col span={7}>{this.renderImageQuality()}</Col>
-                    <Col span={7} offset={1}>
+                <Row>
+                    <Col span={11}>
                         {this.renderOverlap()}
                     </Col>
-                    <Col span={7} offset={1}>
+                    <Col span={11} offset={2}>
                         {this.renderSegmentSize()}
                     </Col>
                 </Row>
 
-                <Row justify='start'>
-                    <Col span={7}>{this.renderStartFrame()}</Col>
-                    <Col span={7} offset={1}>
+                <Row>
+                    <Col span={11}>{this.renderStartFrame()}</Col>
+                    <Col span={11} offset={2}>
                         {this.renderStopFrame()}
-                    </Col>
-                    <Col span={7} offset={1}>
-                        {this.renderFrameStep()}
                     </Col>
                 </Row>
 
-                <Row justify='start'>
-                    <Col span={7}>{this.renderChunkSize()}</Col>
+                <Row>
+                    <Col span={11}>
+                        {this.renderFrameStep()}
+                    </Col>
+                    <Col span={11} offset={2}>
+                        {this.renderChunkSize()}
+                    </Col>
                 </Row>
 
                 {installedGit ? this.renderGit() : null}
-
-                <Row>
-                    <Col span={24}>{this.renderBugTracker()}</Col>
-                </Row>
-                <Row justify='space-between'>
-                    <Col span={11}>
-                        {this.renderSourceStorage()}
-                    </Col>
-                    <Col span={11} offset={1}>
-                        {this.renderTargetStorage()}
-                    </Col>
-                </Row>
             </Form>
         );
     }

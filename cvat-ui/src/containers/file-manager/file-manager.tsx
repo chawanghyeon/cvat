@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { connect } from 'react-redux';
 
@@ -16,7 +11,7 @@ import { ShareItem, CombinedState, ShareFileInfo } from 'reducers';
 
 interface OwnProps {
     ref: any;
-    many: boolean
+    many: boolean;
     onChangeActiveKey(key: string): void;
     onUploadLocalFiles(files: File[]): void;
     onUploadRemoteFiles(urls: string[]): void;
@@ -55,7 +50,6 @@ function mapStateToProps(state: CombinedState): StateToProps {
     }
 
     const { root } = state.share;
-
     return {
         treeData: convert([root], ''),
         share: state.share,
@@ -156,8 +150,6 @@ export class FileManagerContainer extends React.PureComponent<Props> {
             many,
             onChangeActiveKey,
             onUploadLocalFiles,
-            onUploadRemoteFiles,
-            onUploadCloudStorageFiles,
         } = this.props;
 
         return (
@@ -167,9 +159,6 @@ export class FileManagerContainer extends React.PureComponent<Props> {
                 many={many}
                 onLoadData={getTreeData}
                 onUploadLocalFiles={onUploadLocalFiles}
-                onUploadRemoteFiles={onUploadRemoteFiles}
-                onUploadShareFiles={this.handleUploadShareFiles}
-                onUploadCloudStorageFiles={onUploadCloudStorageFiles}
                 onChangeActiveKey={onChangeActiveKey}
                 ref={(component): void => {
                     this.managerComponentRef = component;

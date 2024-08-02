@@ -1,7 +1,3 @@
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { getCore, Webhook } from 'cvat-core-wrapper';
 import { Dispatch, ActionCreator, Store } from 'redux';
 import { WebhooksQuery } from 'reducers';

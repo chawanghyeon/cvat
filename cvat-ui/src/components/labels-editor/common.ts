@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { SerializedLabel, SerializedAttribute } from 'cvat-core-wrapper';
 
 export interface SkeletonConfiguration {

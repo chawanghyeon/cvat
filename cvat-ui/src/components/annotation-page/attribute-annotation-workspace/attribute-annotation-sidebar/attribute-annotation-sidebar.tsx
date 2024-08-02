@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
@@ -20,7 +15,7 @@ import {
 import isAbleToChangeFrame from 'utils/is-able-to-change-frame';
 import GlobalHotKeys, { KeyMap } from 'utils/mousetrap-react';
 import { ThunkDispatch } from 'utils/redux';
-import AppearanceBlock from 'components/annotation-page/appearance-block';
+import AppearanceBlock from 'components/header/settings-modal/appearance-block';
 import ObjectButtonsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-buttons';
 import { CombinedState, ObjectType } from 'reducers';
 import AttributeEditor from './attribute-editor';
@@ -367,7 +362,7 @@ function AttributeAnnotationSidebar(props: StateToProps & DispatchToProps): JSX.
             </span>
             <div className='cvat-sidebar-collapse-button-spacer' />
             <div className='attribute-annotations-sidebar-not-found-wrapper'>
-                <Text strong>No objects found</Text>
+                <Text strong>개체가 없습니다.</Text>
             </div>
         </Layout.Sider>
     );

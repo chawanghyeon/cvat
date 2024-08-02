@@ -1,7 +1,3 @@
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 # NOTE: importing in the utils.py header leads to circular importing
 
 from typing import Any, Dict, Optional, Type

@@ -1,7 +1,3 @@
-// Copyright (c) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -112,7 +108,7 @@ function ExportBackupModal(): JSX.Element {
     return (
         <Modal
             title={<Text strong>{`Export ${instanceType}`}</Text>}
-            visible={!!instance}
+            open={!!instance}
             onCancel={closeModal}
             onOk={() => form.submit()}
             className={`cvat-modal-export-${instanceType.split(' ')[0]}`}

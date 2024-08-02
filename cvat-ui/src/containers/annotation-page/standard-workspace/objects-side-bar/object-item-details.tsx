@@ -1,7 +1,3 @@
-// Copyright (C) 2021-2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { Dispatch } from 'react';
 import { ObjectState } from 'cvat-core-wrapper';
 import { CombinedState } from 'reducers';
@@ -12,6 +8,7 @@ import { LogType } from 'cvat-logger';
 import { connect } from 'react-redux';
 
 interface OwnProps {
+    hasMounted: boolean;
     readonly: boolean;
     clientID: number;
     parentID: number | null;
@@ -99,11 +96,19 @@ class ObjectItemDetailsContainer extends React.PureComponent<Props> {
     };
 
     public render(): JSX.Element | null {
-        const { readonly, collapsed, state } = this.props;
+        const {
+            hasMounted,
+            clientID,
+            readonly,
+            collapsed,
+            state,
+        } = this.props;
 
         if (state) {
             return (
                 <ObjectItemDetails
+                    hasMounted={hasMounted}
+                    clientID={clientID}
                     readonly={readonly}
                     collapsed={collapsed}
                     collapse={this.collapse}

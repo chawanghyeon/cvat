@@ -1,8 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-// Copyright (C) CVAT.ai corp
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CombinedState, ObjectType } from 'reducers';
@@ -17,6 +12,8 @@ export default function RemoveConfirmComponent(): JSX.Element | null {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState<JSX.Element>(<></>);
     const objectState = useSelector((state: CombinedState) => state.annotation.remove.objectState);
+    const { activatedStateID, states } = useSelector((state: CombinedState) => state.annotation.annotations);
+    const { workspace } = useSelector((state: CombinedState) => state.annotation);
     const force = useSelector((state: CombinedState) => state.annotation.remove.force);
     const jobInstance = useSelector((state: CombinedState) => state.annotation.job.instance);
     const dispatch = useDispatch();
@@ -28,10 +25,35 @@ export default function RemoveConfirmComponent(): JSX.Element | null {
     const onCancel = useCallback(() => {
         dispatch(removeObjectAction(null, false));
     }, []);
+    // front-custom key function active label delete
+    const keyFunction = (e: KeyboardEvent): void => {
+        if (
+            (e.key === 'p' || e.code === 'keyP') &&
+            workspace === 'Standard' &&
+            activatedStateID &&
+            states &&
+            !e.ctrlKey &&
+            !e.altKey &&
+            !e.shiftKey
+        ) {
+            const filterdState = states.filter((s) => s.clientID === activatedStateID);
+            if (filterdState[0]) {
+                dispatch(removeObjectAction(filterdState[0], true));
+                setTimeout(() => {
+                    dispatch(removeObjectAsync(jobInstance, filterdState[0], true));
+                }, 100);
+            }
+        }
+    };
 
     useEffect(() => {
-        const newVisible = (!!objectState && !force && objectState.lock) ||
-            (objectState?.objectType === ObjectType.TRACK && !force);
+        window.addEventListener('keydown', keyFunction);
+        return () => window.removeEventListener('keydown', keyFunction);
+    }, [activatedStateID, states, workspace]);
+
+    useEffect(() => {
+        const newVisible =
+            (!!objectState && !force && objectState.lock) || (objectState?.objectType === ObjectType.TRACK && !force);
         setTitle(objectState?.lock ? 'Object is locked' : 'Remove object');
         let descriptionMessage: string | JSX.Element = 'Are you sure you want to remove it?';
 
@@ -39,12 +61,10 @@ export default function RemoveConfirmComponent(): JSX.Element | null {
             descriptionMessage = (
                 <>
                     <Text>
-                        {
-                            `The object you are trying to remove is a track.
+                        {`The object you are trying to remove is a track.
                             If you continue, it removes many drawn objects on different frames.
                             If you want to hide it only on this frame, use the outside feature instead.
-                            ${descriptionMessage}`
-                        }
+                            ${descriptionMessage}`}
                     </Text>
                     <div className='cvat-remove-object-confirm-wrapper'>
                         {/* eslint-disable-next-line */}
@@ -67,14 +87,12 @@ export default function RemoveConfirmComponent(): JSX.Element | null {
             okText='Yes'
             cancelText='Cancel'
             title={title}
-            visible={visible}
+            open={visible}
             onOk={onOk}
             onCancel={onCancel}
             className='cvat-modal-confirm'
         >
-            <div>
-                {description}
-            </div>
+            <div>{description}</div>
         </Modal>
     );
 }

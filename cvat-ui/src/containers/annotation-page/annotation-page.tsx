@@ -1,11 +1,6 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { RouteComponentProps } from 'react-router';
-
 import AnnotationPageComponent from 'components/annotation-page/annotation-page';
 import {
     getJobAsync, saveLogsAsync, changeFrameAsync,
@@ -17,6 +12,7 @@ import { CombinedState, Workspace } from 'reducers';
 type OwnProps = RouteComponentProps<{
     tid: string;
     jid: string;
+    fid: string;
 }>;
 
 interface StateToProps {
@@ -27,6 +23,7 @@ interface StateToProps {
 }
 
 interface DispatchToProps {
+    frameID: number;
     getJob(): void;
     changeFrame(frame: number): void;
     saveLogs(): void;
@@ -60,6 +57,8 @@ function mapDispatchToProps(dispatch: any, own: OwnProps): DispatchToProps {
     const { params } = own.match;
     const taskID = +params.tid;
     const jobID = +params.jid;
+    const frameID = +params.fid;
+
     const searchParams = new URLSearchParams(window.location.search);
     const initialFilters: object[] = [];
     let initialFrame: number | null = null;
@@ -86,6 +85,7 @@ function mapDispatchToProps(dispatch: any, own: OwnProps): DispatchToProps {
     }
 
     return {
+        frameID,
         getJob(): void {
             dispatch(getJobAsync(taskID, jobID, initialFrame, initialFilters));
         },

@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { DataError, ArgumentError } from './exceptions';
 import { Attribute } from './labels';
 import { ShapeType, AttributeType } from './enums';

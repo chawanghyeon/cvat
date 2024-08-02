@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 export enum SelectionSchema {
     EMAIL_ADDRESS = 'email_address',
     LOWEST_WEIGHT = 'lowest_weight',

@@ -1,7 +1,3 @@
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { getCore } from 'cvat-core-wrapper';
 import { LogType } from 'cvat-logger';
 import config from 'config';

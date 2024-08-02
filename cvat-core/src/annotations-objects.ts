@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import config from './config';
 import ObjectState, { SerializedData } from './object-state';
 import { checkObjectType, clamp } from './common';
@@ -434,7 +429,7 @@ class Drawn extends Annotation {
     private fitPoints(points: number[], rotation: number, maxX: number, maxY: number): number[] {
         const { shapeType, parentID } = this;
         checkObjectType('rotation', rotation, 'number', null);
-        points.forEach((coordinate) => checkObjectType('coordinate', coordinate, 'number', null));
+        // points.forEach((coordinate) => checkObjectType('coordinate', coordinate, 'number', null));
 
         if (parentID !== null || shapeType === ShapeType.CUBOID ||
             shapeType === ShapeType.ELLIPSE || !!rotation) {
@@ -455,7 +450,7 @@ class Drawn extends Annotation {
         return fittedPoints;
     }
 
-    protected validateStateBeforeSave(data: ObjectState, updated: ObjectState['updateFlags'], frame?: number): number[] {
+    protected validateStateBeforeSave(data: ObjectState, updated: ObjectState['updateFlags'], frame?: number): any {
         Annotation.prototype.validateStateBeforeSave.call(this, data, updated);
 
         let fittedPoints = [];
@@ -494,19 +489,19 @@ export interface RawShapeData {
         label_id: number;
         occluded: boolean;
         outside: boolean;
-        points: number[];
+        points: any;
         type: ShapeType;
     }[];
     occluded: boolean;
     outside?: boolean; // only for skeleton elements
-    points?: number[];
+    points?: any;
     rotation: number;
     z_order: number;
     type: ShapeType;
 }
 
 export class Shape extends Drawn {
-    public points: number[];
+    public points: any;
     public occluded: boolean;
     public outside: boolean;
     public rotation: number;
@@ -618,7 +613,7 @@ export class Shape extends Drawn {
         this.rotation = redoRotation;
     }
 
-    protected savePoints(points: number[], frame: number): void {
+    protected savePoints(points: any, frame: number): void {
         const undoPoints = this.points;
         const redoPoints = points;
         const undoSource = this.source;
@@ -736,7 +731,10 @@ export class Shape extends Drawn {
             updated[readOnlyField] = false;
         }
 
-        const fittedPoints = this.validateStateBeforeSave(data, updated, frame);
+        let fittedPoints = this.validateStateBeforeSave(data, updated, frame);
+        if (data?.points?.length > 16) {
+            fittedPoints = data.points;
+        }
         const { rotation } = data;
 
         // Now when all fields are validated, we can apply them
@@ -806,7 +804,7 @@ export interface RawTrackData {
     shapes: {
         attributes: RawTrackData['attributes'];
         id?: number;
-        points?: number[];
+        points?: any;
         frame: number;
         occluded: boolean;
         outside: boolean;
@@ -823,12 +821,12 @@ interface TrackedShape {
     outside: boolean;
     rotation: number;
     zOrder: number;
-    points?: number[];
+    points?: any;
     attributes: Record<number, string>;
 }
 
 export interface InterpolatedPosition {
-    points: number[];
+    points: any;
     rotation: number;
     occluded: boolean;
     outside: boolean;
@@ -1203,7 +1201,7 @@ export class Track extends Drawn {
         );
     }
 
-    protected savePoints(points: number[], frame: number): void {
+    protected savePoints(points: any, frame: number): void {
         const wasKeyframe = frame in this.shapes;
         const undoSource = this.source;
         const redoSource = this.readOnlyFields.includes('source') ? this.source : Source.MANUAL;
@@ -1733,7 +1731,7 @@ export class PointsShape extends PolyShape {
         checkNumberOfPoints(this.shapeType, this.points);
     }
 
-    static distance(points: number[], x: number, y: number): number {
+    static distance(points: any, x: number, y: number): number {
         const distances = [];
         for (let i = 0; i < points.length; i += 2) {
             const x1 = points[i];

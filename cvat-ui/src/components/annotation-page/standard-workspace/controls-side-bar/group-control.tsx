@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 
@@ -102,7 +97,7 @@ function GroupControl(props: Props): JSX.Element {
                 }}
                 handlers={shortcutHandlers}
             />
-            <CVATTooltip title={title} placement='right'>
+            <CVATTooltip title={title} placement='bottom'>
                 <Icon {...dynamicIconProps} component={GroupIcon} />
             </CVATTooltip>
         </>

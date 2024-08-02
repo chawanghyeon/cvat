@@ -1,7 +1,3 @@
-# Copyright (C) 2021-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save, post_migrate

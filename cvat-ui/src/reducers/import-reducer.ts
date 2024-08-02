@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { omit } from 'lodash';
 import { ImportActions, ImportActionTypes } from 'actions/import-actions';
 import { getCore } from 'cvat-core-wrapper';

@@ -1,8 +1,3 @@
-# Copyright (C) 2019-2022 Intel Corporation
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from copy import copy, deepcopy
 
 import math
@@ -850,7 +845,7 @@ class TrackManager(ObjectManager):
     def _unite_objects(obj0, obj1):
         track = obj0 if obj0["frame"] < obj1["frame"] else obj1
         assert obj0["label_id"] == obj1["label_id"]
-        shapes = {shape["frame"]:shape for shape in obj0["shapes"]}
+        shapes = {shape["frame"]: shape for shape in obj0["shapes"]}
         for shape in obj1["shapes"]:
             frame = shape["frame"]
             if frame in shapes:

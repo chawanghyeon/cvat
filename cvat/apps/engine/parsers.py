@@ -1,7 +1,3 @@
-# Copyright (C) 2021-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from rest_framework.parsers import BaseParser
 
 class TusUploadParser(BaseParser):

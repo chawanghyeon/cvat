@@ -1,14 +1,10 @@
-// Copyright (C) 2021-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
-import { useHistory } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import Form from 'antd/lib/form';
 import Input from 'antd/lib/input';
 import Button from 'antd/lib/button';
 import Space from 'antd/lib/space';
+import Divider from 'antd/lib/divider';
 import { Store } from 'antd/lib/form/interface';
 import { useForm } from 'antd/lib/form/Form';
 import notification from 'antd/lib/notification';
@@ -16,24 +12,22 @@ import notification from 'antd/lib/notification';
 import { createOrganizationAsync } from 'actions/organization-actions';
 import validationPatterns from 'utils/validation-patterns';
 import { CombinedState } from 'reducers';
+import { useTranslation } from 'react-i18next';
 
 function CreateOrganizationForm(): JSX.Element {
     const [form] = useForm<Store>();
+    const { t } = useTranslation();
     const dispatch = useDispatch();
-    const history = useHistory();
     const creating = useSelector((state: CombinedState) => state.organizations.creating);
     const MAX_SLUG_LEN = 16;
     const MAX_NAME_LEN = 64;
 
     const onFinish = (values: Store): void => {
-        const {
-            phoneNumber, location, email, ...rest
-        } = values;
+        const { phoneNumber, email, ...rest } = values;
 
         rest.contact = {
             ...(phoneNumber ? { phoneNumber } : {}),
             ...(email ? { email } : {}),
-            ...(location ? { location } : {}),
         };
 
         dispatch(
@@ -50,44 +44,74 @@ function CreateOrganizationForm(): JSX.Element {
             autoComplete='off'
             onFinish={onFinish}
             className='cvat-create-organization-form'
-            layout='vertical'
+            labelCol={{ span: 4 }}
         >
+            <Divider />
             <Form.Item
                 hasFeedback
                 name='slug'
-                label='Short name'
+                label={t('organizations.create.shortName')}
                 rules={[
-                    { required: true, message: 'Short name is a required field' },
-                    { max: MAX_SLUG_LEN, message: `Short name must not exceed ${MAX_SLUG_LEN} characters` },
+                    { required: true, message: t('organizations.validation.shortNameRequire') },
+                    {
+                        max: MAX_SLUG_LEN,
+                        message: `${t('organizations.validation.shortNameLen_1')} ${MAX_SLUG_LEN} ${t(
+                            'organizations.validation.shortNameLen_2',
+                        )}`,
+                    },
                     { ...validationPatterns.validateOrganizationSlug },
                 ]}
             >
-                <Input />
+                <Input placeholder='AgileGrowth' />
             </Form.Item>
+            <Divider />
             <Form.Item
                 hasFeedback
                 name='name'
-                label='Full name'
-                rules={[{ max: MAX_NAME_LEN, message: `Full name must not exceed ${MAX_NAME_LEN} characters` }]}
+                label={t('organizations.create.fullName')}
+                rules={[
+                    {
+                        max: MAX_NAME_LEN,
+                        message: `${t('organizations.validation.fullNameLen_1')} ${MAX_NAME_LEN} ${t(
+                            'organizations.validation.fullNameLen_2',
+                        )}`,
+                    },
+                ]}
             >
-                <Input />
+                <Input placeholder='AgileGrowth corp.' />
             </Form.Item>
+            <Divider />
             <Form.Item hasFeedback name='description' label='Description'>
                 <Input.TextArea rows={3} />
             </Form.Item>
-            <Form.Item hasFeedback name='email' label='Email' rules={[{ type: 'email', message: 'The input is not a valid E-mail' }]}>
-                <Input autoComplete='email' placeholder='support@organization.com' />
+            <Divider />
+            <Form.Item
+                hasFeedback
+                name='email'
+                label={t('organizations.create.email')}
+                rules={[{ type: 'email', message: t('organizations.validation.email') }]}
+            >
+                <Input autoComplete='email' placeholder='support@agilegrowth.co.kr' />
             </Form.Item>
-            <Form.Item hasFeedback name='phoneNumber' label='Phone number' rules={[{ ...validationPatterns.validatePhoneNumber }]}>
-                <Input autoComplete='phoneNumber' placeholder='+44 5555 555555' />
+            <Divider />
+            <Form.Item
+                hasFeedback
+                name='phoneNumber'
+                label={t('organizations.create.phoneNumber')}
+                rules={[{ ...validationPatterns.validatePhoneNumber }]}
+            >
+                <Input autoComplete='phoneNumber' placeholder='010-1234-5678' />
             </Form.Item>
-            <Form.Item hasFeedback name='location' label='Location'>
-                <Input autoComplete='location' placeholder='Country, State/Province, Address, Postal code' />
-            </Form.Item>
+            <Divider />
             <Form.Item>
-                <Space className='cvat-create-organization-form-buttons-block' align='end'>
-                    <Button className='cvat-cancel-new-organization-button' onClick={() => history.goBack()}>Cancel</Button>
-                    <Button className='cvat-submit-new-organization-button' loading={creating} disabled={creating} htmlType='submit' type='primary'>
+                <Space className='cvat-create-organization-form-buttons-block' align='center'>
+                    <Button
+                        className='cvat-submit-new-organization-button'
+                        loading={creating}
+                        disabled={creating}
+                        htmlType='submit'
+                        type='primary'
+                    >
                         Submit
                     </Button>
                 </Space>

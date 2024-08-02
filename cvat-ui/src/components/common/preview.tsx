@@ -1,7 +1,3 @@
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useEffect } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,8 +10,11 @@ import { getCloudStoragePreviewAsync } from 'actions/cloud-storage-actions';
 import {
     CombinedState, Job, Task, Project, CloudStorage,
 } from 'reducers';
+import { Empty } from 'antd';
+import { IllustFileIcon } from 'icons';
 import MLModel from 'cvat-core/src/ml-model';
 import { getModelPreviewAsync } from 'actions/models-actions';
+
 
 interface Props {
     job?: Job | undefined;
@@ -88,7 +87,7 @@ export default function Preview(props: Props): JSX.Element {
     if (preview.initialized && !preview.preview) {
         return (
             <div className={emptyPreviewClassName || ''} onClick={onClick} aria-hidden>
-                <PictureOutlined />
+                <Empty description='' image={<IllustFileIcon />} />
             </div>
         );
     }

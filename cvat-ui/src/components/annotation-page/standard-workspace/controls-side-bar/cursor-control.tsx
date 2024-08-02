@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import Icon from '@ant-design/icons';
 
@@ -21,7 +17,7 @@ function CursorControl(props: Props): JSX.Element {
     const { canvasInstance, activeControl, cursorShortkey } = props;
 
     return (
-        <CVATTooltip title={`Cursor ${cursorShortkey}`} placement='right'>
+        <CVATTooltip title={`Cursor ${cursorShortkey}`} placement='bottom'>
             <Icon
                 component={CursorIcon}
                 className={

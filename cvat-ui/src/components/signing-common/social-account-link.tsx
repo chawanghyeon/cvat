@@ -1,7 +1,3 @@
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import './styles.scss';
 import React from 'react';
 import { Col, Row } from 'antd/lib/grid';
@@ -22,26 +18,26 @@ function SocialAccountLink(props: SocialAccountLinkProps): JSX.Element {
     } = props;
 
     return (
-        <Row>
-            <Col flex='auto'>
-                <Button
-                    size='large'
-                    href={href}
-                    className={`cvat-social-authentication-button ${className}`}
-                >
-                    <Row align='middle' style={{ width: '100%' }}>
-                        <Col>
-                            {(icon) ?
-                                <AuthenticationProviderIcon iconData={icon} provider={children} /> :
-                                <LoginOutlined className='cvat-social-authentication-icon' />}
-                        </Col>
-                        <Col flex='auto'>
-                            {children}
-                        </Col>
-                    </Row>
-                </Button>
-            </Col>
-        </Row>
+        <Col flex='auto'>
+            <Button
+                style={{ width: '100%' }}
+                type='primary'
+                size='large'
+                href={href}
+                className={`cvat-social-authentication-button ${className}`}
+            >
+                <Row align='middle' style={{ width: '100%' }}>
+                    <Col>
+                        {(icon) ?
+                            <AuthenticationProviderIcon iconData={icon} provider={children} /> :
+                            <LoginOutlined className='cvat-social-authentication-icon' />}
+                    </Col>
+                    <Col flex='auto'>
+                        {children}
+                    </Col>
+                </Row>
+            </Button>
+        </Col>
     );
 }
 

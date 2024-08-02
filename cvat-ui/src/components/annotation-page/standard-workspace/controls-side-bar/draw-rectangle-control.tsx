@@ -1,32 +1,24 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
-import Popover from 'antd/lib/popover';
 import Icon from '@ant-design/icons';
 
 import { Canvas } from 'cvat-canvas-wrapper';
 import { RectangleIcon } from 'icons';
-import { ShapeType } from 'reducers';
-
-import DrawShapePopoverContainer from 'containers/annotation-page/standard-workspace/controls-side-bar/draw-shape-popover';
-import withVisibilityHandling from './handle-popover-visibility';
+import CvatTooltip from 'components/common/cvat-tooltip';
 
 export interface Props {
     canvasInstance: Canvas;
     isDrawing: boolean;
     disabled?: boolean;
+    onDraw: () => void;
 }
 
-const CustomPopover = withVisibilityHandling(Popover, 'draw-rectangle');
 function DrawRectangleControl(props: Props): JSX.Element {
-    const { canvasInstance, isDrawing, disabled } = props;
-    const dynamicPopoverProps = isDrawing ? {
-        overlayStyle: {
-            display: 'none',
-        },
-    } : {};
+    const {
+        canvasInstance,
+        isDrawing,
+        disabled,
+        onDraw,
+    } = props;
 
     const dynamicIconProps = isDrawing ? {
         className: 'cvat-draw-rectangle-control cvat-active-canvas-control',
@@ -35,19 +27,17 @@ function DrawRectangleControl(props: Props): JSX.Element {
         },
     } : {
         className: 'cvat-draw-rectangle-control',
+        onClick: (): void => {
+            onDraw();
+        },
     };
 
     return disabled ? (
         <Icon className='cvat-draw-rectangle-control cvat-disabled-canvas-control' component={RectangleIcon} />
     ) : (
-        <CustomPopover
-            {...dynamicPopoverProps}
-            overlayClassName='cvat-draw-shape-popover'
-            placement='right'
-            content={<DrawShapePopoverContainer shapeType={ShapeType.RECTANGLE} />}
-        >
+        <CvatTooltip placement='bottomLeft' title='Press Shift + F or D to adjust the size'>
             <Icon {...dynamicIconProps} component={RectangleIcon} />
-        </CustomPopover>
+        </CvatTooltip>
     );
 }
 

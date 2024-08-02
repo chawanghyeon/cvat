@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { BoundariesActions, BoundariesActionTypes } from 'actions/boundaries-actions';
 import { UserAgreementsActions, UserAgreementsActionTypes } from 'actions/useragreements-actions';
 import { AuthActions, AuthActionTypes } from 'actions/auth-actions';

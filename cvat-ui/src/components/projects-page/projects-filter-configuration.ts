@@ -1,7 +1,3 @@
-// Copyright (C) 2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Config } from 'react-awesome-query-builder';
 
 export const config: Partial<Config> = {
@@ -55,7 +51,7 @@ export const config: Partial<Config> = {
 export const localStorageRecentCapacity = 10;
 export const localStorageRecentKeyword = 'recentlyAppliedProjectsFilters';
 export const predefinedFilterValues = {
-    'Assigned to me': '{"and":[{"==":[{"var":"assignee"},"<username>"]}]}',
-    'Owned by me': '{"and":[{"==":[{"var":"owner"},"<username>"]}]}',
-    'Not completed': '{"!":{"and":[{"==":[{"var":"status"},"completed"]}]}}',
+    '나에게 할당된': '{"and":[{"==":[{"var":"assignee"},"<username>"]}]}',
+    '내가 소유자인': '{"and":[{"==":[{"var":"owner"},"<username>"]}]}',
+    '완료되지 않은': '{"!":{"and":[{"==":[{"var":"status"},"completed"]}]}}',
 };

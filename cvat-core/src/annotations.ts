@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { Storage } from './storage';
 import serverProxy from './server-proxy';
 import Collection from './annotations-collection';

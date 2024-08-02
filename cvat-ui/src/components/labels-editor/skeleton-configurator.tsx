@@ -231,8 +231,8 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
         const dataType = edge.getAttribute('data-type');
         const dataNodeFrom = edge.getAttribute('data-node-from');
         const dataNodeTo = edge.getAttribute('data-node-to');
-        const nodeFrom = svg.querySelector(`[data-node-id="${dataNodeFrom}"]`);
-        const nodeTo = svg.querySelector(`[data-node-id="${dataNodeTo}"]`);
+        const nodeFrom = svg.querySelector(`[data-node-id='${dataNodeFrom}']`);
+        const nodeTo = svg.querySelector(`[data-node-id='${dataNodeTo}']`);
 
         if (dataType !== 'edge' || !nodeFrom || !nodeTo) {
             return false;
@@ -279,7 +279,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
 
         circle.addEventListener('mouseover', () => {
             circle.setAttribute('stroke-width', '0.3');
-            const text = svg.querySelector(`text[data-for-element-id="${elementID}"]`);
+            const text = svg.querySelector(`text[data-for-element-id='${elementID}']`);
             if (text) {
                 text.setAttribute('fill', 'red');
             }
@@ -291,7 +291,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
 
         circle.addEventListener('mouseout', () => {
             circle.setAttribute('stroke-width', '0.1');
-            const text = svg.querySelector(`text[data-for-element-id="${elementID}"]`);
+            const text = svg.querySelector(`text[data-for-element-id='${elementID}']`);
             if (text) {
                 text.setAttribute('fill', 'darkorange');
             }
@@ -374,9 +374,9 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
 
                 // if such edge already exists, remove the current one
                 const edge1 = svg
-                    .querySelector(`[data-node-from="${dataNodeFrom}"][data-node-to="${dataNodeTo}"]`);
+                    .querySelector(`[data-node-from='${dataNodeFrom}'][data-node-to='${dataNodeTo}']`);
                 const edge2 = svg
-                    .querySelector(`[data-node-from="${dataNodeTo}"][data-node-to="${dataNodeFrom}"]`);
+                    .querySelector(`[data-node-from='${dataNodeTo}'][data-node-to='${dataNodeFrom}']`);
                 if (edge1 || edge2) {
                     line.remove();
                 }
@@ -589,9 +589,14 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
             } else if (dataType === 'edge') {
                 const dataNodeFrom = child.getAttribute('data-node-from');
                 const dataNodeTo = child.getAttribute('data-node-to');
+                if (Number(dataNodeTo) < 1 || dataNodeTo === null) {
+                    throw new Error(
+                        `Edge's nodeFrom ${dataNodeFrom} The line didn't connect.`,
+                    );
+                }
                 if (dataNodeFrom && dataNodeTo && Number.isInteger(+dataNodeFrom) && Number.isInteger(+dataNodeTo)) {
-                    const node1 = svg.querySelector(`[data-node-from="${dataNodeFrom}"]`);
-                    const node2 = svg.querySelector(`[data-node-to="${dataNodeTo}"]`);
+                    const node1 = svg.querySelector(`[data-node-from='${dataNodeFrom}']`);
+                    const node2 = svg.querySelector(`[data-node-to='${dataNodeTo}']`);
                     if (!node1 || !node2) {
                         throw new Error(
                             `Edge's nodeFrom ${dataNodeFrom} or nodeTo ${dataNodeTo} do not to refer to any node`,
@@ -665,7 +670,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                             if (data) {
                                 this.labels[elementID] = data;
                                 if (data.color && svgRef.current) {
-                                    const element = svgRef.current.querySelector(`[data-element-id="${elementID}"]`);
+                                    const element = svgRef.current.querySelector(`[data-element-id='${elementID}']`);
                                     if (element) {
                                         element.setAttribute('fill', data.color);
                                     }

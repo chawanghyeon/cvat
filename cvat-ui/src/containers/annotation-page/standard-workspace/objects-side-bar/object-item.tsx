@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import copy from 'copy-to-clipboard';
 import { connect } from 'react-redux';
@@ -47,7 +42,7 @@ interface StateToProps {
     minZLayer: number;
     maxZLayer: number;
     normalizedKeyMap: Record<string, string>;
-    canvasInstance: Canvas | Canvas3d;
+    canvasInstance: Canvas | Canvas3d | null;
 }
 
 interface DispatchToProps {
@@ -65,6 +60,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
         annotation: {
             annotations: {
                 activatedStateID,
+                activatedElementID,
                 zLayer: { min: minZLayer, max: maxZLayer },
             },
             job: { attributes: jobAttributes, instance: jobInstance, labels },
@@ -89,6 +85,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
         labels,
         ready,
         activeControl,
+        activatedElementID,
         colorBy,
         jobInstance,
         frameNumber,

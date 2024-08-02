@@ -41,7 +41,7 @@ function SkeletonElementContextMenu(props: ContextMenuProps): JSX.Element {
             <Modal
                 okButtonProps={{ hidden: true }}
                 cancelButtonProps={{ hidden: true }}
-                visible={modalVisible}
+                open={modalVisible}
                 onCancel={() => {
                     setModalVisible(false);
                     onConfigureLabel(elementID, null);

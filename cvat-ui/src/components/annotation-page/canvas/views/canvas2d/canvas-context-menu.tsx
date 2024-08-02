@@ -1,8 +1,3 @@
-// Copyright (C) 2021-2022 Intel Corporation
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Menu from 'antd/lib/menu';
@@ -10,7 +5,7 @@ import Menu from 'antd/lib/menu';
 import { MenuInfo } from 'rc-menu/lib/interface';
 
 import ObjectItemElementComponent from 'components/annotation-page/standard-workspace/objects-side-bar/object-item-element';
-import ObjectItemContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-item';
+import ObjectItemContextMenuContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-item-context-menu';
 import { ShapeType, Workspace } from 'reducers';
 import { rotatePoint } from 'utils/math';
 import config from 'config';
@@ -57,24 +52,23 @@ function ReviewContextMenu({
             <Menu.Item className='cvat-context-menu-item' key={ReviewContextMenuKeys.QUICK_ISSUE_ATTRIBUTE}>
                 Quick issue: incorrect attribute
             </Menu.Item>
-            {latestComments.length ? (
-                <Menu.SubMenu
-                    title='Quick issue ...'
-                    className='cvat-context-menu-item'
-                    key={ReviewContextMenuKeys.QUICK_ISSUE_FROM_LATEST}
-                >
-                    {latestComments.map(
-                        (comment: string, id: number): JSX.Element => (
-                            <Menu.Item
-                                className='cvat-context-menu-item cvat-quick-issue-from-latest-item'
-                                key={`${id}`}
-                            >
-                                {comment}
-                            </Menu.Item>
-                        ),
-                    )}
-                </Menu.SubMenu>
-            ) : null}
+            <Menu.SubMenu
+                title='Quick issue ...'
+                className='cvat-context-menu-item'
+                key={ReviewContextMenuKeys.QUICK_ISSUE_FROM_LATEST}
+            >
+                {latestComments.length && latestComments.map(
+                    (comment: string, id: number): JSX.Element => (
+                        <Menu.Item
+                            className='cvat-context-menu-item cvat-quick-issue-from-latest-item'
+                            key={`${id}`}
+                            style={{ color: 'white' }}
+                        >
+                            {comment}
+                        </Menu.Item>
+                    ),
+                )}
+            </Menu.SubMenu>
         </Menu>
     );
 }
@@ -173,7 +167,7 @@ export default function CanvasContextMenu(props: Props): JSX.Element | null {
 
     return ReactDOM.createPortal(
         <div className='cvat-canvas-context-menu' style={{ top, left }}>
-            <ObjectItemContainer
+            <ObjectItemContextMenuContainer
                 readonly={readonly}
                 key={contextMenuClientID}
                 clientID={contextMenuClientID}

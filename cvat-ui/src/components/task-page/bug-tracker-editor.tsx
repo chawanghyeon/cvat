@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React, { useState } from 'react';
 import Button from 'antd/lib/button';
 import Modal from 'antd/lib/modal';
@@ -77,7 +73,7 @@ export default function BugTrackerEditorComponent(props: Props): JSX.Element {
         <Row className='cvat-issue-tracker'>
             <Col>
                 <Text strong className='cvat-text-color'>
-                    Issue Tracker
+                    이슈 트래커
                 </Text>
                 <br />
                 <Text
@@ -87,7 +83,7 @@ export default function BugTrackerEditorComponent(props: Props): JSX.Element {
                         onChange: onChangeValue,
                     }}
                 >
-                    {bugTrackerEditing ? '' : 'Not specified'}
+                    {bugTrackerEditing ? '' : '지정되지 않음'}
                 </Text>
             </Col>
         </Row>

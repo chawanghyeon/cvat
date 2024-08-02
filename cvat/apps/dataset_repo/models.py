@@ -1,7 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.db import models
 from cvat.apps.engine.models import Task
 from enum import Enum

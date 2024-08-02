@@ -1,8 +1,4 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Canvas3d } from 'cvat-canvas3d/src/typescript/canvas3d';
 import { Canvas, RectDrawingMethod, CuboidDrawingMethod } from 'cvat-canvas-wrapper';
 import {
@@ -29,9 +25,6 @@ export interface AuthState {
     socialAuthFetching: boolean;
     socialAuthInitialized: boolean;
     socialAuthMethods: SocialAuthMethods;
-    ssoIDPSelectFetching: boolean;
-    ssoIDPSelected: boolean;
-    ssoIDP: string | null;
 }
 
 export interface ProjectsQuery {
@@ -69,6 +62,7 @@ export interface ProjectsState {
             [projectId: number]: boolean; // deleted (deleting if in dictionary)
         };
     };
+    guide: any[];
 }
 
 export interface TasksQuery {
@@ -87,6 +81,8 @@ export interface JobsQuery {
     sort: string | null;
     search: string | null;
     filter: string | null;
+    username: string | null;
+    all?: boolean;
 }
 
 export type Job = any;
@@ -99,6 +95,7 @@ export interface JobsState {
     previews: {
         [index: number]: Preview;
     };
+    guide: any[];
 }
 
 export interface TasksState {
@@ -112,6 +109,7 @@ export interface TasksState {
     gettingQuery: TasksQuery;
     count: number;
     current: Task[];
+    issues: any[],
     previews: {
         [index: number]: Preview;
     };
@@ -269,10 +267,53 @@ export type PluginsList = {
     [name in SupportedPlugins]: boolean;
 };
 
+export interface PluginComponent {
+    component: any;
+    data: {
+        weight: number;
+        shouldBeRendered: (props?: object, state?: object) => boolean;
+    };
+}
+
 export interface PluginsState {
     fetching: boolean;
     initialized: boolean;
     list: PluginsList;
+    current: {
+        [index: string]: {
+            destructor: CallableFunction;
+            globalStateDidUpdate?: CallableFunction;
+        };
+    };
+    components: {
+        header: {
+            userMenu: {
+                items: PluginComponent[];
+            };
+        };
+        loginPage: {
+            loginForm: PluginComponent[];
+        };
+        projectActions: {
+            items: PluginComponent[];
+        };
+        taskActions: {
+            items: PluginComponent[];
+        };
+        taskItem: {
+            ribbon: PluginComponent[];
+        };
+        projectItem: {
+            ribbon: PluginComponent[];
+        };
+        annotationPage: {
+            header: {
+                player: PluginComponent[];
+            };
+        };
+        router: PluginComponent[];
+        loggedInModals: PluginComponent[];
+    };
 }
 
 export interface AboutState {
@@ -367,6 +408,14 @@ export interface ActiveInference {
     functionID: string | number;
 }
 
+export interface ModelsQuery {
+    page: number;
+    id: number | null;
+    search: string | null;
+    filter: string | null;
+    sort: string | null;
+}
+
 export interface ModelsState {
     initialized: boolean;
     fetching: boolean;
@@ -386,7 +435,7 @@ export interface ModelsState {
     providers: {
         fetching: boolean;
         list: ModelProvider[];
-    }
+    };
     previews: {
         [index: string]: Preview;
     };
@@ -564,6 +613,7 @@ export enum ActiveControl {
     CURSOR = 'cursor',
     DRAG_CANVAS = 'drag_canvas',
     ZOOM_CANVAS = 'zoom_canvas',
+    DRAW_SHAPE = 'draw_shape',
     DRAW_RECTANGLE = 'draw_rectangle',
     DRAW_POLYGON = 'draw_polygon',
     DRAW_POLYLINE = 'draw_polyline',
@@ -583,6 +633,7 @@ export enum ActiveControl {
 }
 
 export enum ShapeType {
+    SHAPE = 'shape',
     RECTANGLE = 'rectangle',
     POLYGON = 'polygon',
     POLYLINE = 'polyline',
@@ -713,6 +764,7 @@ export interface AnnotationState {
     colors: any[];
     filtersPanelVisible: boolean;
     sidebarCollapsed: boolean;
+    leftSidebarCollapsed: boolean;
     appearanceCollapsed: boolean;
     workspace: Workspace;
 }
@@ -840,6 +892,9 @@ export interface OrganizationState {
     leaving: boolean;
     removingMember: boolean;
     updatingMember: boolean;
+    statistic: any;
+    labels: any;
+    umap: any;
 }
 
 export interface WebhooksQuery {

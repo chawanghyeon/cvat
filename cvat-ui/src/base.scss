@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 $grid-unit-size: 8px;
 
 $header-height: $grid-unit-size * 6;
@@ -11,32 +6,42 @@ $layout-lg-grid-size: $grid-unit-size * 2;
 $layout-sm-grid-color: rgba(0, 0, 0, 0.15);
 $layout-lg-grid-color: rgba(0, 0, 0, 0.15);
 
-$header-color: #d8d8d8;
-$text-color: #303030;
+$header-color: #1f1f20;
+$text-color: #fff;
 $text-color-secondary: rgba(0, 0, 0, 0.45);
 $hover-menu-color: rgba(24, 144, 255, 0.05);
-$completed-progress-color: #61c200;
-$inprogress-progress-color: #1890ff;
-$pending-progress-color: #c1c1c1;
+$completed-progress-color: #ffffff;
+$inprogress-progress-color: #9AB0FF;
+$pending-progress-color: #31D2B5;
 $border-color-1: #c3c3c3;
-$border-color-2: rgb(240, 240, 240);
-$border-color-3: #242424;
+$border-color-2: #414142;
+$border-color-3: #656568;
 $border-color-hover: #40a9ff;
-$background-color-1: white;
-$background-color-2: #f1f1f1;
+$background-color-1: black;
+$background-color-2: #414142;
+$background-color-3 : #3b00ab;
+$background-color-4: #2C2D2E;
+$button-color : #4970fb;
+$select-color : #1f1f20;
+$popover-color : #000000;
+$popover-text-color : #3b00ab;
+$popover-title-color : #ffffff;
 $notification-background-color-1: #d9ecff;
 $notification-border-color-1: #1890ff;
 $transparent-color: rgba(0, 0, 0, 0);
-$player-slider-color: #979797;
-$player-buttons-color: #242424;
+$player-slider-color: #d0d0d8;
+$player-buttons-color: #3b00ab;
 $danger-icon-color: #ff4136;
 $ok-icon-color: #61c200;
 $info-icon-color: #0074d9;
-$objects-bar-tabs-color: #bebebe;
+
+$divider-color: #2c2d2e;
+$objects-bar-tabs-color: #2c2d2e;
 $objects-bar-icons-color: #242424; // #6e6e6e
 $active-label-background-color: #d8ecff;
-$object-item-border-color: rgba(0, 0, 0, 0.7);
-$slider-color: #1890ff;
+$object-item-border-color: #1F1F20;
+$slider-color: #ffffff;
+$button-hover-color: #3a60e4;
 
 $box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08),
     0 9px 28px 8px rgba(0, 0, 0, 0.05);

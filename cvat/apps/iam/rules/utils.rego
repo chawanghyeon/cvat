@@ -15,6 +15,11 @@ INTERNAL := "internal"
 SANDBOX := "sandbox"
 ORGANIZATION := "organization"
 
+# Stage
+ANNOTATION := "annotation"
+VALIDATION := "validation"
+ACCEPTANCE := "acceptance"
+
 # Scopes
 CREATE := "create"
 LIST := "list"
@@ -31,6 +36,8 @@ CHANGE_ROLE := "change:role"
 RESEND := "resend"
 UPDATE_DESC := "update:desc"
 UPDATE_ASSIGNEE := "update:assignee"
+UPDATE_WORKER := "update:worker"
+UPDATE_CHECKER := "update:checker"
 UPDATE_OWNER := "update:owner"
 EXPORT_ANNOTATIONS := "export:annotations"
 EXPORT_DATASET := "export:dataset"

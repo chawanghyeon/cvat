@@ -1,7 +1,3 @@
-// Copyright (C) 2022 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 // Setup mock for a server
 jest.mock('../../src/server-proxy', () => {
     return {

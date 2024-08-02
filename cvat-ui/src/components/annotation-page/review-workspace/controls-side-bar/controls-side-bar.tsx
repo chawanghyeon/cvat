@@ -1,9 +1,4 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
-import Layout from 'antd/lib/layout';
 
 import GlobalHotKeys, { KeyMap } from 'utils/mousetrap-react';
 import { ActiveControl, Rotation } from 'reducers';
@@ -14,6 +9,7 @@ import CursorControl from 'components/annotation-page/standard-workspace/control
 import MoveControl from 'components/annotation-page/standard-workspace/controls-side-bar/move-control';
 import FitControl from 'components/annotation-page/standard-workspace/controls-side-bar/fit-control';
 import ResizeControl from 'components/annotation-page/standard-workspace/controls-side-bar/resize-control';
+import { Divider } from 'antd';
 import IssueControl from './issue-control';
 
 interface Props {
@@ -72,7 +68,7 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
     }
 
     return (
-        <Layout.Sider className='cvat-canvas-controls-sidebar' theme='light' width={44}>
+        <div className='cvat-canvas-controls-sidebar'>
             <GlobalHotKeys keyMap={subKeyMap} handlers={handlers} />
             <CursorControl
                 cursorShortkey={normalizedKeyMap.CANCEL}
@@ -86,18 +82,18 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
                 rotateFrame={rotateFrame}
             />
 
-            <hr />
+            <Divider type='vertical' />
 
             <FitControl canvasInstance={canvasInstance} />
             <ResizeControl canvasInstance={canvasInstance} activeControl={activeControl} />
 
-            <hr />
+            <Divider type='vertical' />
             <IssueControl
                 canvasInstance={canvasInstance}
                 activeControl={activeControl}
                 selectIssuePosition={selectIssuePosition}
                 disabled={controlsDisabled}
             />
-        </Layout.Sider>
+        </div>
     );
 }

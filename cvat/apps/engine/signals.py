@@ -1,6 +1,3 @@
-# Copyright (C) 2019-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
 import shutil
 
 from django.contrib.auth.models import User

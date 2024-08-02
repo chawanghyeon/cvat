@@ -1,7 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import React from 'react';
 import { Row, Col } from 'antd/lib/grid';
 import { CloseOutlined } from '@ant-design/icons';

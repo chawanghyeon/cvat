@@ -1,8 +1,3 @@
-# Copyright (C) 2019-2022 Intel Corporation
-# Copyright (C) 2023 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import os
 import os.path as osp
 import tempfile
@@ -45,7 +40,7 @@ PROJECT_CACHE_TTL = DEFAULT_CACHE_TTL / 3
 JOB_CACHE_TTL = DEFAULT_CACHE_TTL
 
 
-def export(dst_format, project_id=None, task_id=None, job_id=None, server_url=None, save_images=False):
+def export(dst_format, project_id=None, task_id=None, job_id=None, server_url=None, save_images=False, *args, **kwargs):
     try:
         if task_id is not None:
             logger = slogger.task[task_id]
@@ -82,7 +77,7 @@ def export(dst_format, project_id=None, task_id=None, job_id=None, server_url=No
             with tempfile.TemporaryDirectory(dir=cache_dir) as temp_dir:
                 temp_file = osp.join(temp_dir, 'result')
                 export_fn(db_instance.id, temp_file, dst_format,
-                    server_url=server_url, save_images=save_images)
+                    server_url=server_url, save_images=save_images, *args, **kwargs)
                 os.replace(temp_file, output_path)
 
             archive_ctime = osp.getctime(output_path)
@@ -107,23 +102,23 @@ def export(dst_format, project_id=None, task_id=None, job_id=None, server_url=No
         log_exception(logger)
         raise
 
-def export_job_annotations(job_id, dst_format=None, server_url=None):
-    return export(dst_format,job_id=job_id, server_url=server_url, save_images=False)
+def export_job_annotations(job_id, dst_format=None, server_url=None, download_only_accepted=False):
+    return export(dst_format, job_id=job_id, server_url=server_url, save_images=False, download_only_accepted=download_only_accepted)
 
-def export_job_as_dataset(job_id, dst_format=None, server_url=None):
-    return export(dst_format, job_id=job_id, server_url=server_url, save_images=True)
+def export_job_as_dataset(job_id, dst_format=None, server_url=None, download_only_accepted=False):
+    return export(dst_format, job_id=job_id, server_url=server_url, save_images=True, download_only_accepted=download_only_accepted)
 
-def export_task_as_dataset(task_id, dst_format=None, server_url=None):
-    return export(dst_format, task_id=task_id, server_url=server_url, save_images=True)
+def export_task_as_dataset(task_id, dst_format=None, server_url=None, download_only_accepted=False):
+    return export(dst_format, task_id=task_id, server_url=server_url, save_images=True, download_only_accepted=download_only_accepted)
 
-def export_task_annotations(task_id, dst_format=None, server_url=None):
-    return export(dst_format,task_id=task_id, server_url=server_url, save_images=False)
+def export_task_annotations(task_id, dst_format=None, server_url=None, download_only_accepted=False):
+    return export(dst_format,task_id=task_id, server_url=server_url, save_images=False, download_only_accepted=download_only_accepted)
 
-def export_project_as_dataset(project_id, dst_format=None, server_url=None):
-    return export(dst_format, project_id=project_id, server_url=server_url, save_images=True)
+def export_project_as_dataset(project_id, dst_format=None, server_url=None, download_only_accepted=False):
+    return export(dst_format, project_id=project_id, server_url=server_url, save_images=True, download_only_accepted=download_only_accepted)
 
-def export_project_annotations(project_id, dst_format=None, server_url=None):
-    return export(dst_format, project_id=project_id, server_url=server_url, save_images=False)
+def export_project_annotations(project_id, dst_format=None, server_url=None, download_only_accepted=False):
+    return export(dst_format, project_id=project_id, server_url=server_url, save_images=False, download_only_accepted=download_only_accepted)
 
 
 def clear_export_cache(file_path, file_ctime, logger):

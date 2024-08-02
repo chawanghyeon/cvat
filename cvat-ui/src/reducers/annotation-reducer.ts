@@ -1,8 +1,3 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { AnyAction } from 'redux';
 import { AnnotationActionTypes } from 'actions/annotation-actions';
 import { AuthActionTypes } from 'actions/auth-actions';
@@ -115,7 +110,8 @@ const defaultState: AnnotationState = {
         visible: false,
     },
     colors: [],
-    sidebarCollapsed: false,
+    sidebarCollapsed: true,
+    leftSidebarCollapsed: true,
     appearanceCollapsed: false,
     filtersPanelVisible: false,
     workspace: Workspace.STANDARD,
@@ -137,6 +133,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         case BoundariesActionTypes.RESET_AFTER_ERROR:
         case AnnotationActionTypes.GET_JOB_SUCCESS: {
             const {
+                userInstance,
                 job,
                 states,
                 openTime,
@@ -150,7 +147,11 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 maxZ,
             } = action.payload;
 
-            const isReview = job.stage === JobStage.REVIEW;
+            let isReview = job.stage === JobStage.REVIEW;
+            if (job.checker) {
+                isReview = job.checker.id === userInstance.id;
+            }
+
             let workspaceSelected = Workspace.STANDARD;
 
             const defaultLabel = job.labels.length ? job.labels[0] : null;
@@ -379,6 +380,12 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 sidebarCollapsed: !state.sidebarCollapsed,
             };
         }
+        case AnnotationActionTypes.COLLAPSE_LEFT_SIDEBAR: {
+            return {
+                ...state,
+                leftSidebarCollapsed: !state.leftSidebarCollapsed,
+            };
+        }
         case AnnotationActionTypes.COLLAPSE_APPEARANCE: {
             return {
                 ...state,
@@ -455,6 +462,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 activeControl = ActiveControl.CURSOR;
             } else if ('activeShapeType' in payload) {
                 const controlMapping = {
+                    [ShapeType.SHAPE]: ActiveControl.DRAW_SHAPE,
                     [ShapeType.RECTANGLE]: ActiveControl.DRAW_RECTANGLE,
                     [ShapeType.POLYGON]: ActiveControl.DRAW_POLYGON,
                     [ShapeType.POLYLINE]: ActiveControl.DRAW_POLYLINE,

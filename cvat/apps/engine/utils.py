@@ -1,8 +1,5 @@
-# Copyright (C) 2020-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 import ast
+import math
 import cv2 as cv
 from collections import namedtuple
 import hashlib
@@ -18,6 +15,7 @@ from av import VideoFrame
 from PIL import Image
 
 from django.core.exceptions import ValidationError
+import numpy as np
 
 Import = namedtuple("Import", ["module", "name", "alias"])
 
@@ -125,8 +123,6 @@ def parse_exception_message(msg):
     return parsed_msg
 
 def process_failed_job(rq_job):
-    if rq_job.meta['tmp_file_descriptor']:
-        os.close(rq_job.meta['tmp_file_descriptor'])
     if os.path.exists(rq_job.meta['tmp_file']):
         os.remove(rq_job.meta['tmp_file'])
     exc_info = str(rq_job.exc_info or rq_job.dependency.exc_info)
@@ -176,3 +172,84 @@ def get_rq_job_meta(request, db_obj):
         'task_id': tid,
         'job_id': jid,
     }
+
+
+# mask validation을 위한 함수들
+def mask2Rle(mask):
+    rle = []
+
+    if mask[0] > 0:
+        rle.extend([0, 1])
+    else:
+        rle.append(1)
+
+    for i in range(1, len(mask)):
+        if mask[i - 1] == mask[i]:
+            rle[-1] += 1
+        else:
+            rle.append(1)
+
+    return rle
+
+
+def rle2mask(rle: list[int], width: int, height: int) -> np.ndarray:
+    decoded = np.zeros((width * height), dtype=np.uint8)
+    cumsum = np.cumsum(rle)
+
+    for i in range(1, len(rle), 2):
+        decoded[cumsum[i-1]:cumsum[i]] = 1
+
+    return decoded.reshape((height, width))
+
+
+def crop_mask(points: list[int], width: int, height: int) -> list[int]:
+    rle = points[:-4]
+    left, top, right, bottom = list(math.trunc(v) for v in points[-4:])
+    should_fix = False
+
+    # 왼쪽 오른쪽 이미지 범위 체크
+    for point in left, right:
+        if point < 0 or point >= width:
+            should_fix = True
+
+    # 위 아래 이미지 범위 체크
+    for point in top, bottom:
+        if point < 0 or point >= height:
+            should_fix = True
+
+    if not should_fix:
+        return points
+
+    # 이미지 범위 안에 있도록 수정
+    new_left = min(max(0, left), width - 1)
+    new_top = min(max(0, top), height - 1)
+    new_right = max(min(width - 1, right), 0)
+    new_bottom = max(min(height - 1, bottom), 0)
+
+    # 원래의 마스크 크기
+    mask_width = right - left + 1
+    mask_height = bottom - top + 1
+    mask = rle2mask(rle, mask_width, mask_height)
+
+    # 새로운 마스크와 원래 마스크의 차이
+    left_gap = abs(new_left - left)
+    top_gap = abs(new_top - top)
+    right_gap = abs(new_right - right)
+    bottom_gap = abs(new_bottom - bottom)
+
+    # 새로운 마스크의 범위
+    new_width_start = max(0, left_gap)
+    new_width_end = mask_width - right_gap
+    new_height_start = max(0, top_gap)
+    new_height_end = mask_height - bottom_gap
+
+    # 새로운 마스크의 범위로 자르기
+    mask = mask[new_height_start:new_height_end, new_width_start:new_width_end]
+
+    # RLE 인코딩
+    rle = mask2Rle(mask.flatten())
+
+    # 새로운 좌표로 추가
+    rle.extend([new_left, new_top, new_right, new_bottom])
+
+    return rle

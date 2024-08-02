@@ -1,13 +1,5 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import _ from 'lodash';
-import {
-    ChunkType, DimensionType, JobStage,
-    JobState, StorageLocation, TaskMode, TaskStatus,
-} from './enums';
+import { ChunkType, DimensionType, JobStage, JobState, StorageLocation, TaskMode, TaskStatus } from './enums';
 import { Storage } from './storage';
 
 import PluginRegistry from './plugins';
@@ -45,10 +37,18 @@ function buildDuplicatedAPI(prototype) {
                 },
 
                 async clear(
-                    reload = false, startframe = undefined, endframe = undefined, delTrackKeyframesOnly = true,
+                    reload = false,
+                    startframe = undefined,
+                    endframe = undefined,
+                    delTrackKeyframesOnly = true,
                 ) {
                     const result = await PluginRegistry.apiWrapper.call(
-                        this, prototype.annotations.clear, reload, startframe, endframe, delTrackKeyframesOnly,
+                        this,
+                        prototype.annotations.clear,
+                        reload,
+                        startframe,
+                        endframe,
+                        delTrackKeyframesOnly,
                     );
                     return result;
                 },
@@ -188,24 +188,13 @@ function buildDuplicatedAPI(prototype) {
                     return result;
                 },
                 async delete(frame) {
-                    await PluginRegistry.apiWrapper.call(
-                        this,
-                        prototype.frames.delete,
-                        frame,
-                    );
+                    await PluginRegistry.apiWrapper.call(this, prototype.frames.delete, frame);
                 },
                 async restore(frame) {
-                    await PluginRegistry.apiWrapper.call(
-                        this,
-                        prototype.frames.restore,
-                        frame,
-                    );
+                    await PluginRegistry.apiWrapper.call(this, prototype.frames.restore, frame);
                 },
                 async save() {
-                    await PluginRegistry.apiWrapper.call(
-                        this,
-                        prototype.frames.save,
-                    );
+                    await PluginRegistry.apiWrapper.call(this, prototype.frames.save);
                 },
                 async ranges() {
                     const result = await PluginRegistry.apiWrapper.call(this, prototype.frames.ranges);
@@ -226,11 +215,7 @@ function buildDuplicatedAPI(prototype) {
                     return result;
                 },
                 async contextImage(frameId) {
-                    const result = await PluginRegistry.apiWrapper.call(
-                        this,
-                        prototype.frames.contextImage,
-                        frameId,
-                    );
+                    const result = await PluginRegistry.apiWrapper.call(this, prototype.frames.contextImage, frameId);
                     return result;
                 },
             },
@@ -305,7 +290,8 @@ function buildDuplicatedAPI(prototype) {
 export class Session {}
 
 export class Job extends Session {
-    public assignee: User;
+    public worker: User;
+    public checker: User;
     public stage: JobStage;
     public state: JobState;
     public readonly id: number;
@@ -365,7 +351,8 @@ export class Job extends Session {
         super();
         const data = {
             id: undefined,
-            assignee: null,
+            worker: null,
+            checker: null,
             stage: undefined,
             state: undefined,
             start_frame: undefined,
@@ -378,6 +365,11 @@ export class Job extends Session {
             data_chunk_size: undefined,
             bug_tracker: null,
             mode: undefined,
+            updated_date: undefined,
+            saved_date: undefined,
+            etc: false,
+            labeled_annotation_count: null,
+            labeled_annotations: null,
         };
 
         const updateTrigger = new FieldUpdateTrigger();
@@ -394,17 +386,20 @@ export class Job extends Session {
             }
         }
 
-        if (data.assignee) data.assignee = new User(data.assignee);
+        if (data.worker) data.worker = new User(data.worker);
+        if (data.checker) data.checker = new User(data.checker);
         if (Array.isArray(initialData.labels)) {
-            data.labels = initialData.labels.map((labelData) => {
-                // can be already wrapped to the class
-                // when create this job from Task constructor
-                if (labelData instanceof Label) {
-                    return labelData;
-                }
+            data.labels = initialData.labels
+                .map((labelData) => {
+                    // can be already wrapped to the class
+                    // when create this job from Task constructor
+                    if (labelData instanceof Label) {
+                        return labelData;
+                    }
 
-                return new Label(labelData);
-            }).filter((label) => !label.hasParent);
+                    return new Label(labelData);
+                })
+                .filter((label) => !label.hasParent);
         }
 
         Object.defineProperties(
@@ -413,14 +408,24 @@ export class Job extends Session {
                 id: {
                     get: () => data.id,
                 },
-                assignee: {
-                    get: () => data.assignee,
-                    set: (assignee) => {
-                        if (assignee !== null && !(assignee instanceof User)) {
+                worker: {
+                    get: () => data.worker,
+                    set: (worker) => {
+                        if (worker !== null && !(worker instanceof User)) {
                             throw new ArgumentError('Value must be a user instance');
                         }
-                        updateTrigger.update('assignee');
-                        data.assignee = assignee;
+                        updateTrigger.update('worker');
+                        data.worker = worker;
+                    },
+                },
+                checker: {
+                    get: () => data.checker,
+                    set: (checker) => {
+                        if (checker !== null && !(checker instanceof User)) {
+                            throw new ArgumentError('Value must be a user instance');
+                        }
+                        updateTrigger.update('checker');
+                        data.checker = checker;
                     },
                 },
                 stage: {
@@ -436,9 +441,7 @@ export class Job extends Session {
                         }
 
                         if (!valueInEnum) {
-                            throw new ArgumentError(
-                                'Value must be a value from the enumeration cvat.enums.JobStage',
-                            );
+                            throw new ArgumentError('Value must be a value from the enumeration cvat.enums.JobStage');
                         }
 
                         updateTrigger.update('stage');
@@ -458,9 +461,7 @@ export class Job extends Session {
                         }
 
                         if (!valueInEnum) {
-                            throw new ArgumentError(
-                                'Value must be a value from the enumeration cvat.enums.JobState',
-                            );
+                            throw new ArgumentError('Value must be a value from the enumeration cvat.enums.JobState');
                         }
 
                         updateTrigger.update('state');
@@ -497,8 +498,38 @@ export class Job extends Session {
                 bugTracker: {
                     get: () => data.bug_tracker,
                 },
+                updatedDate: {
+                    get: () => data.updated_date,
+                },
+                savedDate: {
+                    get: () => data.saved_date,
+                },
                 _updateTrigger: {
                     get: () => updateTrigger,
+                },
+                etc: {
+                    get: () => data.etc,
+                    set: (etc) => {
+                        if (typeof etc !== 'boolean') {
+                            throw new ArgumentError('etc value must be boolean.');
+                        }
+                        updateTrigger.update('etc');
+                        data.etc = etc;
+                    },
+                },
+                labeled_annotation_count: {
+                    get: () => data.labeled_annotation_count,
+                    set: (labeled_annotation_count) => {
+                        updateTrigger.update('labeled_annotation_count');
+                        data.etc = labeled_annotation_count;
+                    },
+                },
+                labeled_annotations: {
+                    get: () => data.labeled_annotations,
+                    set: (labeled_annotations) => {
+                        updateTrigger.update('labeled_annotations');
+                        data.labeled_annotations = labeled_annotations;
+                    },
                 },
             }),
         );
@@ -554,6 +585,11 @@ export class Job extends Session {
         return result;
     }
 
+    async updateTime() {
+        const result = await PluginRegistry.apiWrapper.call(this, Job.prototype.updateTime);
+        return result;
+    }
+
     async issues() {
         const result = await PluginRegistry.apiWrapper.call(this, Job.prototype.issues);
         return result;
@@ -594,7 +630,7 @@ export class Task extends Session {
     public readonly sourceStorage: Storage;
     public readonly targetStorage: Storage;
     public readonly organization: number | null;
-    public readonly progress: { count: number; completed: number };
+    public readonly progress: { count: number; completed: number; ids: number[] };
     public readonly jobs: Job[];
 
     public readonly startFrame: number;
@@ -706,6 +742,7 @@ export class Task extends Session {
         data.progress = {
             completedJobs: initialData?.jobs?.completed || 0,
             totalJobs: initialData?.jobs?.count || 0,
+            ids: initialData?.jobs?.ids || [],
         };
 
         data.files = Object.freeze({
@@ -716,7 +753,8 @@ export class Task extends Session {
 
         if (Array.isArray(initialData.labels)) {
             data.labels = initialData.labels
-                .map((labelData) => new Label(labelData)).filter((label) => !label.hasParent);
+                .map((labelData) => new Label(labelData))
+                .filter((label) => !label.hasParent);
         }
 
         if (Array.isArray(initialData.jobs)) {
@@ -724,7 +762,8 @@ export class Task extends Session {
                 const jobInstance = new Job({
                     url: job.url,
                     id: job.id,
-                    assignee: job.assignee,
+                    worker: job.worker,
+                    checker: job.checker,
                     state: job.state,
                     stage: job.stage,
                     start_frame: job.start_frame,
@@ -740,6 +779,11 @@ export class Task extends Session {
                     dimension: data.dimension,
                     data_compressed_chunk_type: data.data_compressed_chunk_type,
                     data_chunk_size: data.data_chunk_size,
+                    updated_date: job.updated_date,
+                    saved_date: job.saved_date,
+                    etc: job.etc,
+                    labeled_annotation_count: job.labeled_annotation_count,
+                    labeled_annotations: job.labeled_annotations,
                 });
 
                 data.jobs.push(jobInstance);
@@ -853,16 +897,15 @@ export class Task extends Session {
                         }
 
                         if (!Array.isArray(labels) || labels.some((label) => !(label instanceof Label))) {
-                            throw new ArgumentError(
-                                'Each array value must be an instance of Label',
-                            );
+                            throw new ArgumentError('Each array value must be an instance of Label');
                         }
 
                         const oldIDs = data.labels.map((_label) => _label.id);
                         const newIDs = labels.map((_label) => _label.id);
 
                         // find any deleted labels and mark them
-                        data.labels.filter((_label) => !newIDs.includes(_label.id))
+                        data.labels
+                            .filter((_label) => !newIDs.includes(_label.id))
                             .forEach((_label) => {
                                 // for deleted labels let's specify that they are deleted
                                 _label.deleted = true;
@@ -898,9 +941,7 @@ export class Task extends Session {
                     get: () => [...data.files.server_files],
                     set: (serverFiles) => {
                         if (!Array.isArray(serverFiles)) {
-                            throw new ArgumentError(
-                                `Value must be an array. But ${typeof serverFiles} has been got.`,
-                            );
+                            throw new ArgumentError(`Value must be an array. But ${typeof serverFiles} has been got.`);
                         }
 
                         for (const value of serverFiles) {
@@ -918,9 +959,7 @@ export class Task extends Session {
                     get: () => [...data.files.client_files],
                     set: (clientFiles) => {
                         if (!Array.isArray(clientFiles)) {
-                            throw new ArgumentError(
-                                `Value must be an array. But ${typeof clientFiles} has been got.`,
-                            );
+                            throw new ArgumentError(`Value must be an array. But ${typeof clientFiles} has been got.`);
                         }
 
                         for (const value of clientFiles) {
@@ -938,9 +977,7 @@ export class Task extends Session {
                     get: () => [...data.files.remote_files],
                     set: (remoteFiles) => {
                         if (!Array.isArray(remoteFiles)) {
-                            throw new ArgumentError(
-                                `Value must be an array. But ${typeof remoteFiles} has been got.`,
-                            );
+                            throw new ArgumentError(`Value must be an array. But ${typeof remoteFiles} has been got.`);
                         }
 
                         for (const value of remoteFiles) {
@@ -982,20 +1019,18 @@ export class Task extends Session {
                     get: () => data.organization,
                 },
                 sourceStorage: {
-                    get: () => (
+                    get: () =>
                         new Storage({
                             location: data.source_storage?.location || StorageLocation.LOCAL,
                             cloudStorageId: data.source_storage?.cloud_storage_id,
-                        })
-                    ),
+                        }),
                 },
                 targetStorage: {
-                    get: () => (
+                    get: () =>
                         new Storage({
                             location: data.target_storage?.location || StorageLocation.LOCAL,
                             cloudStorageId: data.target_storage?.cloud_storage_id,
-                        })
-                    ),
+                        }),
                 },
                 progress: {
                     get: () => data.progress,

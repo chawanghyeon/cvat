@@ -1,7 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import * as SVG from 'svg.js';
 import 'svg.draw.js';
 import './svg.patch';

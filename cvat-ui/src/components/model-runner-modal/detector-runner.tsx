@@ -19,7 +19,6 @@ import { ModelAttribute, StringObject } from 'reducers';
 
 import CVATTooltip from 'components/common/cvat-tooltip';
 import { clamp } from 'utils/math';
-import config from 'config';
 import {
     MLModel, ModelKind, ModelReturnType, DimensionType, Label as LabelInterface,
 } from 'cvat-core-wrapper';
@@ -68,10 +67,11 @@ function DetectorRunner(props: Props): JSX.Element {
     const isDetector = model && model.kind === ModelKind.DETECTOR;
     const isReId = model && model.kind === ModelKind.REID;
     const isClassifier = model && model.kind === ModelKind.CLASSIFIER;
-    const convertMasksToPolygonsAvailable = isDetector &&
-                    (!model.returnType || model.returnType === ModelReturnType.MASK);
+    const convertMasksToPolygonsAvailable =
+        isDetector && (!model.returnType || model.returnType === ModelReturnType.MASK);
     const buttonEnabled =
-        model && (model.kind === ModelKind.REID ||
+        model &&
+        (model.kind === ModelKind.REID ||
             (model.kind === ModelKind.DETECTOR && !!Object.keys(mapping).length) ||
             (model.kind === ModelKind.CLASSIFIER && !!Object.keys(mapping).length));
     const canHaveMapping = isDetector || isClassifier;
@@ -89,14 +89,13 @@ function DetectorRunner(props: Props): JSX.Element {
         modelAttributes: ModelAttribute[],
     ): StringObject {
         if (Array.isArray(labelAttributes) && Array.isArray(modelAttributes)) {
-            return labelAttributes
-                .reduce((attrAcc: StringObject, attr: any): StringObject => {
-                    if (modelAttributes.some((mAttr) => mAttr.name === attr.name)) {
-                        attrAcc[attr.name] = attr.name;
-                    }
+            return labelAttributes.reduce((attrAcc: StringObject, attr: any): StringObject => {
+                if (modelAttributes.some((mAttr) => mAttr.name === attr.name)) {
+                    attrAcc[attr.name] = attr.name;
+                }
 
-                    return attrAcc;
-                }, {});
+                return attrAcc;
+            }, {});
         }
 
         return {};
@@ -177,10 +176,7 @@ function DetectorRunner(props: Props): JSX.Element {
                 </Col>
                 <Col offset={1}>
                     <CVATTooltip title={removalTitle}>
-                        <DeleteOutlined
-                            className='cvat-danger-circle-icon'
-                            onClick={onClick}
-                        />
+                        <DeleteOutlined className='cvat-danger-circle-icon' onClick={onClick} />
                     </CVATTooltip>
                 </Col>
             </Row>
@@ -230,7 +226,9 @@ function DetectorRunner(props: Props): JSX.Element {
                 <Col span={4}>Model:</Col>
                 <Col span={20}>
                     <Select
-                        placeholder={dimension === DimensionType.DIMENSION_2D ? 'Select a model' : 'No models available'}
+                        placeholder={
+                            dimension === DimensionType.DIMENSION_2D ? 'Select a model' : 'No models available'
+                        }
                         disabled={dimension !== DimensionType.DIMENSION_2D}
                         style={{ width: '100%' }}
                         onChange={(_modelID: string): void => {
@@ -241,12 +239,14 @@ function DetectorRunner(props: Props): JSX.Element {
                                         acc[label.name] = {
                                             name: label.name,
                                             attributes: matchAttributes(
-                                                label.attributes, chosenModel.attributes[label.name],
+                                                label.attributes,
+                                                chosenModel.attributes[label.name],
                                             ),
                                         };
                                     }
                                     return acc;
-                                }, {},
+                                },
+                                {},
                             );
                             setMapping(defaultMapping);
                             setMatch({ model: null, task: null });
@@ -264,72 +264,57 @@ function DetectorRunner(props: Props): JSX.Element {
                     </Select>
                 </Col>
             </Row>
-            {canHaveMapping &&
-                Object.keys(mapping).length ?
+            {canHaveMapping && Object.keys(mapping).length ?
                 Object.keys(mapping).map((modelLabel: string) => {
-                    const label = labels
-                        .find((_label: LabelInterface): boolean => (
-                            _label.name === mapping[modelLabel].name)) as LabelInterface;
+                    const label = labels.find(
+                        (_label: LabelInterface): boolean => _label.name === mapping[modelLabel].name,
+                    ) as LabelInterface;
 
-                    const color = label ? label.color : config.NEW_LABEL_COLOR;
-                    const notMatchedModelAttributes = model.attributes[modelLabel]
-                        .filter((_attribute: ModelAttribute): boolean => (
-                            !(_attribute.name in (mapping[modelLabel].attributes || {}))
-                        ));
+                    const color = label ? label.color : 'red';
+                    const notMatchedModelAttributes = model.attributes[modelLabel].filter(
+                        (_attribute: ModelAttribute): boolean => !(_attribute.name in (mapping[modelLabel].attributes || {})),
+                    );
                     const taskAttributes = label.attributes.map((_attrLabel: any): string => _attrLabel.name);
                     return (
                         <React.Fragment key={modelLabel}>
-                            {
-                                renderMappingRow(color,
-                                    modelLabel,
-                                    label.name,
-                                    'Remove the mapped label',
-                                    (): void => {
-                                        const newMapping = { ...mapping };
-                                        delete newMapping[modelLabel];
-                                        setMapping(newMapping);
+                            {renderMappingRow(color, modelLabel, label.name, 'Remove the mapped label', (): void => {
+                                const newMapping = { ...mapping };
+                                delete newMapping[modelLabel];
+                                setMapping(newMapping);
 
-                                        const newAttrMatches = { ...attrMatches };
-                                        delete newAttrMatches[modelLabel];
-                                        setAttrMatch({ ...newAttrMatches });
-                                    })
-                            }
-                            {
-                                Object.keys(mapping[modelLabel].attributes || {})
-                                    .map((mappedModelAttr: string) => (
-                                        renderMappingRow(
-                                            config.NEW_LABEL_COLOR,
-                                            mappedModelAttr,
-                                            mapping[modelLabel].attributes[mappedModelAttr],
-                                            'Remove the mapped attribute',
-                                            (): void => {
-                                                const newMapping = { ...mapping };
-                                                delete mapping[modelLabel].attributes[mappedModelAttr];
-                                                setMapping(newMapping);
-                                            },
-                                            'cvat-run-model-label-attribute-block',
-                                        )
-                                    ))
-                            }
+                                const newAttrMatches = { ...attrMatches };
+                                delete newAttrMatches[modelLabel];
+                                setAttrMatch({ ...newAttrMatches });
+                            })}
+                            {Object.keys(mapping[modelLabel].attributes || {}).map((mappedModelAttr: string) => renderMappingRow(
+                                'red',
+                                mappedModelAttr,
+                                mapping[modelLabel].attributes[mappedModelAttr],
+                                'Remove the mapped attribute',
+                                (): void => {
+                                    const newMapping = { ...mapping };
+                                    delete mapping[modelLabel].attributes[mappedModelAttr];
+                                    setMapping(newMapping);
+                                },
+                                'cvat-run-model-label-attribute-block',
+                            ))}
                             {notMatchedModelAttributes.length && taskAttributes.length ? (
                                 <Row justify='start' align='middle'>
                                     <Col span={10}>
                                         {renderSelector(
                                             attrMatches[modelLabel]?.model || '',
-                                            'Model attr labels', notMatchedModelAttributes.map((l) => l.name),
-                                            (modelAttrLabel: string) => updateAttrMatch(
-                                                modelLabel, modelAttrLabel, null,
-                                            ),
+                                            'Model attr labels',
+                                            notMatchedModelAttributes.map((l) => l.name),
+                                            (modelAttrLabel: string) => updateAttrMatch(modelLabel, modelAttrLabel, null),
                                             'cvat-run-model-label-attribute-block',
                                         )}
                                     </Col>
                                     <Col span={10} offset={1}>
                                         {renderSelector(
                                             attrMatches[modelLabel]?.task || '',
-                                            'Task attr labels', taskAttributes,
-                                            (taskAttrLabel: string) => updateAttrMatch(
-                                                modelLabel, null, taskAttrLabel,
-                                            ),
+                                            'Task attr labels',
+                                            taskAttributes,
+                                            (taskAttrLabel: string) => updateAttrMatch(modelLabel, null, taskAttrLabel),
                                             'cvat-run-model-label-attribute-block',
                                         )}
                                     </Col>
@@ -342,7 +327,8 @@ function DetectorRunner(props: Props): JSX.Element {
                             ) : null}
                         </React.Fragment>
                     );
-                }) : null}
+                }) :
+                null}
             {canHaveMapping && !!taskLabels.length && !!modelLabels.length ? (
                 <>
                     <Row justify='start' align='middle'>
@@ -373,10 +359,7 @@ function DetectorRunner(props: Props): JSX.Element {
             )}
             {isDetector && withCleanup ? (
                 <div className='detector-runner-clean-previous-annotations-wrapper'>
-                    <Switch
-                        checked={cleanup}
-                        onChange={(checked: boolean): void => setCleanup(checked)}
-                    />
+                    <Switch checked={cleanup} onChange={(checked: boolean): void => setCleanup(checked)} />
                     <Text>Clean previous annotations</Text>
                 </div>
             ) : null}

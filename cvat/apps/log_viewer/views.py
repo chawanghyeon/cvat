@@ -1,7 +1,3 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from django.conf import settings
 from django.http import HttpResponsePermanentRedirect
 from rest_framework import status, viewsets

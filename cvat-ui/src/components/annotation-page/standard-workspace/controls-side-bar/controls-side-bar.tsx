@@ -1,18 +1,14 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) 2022-2023 CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
-import React from 'react';
-import Layout from 'antd/lib/layout';
-
+import React, { useState } from 'react';
 import {
     ActiveControl, ObjectType, Rotation, ShapeType,
 } from 'reducers';
 import GlobalHotKeys, { KeyMap } from 'utils/mousetrap-react';
-import { Canvas, CanvasMode } from 'cvat-canvas-wrapper';
-import { LabelOptColor } from 'components/labels-editor/common';
+import {
+    Canvas, CanvasMode, CuboidDrawingMethod, RectDrawingMethod,
+} from 'cvat-canvas-wrapper';
+import { Divider, RadioChangeEvent } from 'antd';
 
+import { Label } from 'cvat-core-wrapper';
 import ControlVisibilityObserver, { ExtraControlsControl } from './control-visibility-observer';
 import RotateControl, { Props as RotateControlProps } from './rotate-control';
 import CursorControl, { Props as CursorControlProps } from './cursor-control';
@@ -21,18 +17,12 @@ import FitControl, { Props as FitControlProps } from './fit-control';
 import ResizeControl, { Props as ResizeControlProps } from './resize-control';
 import ToolsControl from './tools-control';
 import OpenCVControl from './opencv-control';
-import DrawRectangleControl, { Props as DrawRectangleControlProps } from './draw-rectangle-control';
-import DrawPolygonControl, { Props as DrawPolygonControlProps } from './draw-polygon-control';
-import DrawPolylineControl, { Props as DrawPolylineControlProps } from './draw-polyline-control';
-import DrawPointsControl, { Props as DrawPointsControlProps } from './draw-points-control';
-import DrawEllipseControl, { Props as DrawEllipseControlProps } from './draw-ellipse-control';
-import DrawCuboidControl, { Props as DrawCuboidControlProps } from './draw-cuboid-control';
-import DrawMaskControl, { Props as DrawMaskControlProps } from './draw-mask-control';
-import DrawSkeletonControl, { Props as DrawSkeletonControlProps } from './draw-skeleton-control';
+import drawShapeControl, { Props as DrawShapeControlProps } from './draw-shape-control';
 import SetupTagControl, { Props as SetupTagControlProps } from './setup-tag-control';
 import MergeControl, { Props as MergeControlProps } from './merge-control';
 import GroupControl, { Props as GroupControlProps } from './group-control';
 import SplitControl, { Props as SplitControlProps } from './split-control';
+import DrawSettingsControl from './draw-settings-control';
 
 interface Props {
     canvasInstance: Canvas;
@@ -41,6 +31,8 @@ interface Props {
     normalizedKeyMap: Record<string, string>;
     labels: any[];
     frameData: any;
+    activeShapeType: ShapeType;
+    selectedLabelID: number | null;
 
     mergeObjects(enabled: boolean): void;
     groupObjects(enabled: boolean): void;
@@ -50,6 +42,14 @@ interface Props {
     pasteShape(): void;
     resetGroup(): void;
     redrawShape(): void;
+    onDrawStart(
+        shapeType: ShapeType,
+        labelID: number,
+        objectType: ObjectType,
+        points?: number,
+        rectDrawingMethod?: RectDrawingMethod,
+        cuboidDrawingMethod?: CuboidDrawingMethod,
+    ): void;
 }
 
 // We use the observer to see if these controls are in the viewport
@@ -61,14 +61,7 @@ const ObservedFitControl = ControlVisibilityObserver<FitControlProps>(FitControl
 const ObservedResizeControl = ControlVisibilityObserver<ResizeControlProps>(ResizeControl);
 const ObservedToolsControl = ControlVisibilityObserver(ToolsControl);
 const ObservedOpenCVControl = ControlVisibilityObserver(OpenCVControl);
-const ObservedDrawRectangleControl = ControlVisibilityObserver<DrawRectangleControlProps>(DrawRectangleControl);
-const ObservedDrawPolygonControl = ControlVisibilityObserver<DrawPolygonControlProps>(DrawPolygonControl);
-const ObservedDrawPolylineControl = ControlVisibilityObserver<DrawPolylineControlProps>(DrawPolylineControl);
-const ObservedDrawPointsControl = ControlVisibilityObserver<DrawPointsControlProps>(DrawPointsControl);
-const ObservedDrawEllipseControl = ControlVisibilityObserver<DrawEllipseControlProps>(DrawEllipseControl);
-const ObservedDrawCuboidControl = ControlVisibilityObserver<DrawCuboidControlProps>(DrawCuboidControl);
-const ObservedDrawMaskControl = ControlVisibilityObserver<DrawMaskControlProps>(DrawMaskControl);
-const ObservedDrawSkeletonControl = ControlVisibilityObserver<DrawSkeletonControlProps>(DrawSkeletonControl);
+const ObservedDrawShapeControl = ControlVisibilityObserver<DrawShapeControlProps>(drawShapeControl);
 const ObservedSetupTagControl = ControlVisibilityObserver<SetupTagControlProps>(SetupTagControl);
 const ObservedMergeControl = ControlVisibilityObserver<MergeControlProps>(MergeControl);
 const ObservedGroupControl = ControlVisibilityObserver<GroupControlProps>(GroupControl);
@@ -81,6 +74,7 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
         normalizedKeyMap,
         keyMap,
         labels,
+        selectedLabelID,
         mergeObjects,
         groupObjects,
         splitTrack,
@@ -90,34 +84,105 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
         resetGroup,
         redrawShape,
         frameData,
+        activeShapeType,
+        onDrawStart,
     } = props;
 
     const controlsDisabled = !labels.length || frameData.deleted;
-    const withUnspecifiedType = labels.some((label: any) => label.type === 'any' && !label.hasParent);
-    let rectangleControlVisible = withUnspecifiedType;
-    let polygonControlVisible = withUnspecifiedType;
-    let polylineControlVisible = withUnspecifiedType;
-    let pointsControlVisible = withUnspecifiedType;
-    let ellipseControlVisible = withUnspecifiedType;
-    let cuboidControlVisible = withUnspecifiedType;
-    let maskControlVisible = withUnspecifiedType;
-    let tagControlVisible = withUnspecifiedType;
-    const skeletonControlVisible = labels.some((label: LabelOptColor) => label.type === 'skeleton');
-    labels.forEach((label: LabelOptColor) => {
-        rectangleControlVisible = rectangleControlVisible || label.type === ShapeType.RECTANGLE;
-        polygonControlVisible = polygonControlVisible || label.type === ShapeType.POLYGON;
-        polylineControlVisible = polylineControlVisible || label.type === ShapeType.POLYLINE;
-        pointsControlVisible = pointsControlVisible || label.type === ShapeType.POINTS;
-        ellipseControlVisible = ellipseControlVisible || label.type === ShapeType.ELLIPSE;
-        cuboidControlVisible = cuboidControlVisible || label.type === ShapeType.CUBOID;
-        maskControlVisible = maskControlVisible || label.type === ShapeType.MASK;
-        tagControlVisible = tagControlVisible || label.type === ObjectType.TAG;
-    });
+    const [labelID, setLabelID] = useState(selectedLabelID);
+    const [rectDrawingMethod, setRectDrawingMethod] =
+        useState(ShapeType.RECTANGLE ? RectDrawingMethod.CLASSIC : undefined);
+    const [cuboidDrawingMethod, setCuboidDrawingMethod] =
+        useState(ShapeType.CUBOID ? CuboidDrawingMethod.CLASSIC : undefined);
+    const [objectType, setObjectType] = useState<ObjectType>(ObjectType.SHAPE);
+    const [numberOfPoints, setNumberOfPoints] = useState<number | undefined>(undefined);
+
+    // const shapeControlVisible = labels.some((label: any) => label.type === 'any' && !label.hasParent);
+    const shapeControlVisible = labels.some((label: any) => label.type === 'any' || label.type === 'skeleton');
+    const tagControlVisible = shapeControlVisible;
+
+    const isDrawing = activeControl === ActiveControl.DRAW_RECTANGLE ||
+        activeControl === ActiveControl.DRAW_POLYGON ||
+        activeControl === ActiveControl.DRAW_POLYLINE ||
+        activeControl === ActiveControl.DRAW_POINTS ||
+        activeControl === ActiveControl.DRAW_ELLIPSE ||
+        activeControl === ActiveControl.DRAW_CUBOID ||
+        activeControl === ActiveControl.DRAW_SKELETON ||
+        activeControl === ActiveControl.DRAW_MASK;
+
+    let minimumPoints = 3;
+    if (activeShapeType === ShapeType.POLYLINE) {
+        minimumPoints = 2;
+    } else if (activeShapeType === ShapeType.POINTS) {
+        minimumPoints = 1;
+    }
 
     const preventDefault = (event: KeyboardEvent | undefined): void => {
         if (event) {
             event.preventDefault();
         }
+    };
+
+    /** 라벨 변경 이벤트 */
+    const onChangeLabel = (value: Label | null) : void => {
+        if (value == null) {
+            return;
+        }
+        setLabelID(value.id as number);
+
+        onDrawStart(activeShapeType, value.id as number, objectType,
+            numberOfPoints, rectDrawingMethod, cuboidDrawingMethod);
+    };
+
+    /** 포인트 변경 이벤트 */
+    const onChangePoints = (value: number | undefined): void => {
+        canvasInstance.cancel();
+        setNumberOfPoints(value);
+        canvasInstance.draw({
+            enabled: true,
+            shapeType: activeShapeType,
+            numberOfPoints: value,
+        });
+
+        onDrawStart(activeShapeType, labelID as number, objectType,
+            value, rectDrawingMethod, cuboidDrawingMethod);
+    };
+
+    /** rectangle 그리기 방식 변경 이벤트 */
+    const onChangeRectDrawingMethod = (event: RadioChangeEvent): void => {
+        canvasInstance.cancel();
+        setRectDrawingMethod(event.target.value);
+        canvasInstance.draw({
+            enabled: true,
+            shapeType: activeShapeType,
+            rectDrawingMethod: event.target.value,
+        });
+
+        onDrawStart(activeShapeType, labelID as number, objectType,
+            numberOfPoints, event.target.value, cuboidDrawingMethod);
+    };
+
+    /** Cuboid 그리기 방식 변경 이벤트 */
+    const onChangeCuboidDrawingMethod = (event: RadioChangeEvent): void => {
+        canvasInstance.cancel();
+        setCuboidDrawingMethod(event.target.value);
+        canvasInstance.draw({
+            enabled: true,
+            shapeType: activeShapeType,
+            cuboidDrawingMethod: event.target.value,
+        });
+
+        onDrawStart(activeShapeType, labelID as number, objectType,
+            numberOfPoints, rectDrawingMethod, event.target.value);
+    };
+
+    /** 그리기/트랙모드 switch 변경 이벤트 */
+    const onChangeObjectType = (checked: boolean): void => {
+        const value = checked ? ObjectType.TRACK : ObjectType.SHAPE;
+        setObjectType(value);
+
+        onDrawStart(activeShapeType, labelID as number, value,
+            numberOfPoints, rectDrawingMethod, cuboidDrawingMethod);
     };
 
     let subKeyMap: any = {
@@ -203,7 +268,7 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
     }
 
     return (
-        <Layout.Sider className='cvat-canvas-controls-sidebar' theme='light' width={44}>
+        <div className='cvat-canvas-controls-sidebar'>
             <GlobalHotKeys keyMap={subKeyMap} handlers={handlers} />
             <ObservedCursorControl
                 cursorShortkey={normalizedKeyMap.CANCEL}
@@ -217,83 +282,30 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
                 rotateFrame={rotateFrame}
             />
 
-            <hr />
+            <Divider type='vertical' />
 
             <ObservedFitControl canvasInstance={canvasInstance} />
             <ObservedResizeControl canvasInstance={canvasInstance} activeControl={activeControl} />
 
-            <hr />
+            <Divider type='vertical' />
             <ObservedToolsControl />
             <ObservedOpenCVControl />
             {
-                rectangleControlVisible && (
-                    <ObservedDrawRectangleControl
+                shapeControlVisible && (
+                    <ObservedDrawShapeControl
                         canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_RECTANGLE}
+                        isDrawing={isDrawing}
                         disabled={controlsDisabled}
-                    />
-                )
-            }
-            {
-                polygonControlVisible && (
-                    <ObservedDrawPolygonControl
-                        canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_POLYGON}
-                        disabled={controlsDisabled}
-                    />
-                )
-            }
-            {
-                polylineControlVisible && (
-                    <ObservedDrawPolylineControl
-                        canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_POLYLINE}
-                        disabled={controlsDisabled}
-                    />
-                )
-            }
-            {
-                pointsControlVisible && (
-                    <ObservedDrawPointsControl
-                        canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_POINTS}
-                        disabled={controlsDisabled}
-                    />
-                )
-            }
-            {
-                ellipseControlVisible && (
-                    <ObservedDrawEllipseControl
-                        canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_ELLIPSE}
-                        disabled={controlsDisabled}
-                    />
-                )
-            }
-            {
-                cuboidControlVisible && (
-                    <ObservedDrawCuboidControl
-                        canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_CUBOID}
-                        disabled={controlsDisabled}
-                    />
-                )
-            }
-            {
-                maskControlVisible && (
-                    <ObservedDrawMaskControl
-                        canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_MASK}
-                        disabled={controlsDisabled}
-                    />
-                )
-            }
-            {
-                skeletonControlVisible && (
-                    <ObservedDrawSkeletonControl
-                        canvasInstance={canvasInstance}
-                        isDrawing={activeControl === ActiveControl.DRAW_SKELETON}
-                        disabled={controlsDisabled}
+                        activeControl={activeControl}
+                        activeShapeType={activeShapeType}
+                        onDrawStart={onDrawStart}
+                        labels={labels}
+                        selectedLabelID={labelID}
+                        numberOfPoints={numberOfPoints}
+                        rectDrawingMethod={rectDrawingMethod}
+                        cuboidDrawingMethod={cuboidDrawingMethod}
+                        obejctType={objectType}
+                        onChangePoints={onChangePoints}
                     />
                 )
             }
@@ -305,7 +317,7 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
                     />
                 )
             }
-            <hr />
+            <Divider type='vertical' />
 
             <ObservedMergeControl
                 mergeObjects={mergeObjects}
@@ -350,6 +362,26 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
             />
 
             <ExtraControlsControl />
-        </Layout.Sider>
+
+            {isDrawing && (
+                <DrawSettingsControl
+                    canvasInstance={canvasInstance}
+                    activeControl={activeControl}
+                    activeShapeType={activeShapeType}
+                    labels={labels}
+                    selectedLabelID={labelID}
+                    minimumPoints={minimumPoints}
+                    numberOfPoints={numberOfPoints}
+                    rectDrawingMethod={rectDrawingMethod}
+                    cuboidDrawingMethod={cuboidDrawingMethod}
+                    objectType={objectType}
+                    onChangeLabel={onChangeLabel}
+                    onChangePoints={onChangePoints}
+                    onChangeRectDrawingMethod={onChangeRectDrawingMethod}
+                    onChangeCuboidDrawingMethod={onChangeCuboidDrawingMethod}
+                    onChangeObjectType={onChangeObjectType}
+                />
+            )}
+        </div>
     );
 }

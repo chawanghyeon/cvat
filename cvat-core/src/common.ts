@@ -1,8 +1,3 @@
-// Copyright (C) 2019-2022 Intel Corporation
-// Copyright (C) 2022-2023s CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import { ArgumentError } from './exceptions';
 
 export function isBoolean(value): boolean {

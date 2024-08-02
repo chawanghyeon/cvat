@@ -1,14 +1,11 @@
-// Copyright (C) 2020-2022 Intel Corporation
-//
-// SPDX-License-Identifier: MIT
-
 import Modal from 'antd/lib/modal';
 import Table from 'antd/lib/table';
-import React from 'react';
-import { connect } from 'react-redux';
-import { getApplicationKeyMap } from 'utils/mousetrap-react';
+import React, { useEffect, useMemo } from 'react';
+import { connect, useSelector } from 'react-redux';
 import { shortcutsActions } from 'actions/shortcuts-actions';
 import { CombinedState } from 'reducers';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/i18n';
 
 interface StateToProps {
     visible: boolean;
@@ -42,8 +39,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
 }
 
 function ShortcutsDialog(props: StateToProps & DispatchToProps): JSX.Element | null {
+    const { t } = useTranslation();
     const { visible, switchShortcutsDialog, jobInstance } = props;
-    const keyMap = getApplicationKeyMap();
+    const keyMap = useSelector((state: CombinedState) => state.shortcuts.keyMap);
 
     const splitToRows = (data: string[]): JSX.Element[] => data.map(
         (item: string, id: number): JSX.Element => (
@@ -57,44 +55,54 @@ function ShortcutsDialog(props: StateToProps & DispatchToProps): JSX.Element | n
 
     const columns = [
         {
-            title: 'Name',
+            title: t('shortcut.columns.name'),
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Shortcut',
+            title: t('shortcut.columns.shortcut'),
             dataIndex: 'shortcut',
             key: 'shortcut',
             render: splitToRows,
         },
         {
-            title: 'Action',
+            title: t('shortcut.columns.action'),
             dataIndex: 'action',
             key: 'action',
             render: splitToRows,
         },
         {
-            title: 'Description',
+            title: t('shortcut.columns.description'),
             dataIndex: 'description',
             key: 'description',
         },
     ];
 
     const dimensionType = jobInstance?.dimension;
-    const dataSource = Object.keys(keyMap)
-        .filter((key: string) => !dimensionType || keyMap[key].applicable.includes(dimensionType))
-        .map((key: string, id: number) => ({
-            key: id,
-            name: keyMap[key].name || key,
-            description: keyMap[key].description || '',
-            shortcut: keyMap[key].sequences,
-            action: [keyMap[key].action],
-        }));
+    const dataSource = useMemo(
+        () => Object.keys(keyMap)
+            .filter((key: string) => !dimensionType || keyMap[key].applicable.includes(dimensionType))
+            .map((key: string, id: number) => ({
+                key: id,
+                name: t(`shortcut.${keyMap[key].tKey}.name`),
+                description: t(`shortcut.${keyMap[key].tKey}.description`),
+                shortcut: keyMap[key].sequences,
+                action: [keyMap[key].action],
+            })),
+        [i18n, t, keyMap, dimensionType],
+    );
 
+    useEffect(() => {
+        console.log('dataSource : ', dataSource);
+    }, [dataSource]);
+
+    useEffect(() => {
+        console.log('i18n : ', i18n.language);
+    }, [i18n]);
     return (
         <Modal
-            title='Active list of shortcuts'
-            visible={visible}
+            title={t('shortcut.modal.title')}
+            open={visible}
             closable={false}
             width={800}
             onOk={switchShortcutsDialog}
@@ -103,9 +111,9 @@ function ShortcutsDialog(props: StateToProps & DispatchToProps): JSX.Element | n
             className='cvat-shortcuts-modal-window'
         >
             <Table
+                scroll={{ y: '45vh' }}
                 dataSource={dataSource}
                 columns={columns}
-                size='small'
                 className='cvat-shortcuts-modal-window-table'
             />
         </Modal>
